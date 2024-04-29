@@ -1,10 +1,10 @@
 import mongoose from 'mongoose';
 
-import { dbUri } from '../config/index.js';
+import { DB_URI } from '../config.js';
 
 export default async () => {
   mongoose.set("strictQuery", false);
-  await mongoose.connect(dbUri,{})
+  await mongoose.connect(DB_URI,{})
     .then(() => {
       console.log('Mongodb Connection');
     })
