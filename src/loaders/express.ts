@@ -5,7 +5,8 @@ import morgan from 'morgan';
 import helmet from 'helmet';
 import bodyParser from 'body-parser';
 
-import { router } from '../api/programs/routes';
+import { router as programsRouter } from '../api/programs/routes';
+import { router as userRouter} from '../api/user/routes';
 
 export default (app: Express) => {
   process.on('uncaughtException', async (error) => {
@@ -26,7 +27,8 @@ export default (app: Express) => {
   app.disable('x-powered-by');
   app.disable('etag');
 
-  app.use('/programs', router);
+  app.use('/programs', programsRouter);
+  app.use('/user', userRouter);
 
   app.get('/', (_req, res) => {
     return res.status(200).json({ message: "ok" }).end();
