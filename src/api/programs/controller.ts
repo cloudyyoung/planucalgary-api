@@ -48,9 +48,11 @@ export const getPrograms = async (req: Request, res: Response) => {
 
 export const getProgram = async (req: Request, res: Response) => {
   const { id } = req.params;
-  const program = await CatalogProgram.aggregate([
+  const programs = await CatalogProgram.aggregate([
     // Match the specific program by coursedog_id
-    { $match: { coursedog_id: id } },
+    { $match: id.match(/-\d{4}-\d{2}-\d{2}$/) ? { coursedog_id: id } : { code: id } },
+    // Sort by cid descending
+    { $sort: { cid: -1 } },
     // Join with the Department collection
     {
       $lookup: {
@@ -84,11 +86,13 @@ export const getProgram = async (req: Request, res: Response) => {
         departments: '$department_details.display_name',
       }
     },
+    // Limit the result to 1
+    { $limit: 1 }
   ])
 
-  if (!program) {
+  if (!programs || programs.length < 1) {
     return res.status(404).json({ message: 'Program not found' });
   }
 
-  return res.status(200).json(program);
+  return res.status(200).json(programs[0]);
 }
