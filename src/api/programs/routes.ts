@@ -1,9 +1,10 @@
 import { Router } from 'express';
-import { getPrograms } from './controller';
+import { getPrograms, getProgram } from './controller';
 
 const router = Router();
 
 router.get('/', getPrograms);
+router.get('/:id', getProgram);
 
 
 export default router

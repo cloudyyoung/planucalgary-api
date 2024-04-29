@@ -18,14 +18,13 @@ export const getPrograms = async (req: Request, res: Response) => {
     // Project the fields you want to include in the final output
     {
       $project: {
-        id: '$_id',
         cid: '$coursedog_id',
-        program_group_id: '$program_group_id',
+        // program_group_id: '$program_group_id',
         code: '$code',
         degree_designation_code: '$degree_designation_code',
         degree_designation_name: '$degree_designation_name',
-        name: '$name',
-        long_name: '$long_name',
+        // name: '$name',
+        // long_name: '$long_name',
         type: '$type',
         display_name: {
           $cond: { if: { $eq: ['$type', 'ACP'] }, then: '$display_name', else: '$transcript_description' }
@@ -34,10 +33,20 @@ export const getPrograms = async (req: Request, res: Response) => {
         departments: '$department_details.name',
       }
     },
-    // Limit the results to 10
-    { $limit: 10 }
   ]);
 
 
   return res.status(200).json(programs);
 };
+
+
+export const getProgram = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const program = await CatalogProgram.findOne({ coursedog_id: id }).exec();
+
+  if (!program) {
+    return res.status(404).json({ message: 'Program not found' });
+  }
+
+  return res.status(200).json(program);
+}
