@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-const { Schema, model } = mongoose;
+const { Schema, connection } = mongoose;
 
 const CatalogProgramSchema = new Schema({
   active: {
@@ -27,7 +27,6 @@ const CatalogProgramSchema = new Schema({
     type: String,
     required: true
   },
-
   degree_designation_name: {
     type: String,
     required: true
@@ -57,9 +56,11 @@ const CatalogProgramSchema = new Schema({
     required: true
   },
   requisites: {
+    type: Map,
     required: true
   },
   start_term: {
+    type: Map,
     required: true
   },
   transcript_description: {
@@ -82,5 +83,6 @@ const CatalogProgramSchema = new Schema({
   timestamps: true
 });
 
-const CatalogProgram = model('CatalogProgram', CatalogProgramSchema)
+const catalog = connection.useDb('catalog');
+const CatalogProgram = catalog.model('Program', CatalogProgramSchema)
 export { CatalogProgram }

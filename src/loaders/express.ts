@@ -26,7 +26,7 @@ export default (app: Express) => {
   app.disable('x-powered-by');
   app.disable('etag');
 
-  // app.use('/api/programs', router);
+  app.use('/programs', router);
 
   app.get('/', (_req, res) => {
     return res.status(200).json({ message: "ok" }).end();
