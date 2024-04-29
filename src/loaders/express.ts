@@ -1,10 +1,13 @@
+import { Express } from 'express';
 import cors from 'cors';
 import compression from 'compression';
 import morgan from 'morgan';
 import helmet from 'helmet';
 import bodyParser from 'body-parser';
 
-export default (app) => {
+import { router } from '../api/programs/routes';
+
+export default (app: Express) => {
   process.on('uncaughtException', async (error) => {
     console.log(error);
   });
@@ -22,6 +25,8 @@ export default (app) => {
   app.use(compression());
   app.disable('x-powered-by');
   app.disable('etag');
+
+  // app.use('/api/programs', router);
 
   app.get('/', (_req, res) => {
     return res.status(200).json({ message: "ok" }).end();
