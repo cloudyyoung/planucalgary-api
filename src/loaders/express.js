@@ -41,13 +41,7 @@ export default (app) => {
   app.use(prefix, routes);
 
   app.get('/', (_req, res) => {
-    return res.status(200).json({
-      resultMessage: {
-        en: 'Project is successfully working...',
-        tr: 'Proje başarılı bir şekilde çalışıyor...'
-      },
-      resultCode: '00004'
-    }).end();
+    return res.status(200).json({ message: "ok" }).end();
   });
 
   app.use((req, res, next) => {
