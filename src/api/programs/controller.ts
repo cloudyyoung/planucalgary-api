@@ -15,22 +15,28 @@ export const getPrograms = async (req: Request, res: Response) => {
         as: 'department_details' // The result of the join will be stored in this field
       }
     },
+    {
+      $lookup: {
+        from: 'faculties', // This should match the collection name of the Department model
+        localField: 'departments', // The field in CatalogProgram that contains department codes
+        foreignField: 'id', // The field in Department that matches codes
+        as: 'faculty_details' // The result of the join will be stored in this field
+      }
+    },
     // Project the fields you want to include in the final output
     {
       $project: {
         cid: '$coursedog_id',
-        // program_group_id: '$program_group_id',
         code: '$code',
         degree_designation_code: '$degree_designation_code',
         degree_designation_name: '$degree_designation_name',
-        // name: '$name',
-        // long_name: '$long_name',
         type: '$type',
         display_name: {
           $cond: { if: { $eq: ['$type', 'ACP'] }, then: '$display_name', else: '$transcript_description' }
         },
         career: '$career',
-        departments: '$department_details.name',
+        departments: '$department_details.display_name',
+        faculties: '$faculty_details.display_name',
       }
     },
   ]);
@@ -42,7 +48,43 @@ export const getPrograms = async (req: Request, res: Response) => {
 
 export const getProgram = async (req: Request, res: Response) => {
   const { id } = req.params;
-  const program = await CatalogProgram.findOne({ coursedog_id: id }).exec();
+  const program = await CatalogProgram.aggregate([
+    // Match the specific program by coursedog_id
+    { $match: { coursedog_id: id } },
+    // Join with the Department collection
+    {
+      $lookup: {
+        from: 'departments', // This should match the collection name of the Department model
+        localField: 'departments', // The field in CatalogProgram that contains department codes
+        foreignField: 'id', // The field in Department that matches codes
+        as: 'department_details' // The result of the join will be stored in this field
+      }
+    },
+    {
+      $lookup: {
+        from: 'faculties', // This should match the collection name of the Department model
+        localField: 'departments', // The field in CatalogProgram that contains department codes
+        foreignField: 'id', // The field in Department that matches codes
+        as: 'faculty_details' // The result of the join will be stored in this field
+      }
+    },
+    // Project the fields you want to include in the final output
+    {
+      $project: {
+        cid: '$coursedog_id',
+        code: '$code',
+        degree_designation_code: '$degree_designation_code',
+        degree_designation_name: '$degree_designation_name',
+        type: '$type',
+        display_name: {
+          $cond: { if: { $eq: ['$type', 'ACP'] }, then: '$display_name', else: '$transcript_description' }
+        },
+        career: '$career',
+        faculties: '$faculty_details.display_name',
+        departments: '$department_details.display_name',
+      }
+    },
+  ])
 
   if (!program) {
     return res.status(404).json({ message: 'Program not found' });
