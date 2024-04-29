@@ -24,15 +24,15 @@ export default {
   },
   tags: [
     {
-      "name": "User",
-      "description": "API for users"
+      "name": "Account",
+      "description": "API for accounts"
     }
   ],
   apis: [
     "src/models/*.js",
     "src/utils/helpers/*.js",
-    "src/api/controllers/user/*.js",
-    "src/api/controllers/user/edit/*.js",
-    "src/api/controllers/user/auth/*.js"
+    "src/api/controllers/account/*.js",
+    "src/api/controllers/account/edit/*.js",
+    "src/api/controllers/account/auth/*.js"
   ]
 };

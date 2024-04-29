@@ -1,5 +1,5 @@
-import { User } from '../../../../models/index.js';
-import { validateForgotPassword }  from '../../../validators/user.validator.js';
+import { Account } from '../../../../models/index.js';
+import { validateForgotPassword } from '../../../validators/account.validator.js';
 import { errorHelper, getText, logger } from '../../../../utils/index.js';
 import bcrypt from 'bcryptjs';
 const { hash } = bcrypt;
@@ -10,12 +10,12 @@ export default async (req, res) => {
 
   const hashed = await hash(req.body.password, 10);
 
-  await User.updateOne({ _id: req.user._id, isVerified: true, isActivated: true }, { $set: { password: hashed } })
+  await Account.updateOne({ _id: req.account._id, isVerified: true, isActivated: true }, { $set: { password: hashed } })
     .catch(err => {
       return res.status(500).json(errorHelper('00067', req, err.message));
     });
 
-  logger('00068', req.user._id, getText('en', '00068'), 'Info', req);
+  logger('00068', req.account._id, getText('en', '00068'), 'Info', req);
   return res.status(200).json({
     resultMessage: { en: getText('en', '00068'), tr: getText('tr', '00068') },
     resultCode: '00068'
@@ -25,7 +25,7 @@ export default async (req, res) => {
 
 /**
  * @swagger
- * /user/forgot-password:
+ * /account/forgot-password:
  *    post:
  *      summary: Saves the Password when Forgot
  *      parameters:
@@ -45,7 +45,7 @@ export default async (req, res) => {
  *                password:
  *                  type: string
  *      tags:
- *        - User
+ *        - Account
  *      responses:
  *        "200":
  *          description: The new password was created successfully.

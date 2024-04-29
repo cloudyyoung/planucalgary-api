@@ -1,5 +1,5 @@
-import { User } from '../../../../models/index.js';
-import { validateEditUser } from '../../../validators/user.validator.js';
+import { Account } from '../../../../models/index.js';
+import { validateEditAccount } from '../../../validators/account.validator.js';
 import { errorHelper, logger, getText, turkishToEnglish } from '../../../../utils/index.js';
 import { awsAccessKey, awsSecretAccessKey, awsRegion, bucketName } from '../../../../config/index.js';
 import aws from 'aws-sdk';
@@ -13,7 +13,7 @@ const s3 = new S3({
 });
 
 export default async (req, res) => {
-  const { error } = validateEditUser(req.body);
+  const { error } = validateEditAccount(req.body);
   if (error) {
     let code = '00077';
     const message = error.details[0].message;
@@ -23,62 +23,62 @@ export default async (req, res) => {
       code = '00079';
     else if (message.includes('birthDate'))
       code = '00080';
-    else if (message.includes('username'))
+    else if (message.includes('accountname'))
       code = '00081';
     return res.status(400).json(errorHelper(code, req, message));
   }
 
-  const user = await User.findById(req.user._id).catch((err) => {
+  const account = await Account.findById(req.account._id).catch((err) => {
     return res.status(500).json(errorHelper('00082', req, err.message));
   });
 
-  if (req.body.name) user.name = req.body.name;
-  if (req.body.gender) user.gender = req.body.gender;
-  if (req.body.birthDate) user.birthDate = req.body.birthDate;
-  if (req.body.language) user.language = req.body.language;
-  if (req.body.username && req.body.username !== user.username) {
-  const exist = await User.exists({ username: req.body.username }).catch((err) => {
-    return res.status(500).json(errorHelper('00083', req, err.message));
-  });
-  if (exist) return res.status(400).json(errorHelper('00084', req));
+  if (req.body.name) account.name = req.body.name;
+  if (req.body.gender) account.gender = req.body.gender;
+  if (req.body.birthDate) account.birthDate = req.body.birthDate;
+  if (req.body.language) account.language = req.body.language;
+  if (req.body.accountname && req.body.accountname !== account.accountname) {
+    const exist = await Account.exists({ accountname: req.body.accountname }).catch((err) => {
+      return res.status(500).json(errorHelper('00083', req, err.message));
+    });
+    if (exist) return res.status(400).json(errorHelper('00084', req));
 
-  user.username = req.body.username;
+    account.accountname = req.body.accountname;
   }
   let hasError = false;
   if (req.file) {
-  const params = {
-    Bucket: bucketName,
-    Key: turkishToEnglish(user.name).replace(/\s/g, '').toLowerCase() + '/' + user._id + '/' + Date(Date.now()).toLowerCase().substring(0, 15).replace(/\s/g, '-'),
-    Body: req.file.buffer,
-    ContentType: req.file.mimetype,
-  };
+    const params = {
+      Bucket: bucketName,
+      Key: turkishToEnglish(account.name).replace(/\s/g, '').toLowerCase() + '/' + account._id + '/' + Date(Date.now()).toLowerCase().substring(0, 15).replace(/\s/g, '-'),
+      Body: req.file.buffer,
+      ContentType: req.file.mimetype,
+    };
 
-  await s3.upload(params).promise().then((data) => {
-    user.photoUrl = data.Location;
-  }).catch(err => {
-    hasError = true;
-    return res.status(500).json(errorHelper('00087', req, err.message)).end();
-  });
+    await s3.upload(params).promise().then((data) => {
+      account.photoUrl = data.Location;
+    }).catch(err => {
+      hasError = true;
+      return res.status(500).json(errorHelper('00087', req, err.message)).end();
+    });
   }
 
   if (!hasError) {
-  await user.save().catch((err) => {
-    return res.status(500).json(errorHelper('00085', req, err.message));
-  });
+    await account.save().catch((err) => {
+      return res.status(500).json(errorHelper('00085', req, err.message));
+    });
 
-  //NOTE: The only thing we should send to the front is the url of the uploaded photo. Front-end knows all other changes.
-  logger('00086', req.user._id, getText('en', '00086'), 'Info', req);
-  return res.status(200).json({
-    resultMessage: { en: getText('en', '00086'), tr: getText('tr', '00086') },
-    resultCode: '00086',
-    photoUrl: user.photoUrl
-  });
+    //NOTE: The only thing we should send to the front is the url of the uploaded photo. Front-end knows all other changes.
+    logger('00086', req.account._id, getText('en', '00086'), 'Info', req);
+    return res.status(200).json({
+      resultMessage: { en: getText('en', '00086'), tr: getText('tr', '00086') },
+      resultCode: '00086',
+      photoUrl: account.photoUrl
+    });
   }
 };
 
 /**
  * @swagger
- * /user:
+ * /account:
  *    put:
  *      summary: Edit the Profile Information
  *      parameters:
@@ -94,7 +94,7 @@ export default async (req, res) => {
  *            type: file
  *          description: Image file here
  *      requestBody:
- *        description: Some of the user profile information to change
+ *        description: Some of the account profile information to change
  *        required: false
  *        content:
  *          application/json:
@@ -103,7 +103,7 @@ export default async (req, res) => {
  *              properties:
  *                name:
  *                  type: string
- *                username:
+ *                accountname:
  *                  type: string
  *                language:
  *                  type: string
@@ -114,7 +114,7 @@ export default async (req, res) => {
  *                birthDate:
  *                  type: string
  *      tags:
- *        - User
+ *        - Account
  *      responses:
  *        "200":
  *          description: Your profile information was changed successfully.

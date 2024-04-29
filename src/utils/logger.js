@@ -1,9 +1,9 @@
 import { Log } from '../models/index.js';
 import ipHelper from './helpers/ip-helper.js';
 
-export default async (code, userId, errorMessage, level, req) => {
+export default async (code, accountId, errorMessage, level, req) => {
   let ip = 'no-ip';
-  if(req !== '') ip = ipHelper(req);
+  if (req !== '') ip = ipHelper(req);
   let log = new Log({
     resultCode: code,
     level: level,
@@ -11,7 +11,7 @@ export default async (code, userId, errorMessage, level, req) => {
     ip: ip
   });
 
-  if (userId !== '' && userId) log.userId = userId;
+  if (accountId !== '' && accountId) log.accountId = accountId;
 
   await log.save()
     .catch(err => {

@@ -1,5 +1,5 @@
-import { User } from '../../../../models/index.js';
-import { validateChangePassword } from '../../../validators/user.validator.js';
+import { Account } from '../../../../models/index.js';
+import { validateChangePassword } from '../../../validators/account.validator.js';
 import { errorHelper, logger, getText } from '../../../../utils/index.js';
 import bcrypt from 'bcryptjs';
 const { hash, compare } = bcrypt;
@@ -10,30 +10,30 @@ export default async (req, res) => {
 
   if (req.body.oldPassword === req.body.newPassword) return res.status(400).json(errorHelper('00073', req));
 
-  const user = await User.findById(req.user._id).select('password')
-  .catch((err) => {
-    return res.status(500).json(errorHelper('00070', req, err.message));
-  });
+  const account = await Account.findById(req.account._id).select('password')
+    .catch((err) => {
+      return res.status(500).json(errorHelper('00070', req, err.message));
+    });
 
-  const match = await compare(req.body.oldPassword, user.password)
-  .catch((err) => {
-    return res.status(500).json(errorHelper('00071', req, err.message));
-  });
+  const match = await compare(req.body.oldPassword, account.password)
+    .catch((err) => {
+      return res.status(500).json(errorHelper('00071', req, err.message));
+    });
 
   if (!match) return res.status(400).json(errorHelper('00072', req));
 
   const hashed = await hash(req.body.newPassword, 10)
-  .catch((err) => {
-    return res.status(500).json(errorHelper('00074', req, err.message));
-  });
+    .catch((err) => {
+      return res.status(500).json(errorHelper('00074', req, err.message));
+    });
 
-  user.password = hashed;
+  account.password = hashed;
 
-  await user.save().catch((err) => {
+  await account.save().catch((err) => {
     return res.status(500).json(errorHelper('00075', req, err.message));
   });
 
-  logger('00076', req.user._id, getText('en', '00076'), 'Info', req);
+  logger('00076', req.account._id, getText('en', '00076'), 'Info', req);
   return res.status(200).json({
     resultMessage: { en: getText('en', '00076'), tr: getText('tr', '00076') },
     resultCode: '00076'
@@ -42,7 +42,7 @@ export default async (req, res) => {
 
 /**
  * @swagger
- * /user/change-password:
+ * /account/change-password:
  *    post:
  *      summary: Changes the Password
  *      parameters:
@@ -64,7 +64,7 @@ export default async (req, res) => {
  *                newPassword:
  *                  type: string
  *      tags:
- *        - User
+ *        - Account
  *      responses:
  *        "200":
  *          description: Your password was changed successfully.

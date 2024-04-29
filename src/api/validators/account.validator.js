@@ -58,10 +58,10 @@ export function validateChangePassword(body) {
   return schema.validate(body);
 }
 
-export function validateEditUser(body) {
+export function validateEditAccount(body) {
   const schema = Joi.object({
     name: Joi.string().min(3).max(24),
-    username: Joi.string().min(3).max(15),
+    accountname: Joi.string().min(3).max(15),
     language: Joi.string().valid('tr', 'en'),
     gender: Joi.string().valid('male', 'female', 'other'),
     birthDate: Joi.date()

@@ -24,7 +24,7 @@ export default async (email, name, confirmCode, lang, type, req, res) => {
     });
 
     let body = '';
-    //NOTE: You can customize the message that will be sent to the newly registered users according to your pleasure.
+    //NOTE: You can customize the message that will be sent to the newly registered accounts according to your pleasure.
     if (type == 'register') {
       body = `${getText(lang, 'welcomeCode')} ${name}!\r\n\r\n${getText(lang, 'verificationCodeBody')} ${confirmCode}`;
     } else {

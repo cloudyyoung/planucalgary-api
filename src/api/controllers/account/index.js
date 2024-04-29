@@ -9,8 +9,8 @@ export { default as sendVerificationCode } from './auth/send-verification-code.j
 
 // EDIT
 export { default as changePassword } from './edit/change-password.js'
-export { default as editUser } from './edit/edit-user.js'
+export { default as editAccount } from './edit/edit-account.js'
 
 // OTHER
-export { default as getUser } from './get-user.js'
-export { default as deleteUser } from './delete-user.js'
+export { default as getAccount } from './get-account.js'
+export { default as deleteAccount } from './delete-account.js'

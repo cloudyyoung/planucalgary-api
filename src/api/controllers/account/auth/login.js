@@ -1,5 +1,5 @@
-import { User, Token } from '../../../../models/index.js';
-import { validateLogin } from '../../../validators/user.validator.js';
+import { Account, Token } from '../../../../models/index.js';
+import { validateLogin } from '../../../validators/account.validator.js';
 import { errorHelper, getText, logger, signAccessToken, signRefreshToken } from '../../../../utils/index.js';
 import bcrypt from 'bcryptjs';
 const { compare } = bcrypt;
@@ -16,29 +16,29 @@ export default async (req, res) => {
     return res.status(400).json(errorHelper(code, req, error.details[0].message));
   }
 
-  const user = await User.findOne({ email: req.body.email, isActivated: true, isVerified: true }).select('+password')
+  const account = await Account.findOne({ email: req.body.email, isActivated: true, isVerified: true }).select('+password')
     .catch((err) => {
       return res.status(500).json(errorHelper('00041', req, err.message));
     });
 
-  if (!user)
+  if (!account)
     return res.status(404).json(errorHelper('00042', req));
 
-  if (!user.isActivated)
+  if (!account.isActivated)
     return res.status(400).json(errorHelper('00043', req));
 
-  if (!user.isVerified)
+  if (!account.isVerified)
     return res.status(400).json(errorHelper('00044', req));
 
-  const match = await compare(req.body.password, user.password);
+  const match = await compare(req.body.password, account.password);
   if (!match)
     return res.status(400).json(errorHelper('00045', req));
 
-  const accessToken = signAccessToken(user._id);
-  const refreshToken = signRefreshToken(user._id);
+  const accessToken = signAccessToken(account._id);
+  const refreshToken = signRefreshToken(account._id);
   //NOTE: 604800000 ms is equal to 7 days. So, the expiry date of the token is 7 days after.
   await Token.updateOne(
-    { userId: user._id },
+    { accountId: account._id },
     {
       $set: {
         refreshToken: refreshToken,
@@ -51,16 +51,16 @@ export default async (req, res) => {
     return res.status(500).json(errorHelper('00046', req, err.message));
   });
 
-  logger('00047', user._id, getText('en', '00047'), 'Info', req);
+  logger('00047', account._id, getText('en', '00047'), 'Info', req);
   return res.status(200).json({
     resultMessage: { en: getText('en', '00047'), tr: getText('tr', '00047') },
-    resultCode: '00047', user, accessToken, refreshToken
+    resultCode: '00047', account, accessToken, refreshToken
   });
 };
 
 /**
  * @swagger
- * /user/login:
+ * /account/login:
  *    post:
  *      summary: Login
  *      requestBody:
@@ -76,7 +76,7 @@ export default async (req, res) => {
  *                password:
  *                  type: string
  *      tags:
- *        - User
+ *        - Account
  *      responses:
  *        "200":
  *          description: You logged in successfully.
@@ -89,8 +89,8 @@ export default async (req, res) => {
  *                              $ref: '#/components/schemas/ResultMessage'
  *                          resultCode:
  *                              $ref: '#/components/schemas/ResultCode'
- *                          user:
- *                              $ref: '#/components/schemas/User'
+ *                          account:
+ *                              $ref: '#/components/schemas/Account'
  *                          accessToken:
  *                              type: string
  *                          refreshToken:

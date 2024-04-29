@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 const { Schema, model } = mongoose;
 
 const tokenSchema = Schema({
-  userId: { type: Schema.Types.ObjectId, ref: 'User' },
+  accountId: { type: Schema.Types.ObjectId, ref: 'Account' },
   refreshToken: { type: String, required: true },
   expiresIn: { type: Date, required: true },
   createdByIp: { type: String, required: true },

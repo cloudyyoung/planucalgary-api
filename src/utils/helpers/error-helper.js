@@ -7,16 +7,16 @@ export default (code, req, errorMessage) => {
   let key = code;
   if (!en[code]) key = '00008';
 
-  let userId = '';
-  if (req && req.user && req.user._id) userId = req.user._id;
+  let accountId = '';
+  if (req && req.account && req.account._id) accountId = req.account._id;
 
   const enMessage = en[key];
   const trMessage = tr[key];
 
   if (enMessage.includes('server error')) {
-    logger(code, userId, errorMessage, 'Server Error', req);
+    logger(code, accountId, errorMessage, 'Server Error', req);
   } else {
-    logger(code, userId, errorMessage ?? enMessage, 'Client Error', req);
+    logger(code, accountId, errorMessage ?? enMessage, 'Client Error', req);
   }
 
   return {

@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 const { Schema, model } = mongoose;
 
-const userSchema = new Schema({
+const accountSchema = new Schema({
   email: {
     type: String,
     required: true,
@@ -12,18 +12,18 @@ const userSchema = new Schema({
   password: {
     type: String, required: true, select: false
   },
-  username: {
+  accountname: {
     type: String, required: true, lowercase: true, unique: true
   },
   name: {
     type: String, required: true
   },
   /*NOTE: If you are using admin panel and controllers specific to admin panel,
-      you can control the authority of users with the help of this field.*/
+      you can control the authority of accounts with the help of this field.*/
   type: {
     type: String,
-    enum: ['admin', 'user', 'reader', 'creator'],
-    default: 'user',
+    enum: ['admin', 'account', 'reader', 'creator'],
+    default: 'account',
   },
   language: {
     type: String,
@@ -52,12 +52,12 @@ const userSchema = new Schema({
     default:
       'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Node.js_logo.svg/1200px-Node.js_logo.svg.png',
   },
-  //NOTE: To check whether the account is active or not. When user deletes the account, you can store the information anonymously.
+  //NOTE: To check whether the account is active or not. When account deletes the account, you can store the information anonymously.
   isActivated: {
     type: Boolean,
     default: true,
   },
-  //NOTE: To check whether the user skipped the email-verification step or not. You can delete the unverified accounts day by day.
+  //NOTE: To check whether the account skipped the email-verification step or not. You can delete the unverified accounts day by day.
   isVerified: {
     type: Boolean,
     required: true
@@ -71,7 +71,7 @@ const userSchema = new Schema({
     enum: ['Android', 'IOS'],
     required: true
   },
-  //NOTE: In case the user delete its account, you can store its non-personalized information anonymously.
+  //NOTE: In case the account delete its account, you can store its non-personalized information anonymously.
   deletedAt: {
     type: Date
   }
@@ -80,25 +80,25 @@ const userSchema = new Schema({
     timestamps: true
   });
 
-const User = model('User', userSchema)
-export default User
+const Account = model('Account', accountSchema)
+export default Account
 
 /**
 * @swagger
 * components:
 *   schemas:
-*     User:
+*     Account:
 *       type: object
 *       properties:
 *         email:
 *           type: string
 *         name:
 *           type: string
-*         username:
+*         accountname:
 *           type: string
 *         type:
 *           type: string
-*           enum: ['user', 'admin', 'creator', 'reader']
+*           enum: ['account', 'admin', 'creator', 'reader']
 *         language:
 *           type: string
 *           enum: ['tr', 'en']

@@ -1,5 +1,5 @@
-import { User } from '../../../../models/index.js';
-import { validateRegister } from '../../../validators/user.validator.js';
+import { Account } from '../../../../models/index.js';
+import { validateRegister } from '../../../validators/account.validator.js';
 import { errorHelper, generateRandomCode, sendCodeToEmail, logger, getText, turkishToEnglish, signConfirmCodeToken } from '../../../../utils/index.js';
 import ipHelper from '../../../../utils/helpers/ip-helper.js';
 import bcrypt from 'bcryptjs';
@@ -21,10 +21,10 @@ export default async (req, res) => {
     return res.status(400).json(errorHelper(code, req, error.details[0].message));
   }
 
-  const exists = await User.exists({ email: req.body.email })
-  .catch((err) => {
-    return res.status(500).json(errorHelper('00031', req, err.message));
-  });
+  const exists = await Account.exists({ email: req.body.email })
+    .catch((err) => {
+      return res.status(500).json(errorHelper('00031', req, err.message));
+    });
 
   if (exists) return res.status(409).json(errorHelper('00032', req));
 
@@ -33,9 +33,9 @@ export default async (req, res) => {
   const emailCode = generateRandomCode(4);
   await sendCodeToEmail(req.body.email, req.body.name, emailCode, req.body.language, 'register', req, res);
 
-  let username = '';
+  let accountname = '';
   let tempName = '';
-  let existsUsername = true;
+  let existsAccountname = true;
   let name = turkishToEnglish(req.body.name);
   if (name.includes(' ')) {
     tempName = name.trim().split(' ').slice(0, 1).join('').toLowerCase();
@@ -43,19 +43,19 @@ export default async (req, res) => {
     tempName = name.toLowerCase().trim();
   }
   do {
-    username = tempName + generateRandomCode(4);
-    existsUsername = await User.exists({ username: username }).catch((err) => {
+    accountname = tempName + generateRandomCode(4);
+    existsAccountname = await Account.exists({ accountname: accountname }).catch((err) => {
       return res.status(500).json(errorHelper('00033', req, err.message));
     });
-  } while (existsUsername);
+  } while (existsAccountname);
 
   const geo = lookup(ipHelper(req));
 
-  let user = new User({
+  let account = new Account({
     email: req.body.email,
     password: hashed,
     name: name,
-    username: username,
+    accountname: accountname,
     language: req.body.language,
     platform: req.body.platform,
     isVerified: false,
@@ -64,28 +64,28 @@ export default async (req, res) => {
     lastLogin: Date.now()
   });
 
-  user = await user.save().catch((err) => {
+  account = await account.save().catch((err) => {
     return res.status(500).json(errorHelper('00034', req, err.message));
   });
 
-  user.password = null;
+  account.password = null;
 
-  const confirmCodeToken = signConfirmCodeToken(user._id, emailCode);
+  const confirmCodeToken = signConfirmCodeToken(account._id, emailCode);
 
-  logger('00035', user._id, getText('en', '00035'), 'Info', req);
+  logger('00035', account._id, getText('en', '00035'), 'Info', req);
   return res.status(200).json({
     resultMessage: { en: getText('en', '00035'), tr: getText('tr', '00035') },
-    resultCode: '00035', user, confirmToken: confirmCodeToken
+    resultCode: '00035', account, confirmToken: confirmCodeToken
   });
 };
 
 /**
  * @swagger
- * /user:
+ * /account:
  *    post:
- *      summary: Registers the user
+ *      summary: Registers the account
  *      requestBody:
- *        description: All required information about the user
+ *        description: All required information about the account
  *        required: true
  *        content:
  *          application/json:
@@ -109,7 +109,7 @@ export default async (req, res) => {
  *                deviceId:
  *                  type: string
  *      tags:
- *        - User
+ *        - Account
  *      responses:
  *        "200":
  *          description: You registered successfully.
@@ -122,8 +122,8 @@ export default async (req, res) => {
  *                              $ref: '#/components/schemas/ResultMessage'
  *                          resultCode:
  *                              $ref: '#/components/schemas/ResultCode'
- *                          user:
- *                              $ref: '#/components/schemas/User'
+ *                          account:
+ *                              $ref: '#/components/schemas/Account'
  *                          confirmToken:
  *                              type: string
  *        "400":

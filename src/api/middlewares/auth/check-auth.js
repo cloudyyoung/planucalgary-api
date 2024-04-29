@@ -1,4 +1,4 @@
-import { User, Token } from '../../../models/index.js';
+import { Account, Token } from '../../../models/index.js';
 import { errorHelper } from '../../../utils/index.js';
 import { jwtSecretKey } from '../../../config/index.js';
 import pkg from 'mongoose';
@@ -14,18 +14,18 @@ export default async (req, res, next) => {
     token = req.header('Authorization').replace('Bearer ', '');
 
   try {
-    req.user = verify(token, jwtSecretKey);
-    if (!Types.ObjectId.isValid(req.user._id))
+    req.account = verify(token, jwtSecretKey);
+    if (!Types.ObjectId.isValid(req.account._id))
       return res.status(400).json(errorHelper('00007', req));
 
-    const exists = await User.exists({ _id: req.user._id, isVerified: true, isActivated: true })
+    const exists = await Account.exists({ _id: req.account._id, isVerified: true, isActivated: true })
       .catch((err) => {
         return res.status(500).json(errorHelper('00008', req, err.message));
       });
 
     if (!exists) return res.status(400).json(errorHelper('00009', req));
 
-    const tokenExists = await Token.exists({ userId: req.user._id, status: true })
+    const tokenExists = await Token.exists({ accountId: req.account._id, status: true })
       .catch((err) => {
         return res.status(500).json(errorHelper('00010', req, err.message));
       });
