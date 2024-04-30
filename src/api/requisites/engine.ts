@@ -1,5 +1,5 @@
 import { plainToClass } from 'class-transformer';
-import { Requisites } from "./classes";
+import { Requisites } from "./classes/requisites";
 
 class RequisitesEngine {
   private requisites: Requisites
@@ -17,6 +17,10 @@ class RequisitesEngine {
   getRequisiteSetIds() {
     return this.requisites.getRequisiteSetIds()
   }
+}
+
+class StructureConditionEngine {
+
 }
 
 export default RequisitesEngine;
