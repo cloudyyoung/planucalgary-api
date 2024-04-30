@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 
 import { CatalogProgram } from './models';
 import { CatalogCourseSet } from '../course_set/models';
-import { getReferencedSets } from './utils';
+import { getReferencedSets, aggregateRequisiteSets } from './utils';
 
 export const getPrograms = async (req: Request, res: Response) => {
   const programs = await CatalogProgram.aggregate([
@@ -111,6 +111,14 @@ export const getProgram = async (req: Request, res: Response) => {
       }
     },
   ]);
+
+  // Convert into a map for easier access
+  const courseSetMap = courseSets.reduce((acc, courseSet) => {
+    acc[courseSet.id] = courseSet;
+    return acc;
+  }, {});
+
+  program.requisites = aggregateRequisiteSets(program.requisites, courseSetMap);
 
   return res.status(200).json(program);
 }
