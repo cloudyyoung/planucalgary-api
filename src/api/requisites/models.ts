@@ -2,7 +2,12 @@ import { required } from 'joi';
 import mongoose from 'mongoose';
 const { Schema } = mongoose;
 
-const RequisitesSimpleRuleValueValuesSchema = new Schema({
+interface RequisitesSimpleRuleValueValuesProps {
+  logic: string;
+  value: string;
+}
+
+const RequisitesSimpleRuleValueValuesSchema = new Schema<RequisitesSimpleRuleValueValuesProps>({
   logic: {
     type: String,
     enum: ["and", "or"],
@@ -12,7 +17,13 @@ const RequisitesSimpleRuleValueValuesSchema = new Schema({
   }
 }, { _id: false })
 
-const RequisitesSimpleRuleValueSchema = new Schema({
+interface RequisitesSimpleRuleValueProps {
+  id: string;
+  condition: string;
+  values: RequisitesSimpleRuleValueValuesProps[];
+}
+
+const RequisitesSimpleRuleValueSchema = new Schema<RequisitesSimpleRuleValueProps>({
   id: {
     type: String,
     required: true,
@@ -33,7 +44,26 @@ const RequisitesSimpleRuleValueSchema = new Schema({
   }
 }, { _id: false })
 
-const RequisitesSimpleRuleSchema = new Schema({
+interface RequisitesSimpleRuleProps {
+  id: string;
+  name: string;
+  description: string;
+  notes: string;
+  condition: string;
+  minCourses: number;
+  maxCourses: number;
+  minCredits: number;
+  maxCredits: number;
+  credits: number;
+  number: number;
+  restriction: string;
+  grade: string;
+  gradeType: string;
+  subRules: RequisitesSimpleRuleProps[];
+  value: string | RequisitesSimpleRuleValueProps;
+}
+
+const RequisitesSimpleRuleSchema = new Schema<RequisitesSimpleRuleProps>({
   id: {
     type: String,
     required: true
@@ -93,7 +123,7 @@ const RequisitesSimpleRuleSchema = new Schema({
     type: String
   },
   subRules: {
-    type: ["RequisitesSimpleRuleSchema"]
+    type: [],
   },
   value: {
     type: Schema.Types.Mixed, // A string or an object
@@ -113,7 +143,15 @@ const RequisitesSimpleRuleSchema = new Schema({
   },
 }, { _id: false })
 
-const RequisitesSimpleSchema = new Schema({
+interface RequisitesSimpleProps {
+  id: string;
+  type: string;
+  name: string;
+  notes: string;
+  rules: RequisitesSimpleRuleProps[];
+}
+
+const RequisitesSimpleSchema = new Schema<RequisitesSimpleProps>({
   id: {
     type: String,
     required: true
@@ -132,6 +170,10 @@ const RequisitesSimpleSchema = new Schema({
   }
 }, { _id: false })
 
+interface RequisitesProps {
+  requisitesSimple: RequisitesSimpleProps[]
+}
+
 const RequisitesSchema = new Schema({
   requisitesSimple: {
     type: [RequisitesSimpleSchema], // So far, only requisitesSimple is used
@@ -140,3 +182,4 @@ const RequisitesSchema = new Schema({
 }, { _id: false })
 
 export { RequisitesSchema }
+export type { RequisitesProps }
