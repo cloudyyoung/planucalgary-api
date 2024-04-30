@@ -1,5 +1,3 @@
-import { RequisitesProps } from '../requisites/types';
-
 interface CatalogProgramProps {
   active: boolean;
   admission_info: string;
@@ -14,7 +12,7 @@ interface CatalogProgramProps {
   long_name: string;
   name: string;
   program_group_id: string;
-  requisites: RequisitesProps;
+  requisites: Map<string, any>;
   start_term: Map<string, any>;
   transcript_description: string;
   transcript_level: string;
