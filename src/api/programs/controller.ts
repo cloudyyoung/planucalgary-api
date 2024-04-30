@@ -91,30 +91,9 @@ export const getProgram = async (req: Request, res: Response) => {
 
   const program = programs[0];
 
-  // const { referencedCourseSets, referencedRequisiteSets } = getReferencedSets(program.requisites);
-  // const courseSets = await CatalogCourseSet.aggregate([
-  //   { $match: { id: { $in: referencedCourseSets } } },
-  //   {
-  //     $lookup: {
-  //       from: 'courses',
-  //       localField: 'course_list',
-  //       foreignField: 'course_group_id',
-  //       as: 'courses'
-  //     }
-  //   },
-  // ]);
-
-  // // Convert into a map for easier access
-  // const courseSetMap = courseSets.reduce((acc, courseSet) => {
-  //   acc[courseSet.id] = courseSet;
-  //   return acc;
-  // }, {});
-
-  // program.requisites = aggregateRequisiteSets(program.requisites, courseSetMap);
-
   const engine = new RequisitesEngine(program.requisites, {});
   await engine.hydrate()
-  
+
   console.log((await engine.getSets()))
 
   return res.status(200).json(program);
