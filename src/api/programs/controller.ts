@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 
 import { CatalogProgram } from './models';
+import { getReferencedSets } from './utils';
 
 export const getPrograms = async (req: Request, res: Response) => {
   const programs = await CatalogProgram.aggregate([
@@ -84,6 +85,7 @@ export const getProgram = async (req: Request, res: Response) => {
         career: '$career',
         faculties: '$faculty_details.display_name',
         departments: '$department_details.display_name',
+        requisites: '$requisites',
       }
     },
     // Limit the result to 1
@@ -94,5 +96,11 @@ export const getProgram = async (req: Request, res: Response) => {
     return res.status(404).json({ message: 'Program not found' });
   }
 
-  return res.status(200).json(programs[0]);
+  const program = programs[0];
+
+  const { referencedCourseSets, referencedRequisiteSets } = getReferencedSets(program.requisites);
+
+  
+
+  return res.status(200).json(program);
 }
