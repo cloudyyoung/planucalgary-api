@@ -113,8 +113,7 @@ export const getProgram = async (req: Request, res: Response) => {
   // program.requisites = aggregateRequisiteSets(program.requisites, courseSetMap);
 
   const engine = new RequisitesEngine(program.requisites, {});
-  console.log(await engine.getCourseSets())
-  console.log(await engine.getRequisiteSets())
+  console.log(await engine.getSets())
 
   return res.status(200).json(program);
 }

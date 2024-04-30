@@ -7,36 +7,29 @@ import { CatalogRequisiteSet } from '../requisite_set/model';
 class RequisitesEngine {
   private requisites: Requisites
   private facts: any
-  private course_sets: {} = {}
-  private requisite_sets: {} = {}
+  private sets: {} = {}
 
   constructor(requisites: any, facts: any) {
     this.requisites = plainToClass(Requisites, requisites)
     this.facts = facts
   }
 
-  async getCourseSetIds() {
-    return this.requisites.getCourseSetIds()
+  async getSetIds() {
+    return this.requisites.getSetIds()
   }
 
-  async getCourseSets() {
-    const course_set_ids = await this.getCourseSetIds()
-    const course_sets = await CatalogCourseSet.find({ id: { $in: course_set_ids } }).exec()
-    const course_set_map = new Map(course_sets.map(course_set => [course_set.id, course_set]))
-    this.course_sets = course_set_map
-    return course_set_map
-  }
+  async getSets() {
+    const set_ids = await this.getSetIds()
 
-  getRequisiteSetIds() {
-    return this.requisites.getRequisiteSetIds()
-  }
+    const course_sets = await CatalogCourseSet.find({ id: { $in: set_ids } })
+    const requisite_sets = await CatalogRequisiteSet.find({ requisite_set_group_id: { $in: set_ids } })
 
-  async getRequisiteSets() {
-    const requisite_set_ids = await this.getRequisiteSetIds()
-    const requisite_sets = await CatalogRequisiteSet.find({ requisite_set_group_id: { $in: requisite_set_ids } }).exec()
-    const requisite_set_map = new Map(requisite_sets.map(requisite_set => [requisite_set.id, requisite_set]))
-    this.requisite_sets = requisite_set_map
-    return requisite_set_map
+
+    const combined_sets = [...course_sets, ...requisite_sets]
+    const sets = toMap(combined_sets)
+
+    this.sets = sets
+    return sets
   }
 }
 
@@ -48,6 +41,10 @@ class StructureConditionEngine {
     this.structure = plainToClass(StructureCondition, structure)
     this.facts = facts
   }
+}
+
+const toMap = (array: any[]) => {
+  return new Map(array.map(item => [item.id, item]))
 }
 
 export { RequisitesEngine, StructureConditionEngine };
