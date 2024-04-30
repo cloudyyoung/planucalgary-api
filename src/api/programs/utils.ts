@@ -1,7 +1,6 @@
 import { RequisitesProps } from '../requisites/models';
 
 
-// Get the referenced course sets and requisite sets from the requisites object
 export const getReferencedSets = (requisites: RequisitesProps) => {
   const courseSets = [];
   const requisiteSets = [];
@@ -34,4 +33,35 @@ export const getReferencedSets = (requisites: RequisitesProps) => {
     referencedCourseSets: courseSets,
     referencedRequisiteSets: requisiteSets
   }
+}
+
+export const aggregateRequisiteSets = (requisites: RequisitesProps, courseSetsMap: { [key: string]: any }) => {
+  const requisitesSimple = requisites.requisitesSimple
+  for (const requisite of requisitesSimple) {
+    for (const rule of requisite.rules) {
+      const rule_value = rule.value
+      if (typeof rule_value === "string") continue
+
+      const rule_value_condition = rule_value.condition
+      const valid_conditions = ["courseSets", "requisiteSets"]
+      if (!valid_conditions.includes(rule_value_condition)) continue
+
+      const rule_value_values = rule_value.values
+
+      for (const rule_value_value of rule_value_values) {
+        const value = rule_value_value.value
+
+        for (const [t, v] of value.entries()) {
+          if (rule_value_condition === "courseSets") {
+            const courseSet = courseSetsMap[v]
+            if (!courseSet) continue
+            value[t] = courseSet
+          }
+        }
+      }
+
+    }
+  }
+
+  return requisites
 }
