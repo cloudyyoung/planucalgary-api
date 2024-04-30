@@ -1,15 +1,12 @@
 import { RequisitesProps } from "./types";
-import { RequisitesSimple } from "./requisites_simple";
 
 class RequisitesEngine {
   private requisites: RequisitesProps
-  private requisitesSimple: RequisitesSimple
   private facts: any
 
   constructor(requisites: RequisitesProps, facts: any) {
     this.requisites = requisites
     this.facts = facts
-    this.requisitesSimple = new RequisitesSimple(this.requisites.requisitesSimple)
   }
 
   setRequisites(requisites: RequisitesProps) {
