@@ -1,4 +1,6 @@
 import mongoose from 'mongoose';
+import { RequisitesSchema } from '../requisites/models';
+
 const { Schema, connection } = mongoose;
 
 const CatalogProgramSchema = new Schema({
@@ -56,7 +58,7 @@ const CatalogProgramSchema = new Schema({
     required: true
   },
   requisites: {
-    type: Map,
+    type: RequisitesSchema,
     required: true
   },
   start_term: {
