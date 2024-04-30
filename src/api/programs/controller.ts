@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 
 import { CatalogProgram } from './models';
+import { CatalogCourseSet } from '../course_set/models';
 import { getReferencedSets } from './utils';
 
 export const getPrograms = async (req: Request, res: Response) => {
@@ -99,8 +100,17 @@ export const getProgram = async (req: Request, res: Response) => {
   const program = programs[0];
 
   const { referencedCourseSets, referencedRequisiteSets } = getReferencedSets(program.requisites);
-
-  
+  const courseSets = await CatalogCourseSet.aggregate([
+    { $match: { id: { $in: referencedCourseSets } } },
+    {
+      $lookup: {
+        from: 'courses',
+        localField: 'course_list',
+        foreignField: 'course_group_id',
+        as: 'courses'
+      }
+    },
+  ]);
 
   return res.status(200).json(program);
 }
