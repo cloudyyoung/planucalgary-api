@@ -4,7 +4,7 @@ const { Schema } = mongoose;
 
 interface RequisitesSimpleRuleValueValuesProps {
   logic: "and" | "or";
-  value: string;
+  value: string[];
 }
 
 const RequisitesSimpleRuleValueValuesSchema = new Schema<RequisitesSimpleRuleValueValuesProps>({
@@ -13,7 +13,7 @@ const RequisitesSimpleRuleValueValuesSchema = new Schema<RequisitesSimpleRuleVal
     enum: ["and", "or"],
   },
   value: {
-    type: String,
+    type: [String],
   }
 }, { _id: false })
 
@@ -49,7 +49,7 @@ interface RequisitesSimpleRuleProps {
   name: string;
   description: string;
   notes: string;
-  condition: "anyOf" | "allOf" | "numberOf" | "completedAllOf" | "completedAtLeastXOf" | "completedAnyOf" | "enrolledIn" | "minimumCredits" | "minimumResidencyCredits" | "minimumGrade" | "averageGrade" | "freeformText" | "completeVariableCoursesAndVariableCredits;
+  condition: "anyOf" | "allOf" | "numberOf" | "completedAllOf" | "completedAtLeastXOf" | "completedAnyOf" | "enrolledIn" | "minimumCredits" | "minimumResidencyCredits" | "minimumGrade" | "averageGrade" | "freeformText" | "completeVariableCoursesAndVariableCredits";
   minCourses: number;
   maxCourses: number;
   minCredits: number;
