@@ -27,8 +27,16 @@ class RequisitesEngine {
     const course_sets = await CatalogCourseSet.find({ id: { $in: set_ids } })
     const requisite_sets = await CatalogRequisiteSet.find({ requisite_set_group_id: { $in: set_ids } })
 
-    await course_sets.forEach(set => set.structure = new StructureConditionEngine(set.structure, this.facts))
-    await requisite_sets.forEach(set => set.requisites = new RequisitesEngine({ "requisitesSimple": set.requisites }, this.facts))
+    await course_sets.forEach(set => {
+      const engine = new StructureConditionEngine(set.structure, this.facts)
+      engine.hydrate()
+      set.structure = engine
+    })
+    await requisite_sets.forEach(set => {
+      const engine = new RequisitesEngine({ "requisitesSimple": Array(set.requisites) }, this.facts)
+      engine.hydrate()
+      set.requisites = engine
+    })
 
     const sets = new Map<String, any>()
     course_sets.forEach(set => sets.set(set.id, set))
@@ -40,7 +48,6 @@ class RequisitesEngine {
 class StructureConditionEngine {
   private structure: StructureCondition
   private facts: any
-  private courses: Map<String, any> = new Map()
 
   constructor(structure: any, facts: any) {
     this.structure = plainToClass(StructureCondition, structure)
@@ -60,6 +67,7 @@ class StructureConditionEngine {
     const courses = await CatalogCourseSet.find({ id: { $in: course_ids } })
     const course_map = new Map<String, any>()
     courses.forEach(course => course_map.set(course.id, course))
+    console.log(course_map)
     return course_map
   }
 }
