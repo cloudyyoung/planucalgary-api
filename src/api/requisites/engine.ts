@@ -1,19 +1,12 @@
-import { RequisitesProps } from "./types";
+import { plainToClass } from 'class-transformer';
+import { Requisites } from "./classes";
 
 class RequisitesEngine {
-  private requisites: RequisitesProps
+  private requisites: Requisites
   private facts: any
 
-  constructor(requisites: RequisitesProps, facts: any) {
-    this.requisites = requisites
-    this.facts = facts
-  }
-
-  setRequisites(requisites: RequisitesProps) {
-    this.requisites = requisites
-  }
-
-  setFacts(facts: any) {
+  constructor(requisites: any, facts: any) {
+    this.requisites = plainToClass(Requisites, requisites)
     this.facts = facts
   }
 }

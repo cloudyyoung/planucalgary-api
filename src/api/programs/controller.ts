@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 
 import { CatalogProgram } from './models';
+import { RequisitesEngine } from '../requisites/engine';
 
 export const getPrograms = async (req: Request, res: Response) => {
   const programs = await CatalogProgram.aggregate([
@@ -110,6 +111,8 @@ export const getProgram = async (req: Request, res: Response) => {
   // }, {});
 
   // program.requisites = aggregateRequisiteSets(program.requisites, courseSetMap);
+
+  new RequisitesEngine(program.requisites, {});
 
   return res.status(200).json(program);
 }
