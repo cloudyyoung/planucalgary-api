@@ -7,11 +7,12 @@ import { CatalogRequisiteSet } from '../requisite_set/model';
 class RequisitesEngine {
   private requisites: Requisites
   private facts: any
-  private sets: {} = {}
+  private sets: Map<String, any> = new Map()
 
   constructor(requisites: any, facts: any) {
     this.requisites = plainToClass(Requisites, requisites)
     this.facts = facts
+    this.getSets().then(sets => this.sets = sets)
   }
 
   async getSetIds() {
@@ -24,11 +25,12 @@ class RequisitesEngine {
     const course_sets = await CatalogCourseSet.find({ id: { $in: set_ids } })
     const requisite_sets = await CatalogRequisiteSet.find({ requisite_set_group_id: { $in: set_ids } })
 
+    await course_sets.forEach(set => set.structure = new StructureConditionEngine(set.structure, this.facts))
+    await requisite_sets.forEach(set => set.requisites = new StructureConditionEngine(set.requisites, this.facts))
 
-    const combined_sets = [...course_sets, ...requisite_sets]
-    const sets = toMap(combined_sets)
-
-    this.sets = sets
+    const sets = new Map<String, any>()
+    course_sets.forEach(set => sets.set(set.id, set))
+    requisite_sets.forEach(set => sets.set(set.requisite_set_group_id, set))
     return sets
   }
 }
@@ -41,10 +43,6 @@ class StructureConditionEngine {
     this.structure = plainToClass(StructureCondition, structure)
     this.facts = facts
   }
-}
-
-const toMap = (array: any[]) => {
-  return new Map(array.map(item => [item.id, item]))
 }
 
 export { RequisitesEngine, StructureConditionEngine };
