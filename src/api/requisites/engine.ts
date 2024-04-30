@@ -3,7 +3,6 @@ import { Requisites } from "./classes/requisites";
 import { StructureCondition } from './classes/structure_condition';
 import { CatalogCourseSet } from '../course_set/models';
 import { CatalogRequisiteSet } from '../requisite_set/model';
-import { CatalogSetsProps } from './types';
 
 class RequisitesEngine {
   public requisites: Requisites
@@ -29,7 +28,7 @@ class RequisitesEngine {
     const requisite_sets = await CatalogRequisiteSet.find({ requisite_set_group_id: { $in: set_ids } })
 
     await course_sets.forEach(set => set.structure = new StructureConditionEngine(set.structure, this.facts))
-    await requisite_sets.forEach(set => set.requisites = new StructureConditionEngine(set.requisites, this.facts))
+    await requisite_sets.forEach(set => set.requisites = new RequisitesEngine({ "requisitesSimple": set.requisites }, this.facts))
 
     const sets = new Map<String, any>()
     course_sets.forEach(set => sets.set(set.id, set))
