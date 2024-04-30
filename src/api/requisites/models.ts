@@ -170,7 +170,7 @@ const RequisitesSimpleSchema = new Schema<RequisitesSimpleProps>({
 }, { _id: false })
 
 interface RequisitesProps {
-  requisitesSimple: RequisitesSimpleProps[]
+  requisitesSimple: RequisitesSimpleProps
 }
 
 const RequisitesSchema = new Schema({
@@ -181,4 +181,10 @@ const RequisitesSchema = new Schema({
 }, { _id: false })
 
 export { RequisitesSchema }
-export type { RequisitesProps }
+export type {
+  RequisitesProps,
+  RequisitesSimpleProps,
+  RequisitesSimpleRuleProps,
+  RequisitesSimpleRuleValueProps,
+  RequisitesSimpleRuleValueValuesProps
+}
