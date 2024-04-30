@@ -19,7 +19,7 @@ const CatalogRequisiteSetSchema = new Schema<RequisiteSetProps>({
     required: true
   },
   requisites: {
-    type: Map,
+    type: Array,
     required: true
   },
   version: {
