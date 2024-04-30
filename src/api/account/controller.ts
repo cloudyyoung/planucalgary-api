@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 
-import { User } from './models';
+import { Accounts } from './models';
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 
@@ -25,13 +25,13 @@ export const signup = async (req: Request, res: Response) => {
     }
 
     //Check for the same username
-    const usernameCheck = await User.findOne({username});
+    const usernameCheck = await Accounts.findOne({username});
     if (usernameCheck){
       return res.json({"message":"Username already exists.", status:false});
     }
 
     //check for the same email
-    const emailCheck = await User.findOne({email});
+    const emailCheck = await Accounts.findOne({email});
     if (emailCheck){
       return res.json({"message":"Email already exists.", status:false});
     }
@@ -42,7 +42,7 @@ export const signup = async (req: Request, res: Response) => {
 
     const passwordHash = await bcrypt.hash(password,10)
 
-    const user = await User.create({
+    const user = await Accounts.create({
       email,
       username,
       password: passwordHash
@@ -72,7 +72,7 @@ export const signin = async (req: Request, res: Response) => {
     const {username, password} = req.body;
 
     //Check for similar username
-    const loginUser = await User.findOne({username});
+    const loginUser = await Accounts.findOne({username});
     if (!loginUser){
       return res.json({"message":"Incorrect Username or Password", status:false});
     }
