@@ -59,7 +59,7 @@ const CatalogProgramSchema = new Schema<CatalogProgramProps>({
     required: true
   },
   requisites: {
-    type: RequisitesSchema,
+    type: Map,
     required: true
   },
   start_term: {

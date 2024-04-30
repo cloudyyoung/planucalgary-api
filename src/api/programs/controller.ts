@@ -72,21 +72,14 @@ export const getProgram = async (req: Request, res: Response) => {
         as: 'faculty_details' // The result of the join will be stored in this field
       }
     },
-    // Project the fields you want to include in the final output
+    // Add fields
     {
-      $project: {
-        cid: '$coursedog_id',
-        code: '$code',
-        degree_designation_code: '$degree_designation_code',
-        degree_designation_name: '$degree_designation_name',
-        type: '$type',
+      $addFields: {
         display_name: {
           $cond: { if: { $eq: ['$type', 'ACP'] }, then: '$display_name', else: '$transcript_description' }
         },
-        career: '$career',
         faculties: '$faculty_details.display_name',
         departments: '$department_details.display_name',
-        requisites: '$requisites',
       }
     },
     // Limit the result to 1
@@ -99,26 +92,26 @@ export const getProgram = async (req: Request, res: Response) => {
 
   const program = programs[0];
 
-  const { referencedCourseSets, referencedRequisiteSets } = getReferencedSets(program.requisites);
-  const courseSets = await CatalogCourseSet.aggregate([
-    { $match: { id: { $in: referencedCourseSets } } },
-    {
-      $lookup: {
-        from: 'courses',
-        localField: 'course_list',
-        foreignField: 'course_group_id',
-        as: 'courses'
-      }
-    },
-  ]);
+  // const { referencedCourseSets, referencedRequisiteSets } = getReferencedSets(program.requisites);
+  // const courseSets = await CatalogCourseSet.aggregate([
+  //   { $match: { id: { $in: referencedCourseSets } } },
+  //   {
+  //     $lookup: {
+  //       from: 'courses',
+  //       localField: 'course_list',
+  //       foreignField: 'course_group_id',
+  //       as: 'courses'
+  //     }
+  //   },
+  // ]);
 
-  // Convert into a map for easier access
-  const courseSetMap = courseSets.reduce((acc, courseSet) => {
-    acc[courseSet.id] = courseSet;
-    return acc;
-  }, {});
+  // // Convert into a map for easier access
+  // const courseSetMap = courseSets.reduce((acc, courseSet) => {
+  //   acc[courseSet.id] = courseSet;
+  //   return acc;
+  // }, {});
 
-  program.requisites = aggregateRequisiteSets(program.requisites, courseSetMap);
+  // program.requisites = aggregateRequisiteSets(program.requisites, courseSetMap);
 
   return res.status(200).json(program);
 }
