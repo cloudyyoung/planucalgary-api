@@ -21,14 +21,13 @@ class RequisitesEngine {
 }
 
 class StructureConditionEngine {
-  private structureCondition: StructureCondition
+  private structure: StructureCondition
   private facts: any
 
-  constructor(structureCondition: any, facts: any) {
-    this.structureCondition = plainToClass(StructureCondition, structureCondition)
+  constructor(structure: any, facts: any) {
+    this.structure = plainToClass(StructureCondition, structure)
     this.facts = facts
   }
 }
 
-export default RequisitesEngine;
-export { RequisitesEngine };
+export { RequisitesEngine, StructureConditionEngine };
