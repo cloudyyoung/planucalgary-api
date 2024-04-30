@@ -1,8 +1,6 @@
 import { Request, Response } from 'express';
 
 import { CatalogProgram } from './models';
-import { CatalogCourseSet } from '../course_set/models';
-import { getReferencedSets, aggregateRequisiteSets } from './utils';
 
 export const getPrograms = async (req: Request, res: Response) => {
   const programs = await CatalogProgram.aggregate([
