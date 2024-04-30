@@ -94,7 +94,5 @@ export const getProgram = async (req: Request, res: Response) => {
   const engine = new RequisitesEngine(program.requisites, {});
   await engine.hydrate()
 
-  console.log((await engine.getSets()))
-
-  return res.status(200).json(program);
+  return res.status(200).json(engine.requisites);
 }

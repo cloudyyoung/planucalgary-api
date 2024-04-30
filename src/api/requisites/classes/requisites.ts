@@ -1,8 +1,17 @@
 import { Expose, Type } from 'class-transformer';
+import { CatalogSetsProps } from '../types';
 
 class RequisitesSimpleRuleValueValues {
   logic: "and" | "or" = "and";
-  value: string[] = [];
+
+  @Expose({ name: "value" })
+  _value: string[] = []; // Dehydrated IDs
+
+  value: CatalogSetsProps[] = []; // Hydrated objects
+
+  hydrate(sets: Map<String, CatalogSetsProps>) {
+    this.value = this._value.map(id => sets.get(id)).filter(Boolean) as CatalogSetsProps[]
+  }
 }
 
 class RequisitesSimpleRuleValue {
@@ -14,9 +23,13 @@ class RequisitesSimpleRuleValue {
 
   getSetIds() {
     if (this.condition === "courseSets" || this.condition === "requirementSets" || this.condition === "requisiteSets") {
-      return this.values.flatMap(value => value.value)
+      return this.values.flatMap(value => value._value)
     }
     return [];
+  }
+
+  hydrate(sets: Map<String, CatalogSetsProps>) {
+    this.values.forEach(value => value.hydrate(sets))
   }
 }
 
@@ -60,6 +73,16 @@ class RequisitesSimpleRule {
     }
     return [];
   }
+
+  hydrate(sets: Map<String, CatalogSetsProps>) {
+    if (this.value instanceof RequisitesSimpleRuleValue) {
+      this.value.values.forEach(value => value.hydrate(sets))
+    }
+
+    if (this.sub_rules) {
+      this.sub_rules.forEach(sub_rule => sub_rule.hydrate(sets))
+    }
+  }
 }
 
 class RequisitesSimple {
@@ -74,6 +97,10 @@ class RequisitesSimple {
   getSetIds() {
     return this.rules.flatMap(rule => rule.getSetIds())
   }
+
+  hydrate(sets: Map<String, CatalogSetsProps>) {
+    this.rules.forEach(rule => rule.hydrate(sets))
+  }
 }
 
 class Requisites {
@@ -83,6 +110,10 @@ class Requisites {
 
   getSetIds() {
     return this.requisites_simple.flatMap(requisite => requisite.getSetIds())
+  }
+
+  hydrate(sets: Map<String, CatalogSetsProps>) {
+    this.requisites_simple.forEach(requisite => requisite.hydrate(sets))
   }
 }
 

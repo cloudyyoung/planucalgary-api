@@ -3,11 +3,11 @@ import { Requisites } from "./classes/requisites";
 import { StructureCondition } from './classes/structure_condition';
 import { CatalogCourseSet } from '../course_set/models';
 import { CatalogRequisiteSet } from '../requisite_set/model';
+import { CatalogSetsProps } from './types';
 
 class RequisitesEngine {
-  private requisites: Requisites
+  public requisites: Requisites
   private facts: any
-  private sets: Map<String, any> = new Map()
 
   constructor(requisites: any, facts: any) {
     this.requisites = plainToClass(Requisites, requisites)
@@ -15,7 +15,7 @@ class RequisitesEngine {
   }
 
   async hydrate() {
-    this.sets = await this.getSets()
+    await this.requisites.hydrate(await this.getSets())
   }
 
   async getSetIds() {
