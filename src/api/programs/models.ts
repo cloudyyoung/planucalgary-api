@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import { RequisitesSchema } from '../requisites/models';
 import { CatalogProgramProps } from './types';
 
 const { Schema, connection } = mongoose;

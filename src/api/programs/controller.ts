@@ -112,7 +112,9 @@ export const getProgram = async (req: Request, res: Response) => {
 
   // program.requisites = aggregateRequisiteSets(program.requisites, courseSetMap);
 
-  new RequisitesEngine(program.requisites, {});
+  const engine = new RequisitesEngine(program.requisites, {});
+  console.log(engine.getCourseSetIds())
+  console.log(engine.getRequisiteSetIds())
 
   return res.status(200).json(program);
 }

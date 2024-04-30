@@ -11,6 +11,22 @@ class RequisitesSimpleRuleValue {
 
   @Type(() => RequisitesSimpleRuleValueValues)
   values: RequisitesSimpleRuleValueValues[] = [];
+
+  @Expose()
+  getCourseSetIds() {
+    if (this.condition === "courseSets") {
+      return this.values.flatMap(value => value.value)
+    }
+    return [];
+  }
+
+  @Expose()
+  getRequisiteSetIds() {
+    if (this.condition === "requisiteSets") {
+      return this.values.flatMap(value => value.value)
+    }
+    return [];
+  }
 }
 
 class RequisitesSimpleRule {
@@ -46,6 +62,22 @@ class RequisitesSimpleRule {
 
   @Type(() => RequisitesSimpleRuleValue)
   value: string | RequisitesSimpleRuleValue = "";
+
+  @Expose()
+  getCourseSetIds() {
+    if (this.value instanceof RequisitesSimpleRuleValue) {
+      return this.value.getCourseSetIds()
+    }
+    return [];
+  }
+
+  @Expose()
+  getRequisiteSetIds() {
+    if (this.value instanceof RequisitesSimpleRuleValue) {
+      return this.value.getRequisiteSetIds()
+    }
+    return [];
+  }
 }
 
 class RequisitesSimple {
@@ -56,12 +88,32 @@ class RequisitesSimple {
 
   @Type(() => RequisitesSimpleRule)
   rules: RequisitesSimpleRule[] = [];
+
+  @Expose()
+  getCourseSetIds() {
+    return this.rules.flatMap(rule => rule.getCourseSetIds())
+  }
+
+  @Expose()
+  getRequisiteSetIds() {
+    return this.rules.flatMap(rule => rule.getRequisiteSetIds())
+  }
 }
 
 class Requisites {
   @Type(() => RequisitesSimple)
   @Expose({ name: "requisitesSimple" })
   requisites_simple: RequisitesSimple[] = []
+
+  @Expose()
+  getCourseSetIds() {
+    return this.requisites_simple.flatMap(requisite => requisite.getCourseSetIds())
+  }
+
+  @Expose()
+  getRequisiteSetIds() {
+    return this.requisites_simple.flatMap(requisite => requisite.getRequisiteSetIds())
+  }
 }
 
 export { Requisites }

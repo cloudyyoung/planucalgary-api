@@ -9,6 +9,14 @@ class RequisitesEngine {
     this.requisites = plainToClass(Requisites, requisites)
     this.facts = facts
   }
+
+  getCourseSetIds() {
+    return this.requisites.getCourseSetIds()
+  }
+
+  getRequisiteSetIds() {
+    return this.requisites.getRequisiteSetIds()
+  }
 }
 
 export default RequisitesEngine;
