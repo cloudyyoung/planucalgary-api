@@ -10,7 +10,7 @@ class StructureCondition {
   @Type(() => StructureConditionRule)
   rules: StructureConditionRule[] = [];
 
-  getCourseSetIds(): string[] {
+  getCourseIds(): string[] {
     return this.rules.flatMap(rule => rule.value).filter(value => value !== undefined) as string[];
   }
 }

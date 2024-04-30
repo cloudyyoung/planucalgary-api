@@ -12,7 +12,10 @@ class RequisitesEngine {
   constructor(requisites: any, facts: any) {
     this.requisites = plainToClass(Requisites, requisites)
     this.facts = facts
-    this.getSets().then(sets => this.sets = sets)
+  }
+
+  async hydrate() {
+    this.sets = await this.getSets()
   }
 
   async getSetIds() {
@@ -38,10 +41,27 @@ class RequisitesEngine {
 class StructureConditionEngine {
   private structure: StructureCondition
   private facts: any
+  private courses: Map<String, any> = new Map()
 
   constructor(structure: any, facts: any) {
     this.structure = plainToClass(StructureCondition, structure)
     this.facts = facts
+  }
+
+  async hydrate() {
+    await this.getCourses()
+  }
+
+  async getCoursesIds() {
+    return this.structure.getCourseIds()
+  }
+
+  async getCourses() {
+    const course_ids = await this.getCoursesIds()
+    const courses = await CatalogCourseSet.find({ id: { $in: course_ids } })
+    const course_map = new Map<String, any>()
+    courses.forEach(course => course_map.set(course.id, course))
+    return course_map
   }
 }
 
