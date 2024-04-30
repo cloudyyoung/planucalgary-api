@@ -1,4 +1,6 @@
 import mongoose from 'mongoose';
+import { CatalogCourseSetProps } from './types';
+
 const { Schema, connection } = mongoose;
 
 const CatalogCourseSetSchema = new Schema<CatalogCourseSetProps>({

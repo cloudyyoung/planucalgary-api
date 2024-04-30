@@ -7,3 +7,5 @@ interface CatalogCourseSetProps {
   structure: object;
   type: "static" | "dynamic";
 }
+
+export { CatalogCourseSetProps }

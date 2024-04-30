@@ -6,3 +6,5 @@ interface RequisiteSetProps {
   requisites: object;
   version: number;
 }
+
+export { RequisiteSetProps }

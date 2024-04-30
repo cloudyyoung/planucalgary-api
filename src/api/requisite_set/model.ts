@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { RequisiteSetProps } from './types';
 const { Schema, connection } = mongoose;
 
 const CatalogRequisiteSetSchema = new Schema<RequisiteSetProps>({
