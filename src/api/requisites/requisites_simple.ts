@@ -1,4 +1,4 @@
-import { RequisitesSimpleProps, RequisitesSimpleRuleProps, RequisitesSimpleRuleValueProps, RequisitesSimpleRuleValueValuesProps } from "./models";
+import { RequisitesSimpleProps, RequisitesSimpleRuleProps, RequisitesSimpleRuleValueProps, RequisitesSimpleRuleValueValuesProps } from "./types";
 
 class RequisitesSimple {
   private requisitesSimple: RequisitesSimpleProps;

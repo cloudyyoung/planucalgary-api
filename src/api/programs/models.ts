@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
-import { RequisitesSchema, RequisitesProps } from '../requisites/models';
+import { RequisitesSchema } from '../requisites/models';
+import { RequisitesProps } from '../requisites/types';
 
 const { Schema, connection } = mongoose;
 

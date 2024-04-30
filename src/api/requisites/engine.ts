@@ -1,4 +1,4 @@
-import { RequisitesProps, RequisitesSimpleProps } from "./models";
+import { RequisitesProps } from "./types";
 import { RequisitesSimple } from "./requisites_simple";
 
 class RequisitesEngine {

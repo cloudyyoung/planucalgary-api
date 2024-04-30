@@ -1,10 +1,12 @@
 import mongoose from 'mongoose';
-const { Schema } = mongoose;
+import {
+  RequisitesSimpleProps,
+  RequisitesSimpleRuleProps,
+  RequisitesSimpleRuleValueProps,
+  RequisitesSimpleRuleValueValuesProps,
+} from './types';
 
-interface RequisitesSimpleRuleValueValuesProps {
-  logic: "and" | "or";
-  value: string[];
-}
+const { Schema } = mongoose;
 
 const RequisitesSimpleRuleValueValuesSchema = new Schema<RequisitesSimpleRuleValueValuesProps>({
   logic: {
@@ -15,12 +17,6 @@ const RequisitesSimpleRuleValueValuesSchema = new Schema<RequisitesSimpleRuleVal
     type: [String],
   }
 }, { _id: false })
-
-interface RequisitesSimpleRuleValueProps {
-  id: string;
-  condition: "courses" | "programs" | "courseSets" | "requirementSets" | "requisiteSets" | "none";
-  values: RequisitesSimpleRuleValueValuesProps[];
-}
 
 const RequisitesSimpleRuleValueSchema = new Schema<RequisitesSimpleRuleValueProps>({
   id: {
@@ -42,25 +38,6 @@ const RequisitesSimpleRuleValueSchema = new Schema<RequisitesSimpleRuleValueProp
     type: [RequisitesSimpleRuleValueValuesSchema]
   }
 }, { _id: false })
-
-interface RequisitesSimpleRuleProps {
-  id: string;
-  name: string;
-  description: string;
-  notes: string;
-  condition: "anyOf" | "allOf" | "numberOf" | "completedAllOf" | "completedAtLeastXOf" | "completedAnyOf" | "enrolledIn" | "minimumCredits" | "minimumResidencyCredits" | "minimumGrade" | "averageGrade" | "freeformText" | "completeVariableCoursesAndVariableCredits";
-  minCourses: number;
-  maxCourses: number;
-  minCredits: number;
-  maxCredits: number;
-  credits: number;
-  number: number;
-  restriction: string;
-  grade: string;
-  gradeType: string;
-  subRules: RequisitesSimpleRuleProps[];
-  value: string | RequisitesSimpleRuleValueProps;
-}
 
 const RequisitesSimpleRuleSchema = new Schema<RequisitesSimpleRuleProps>({
   id: {
@@ -142,14 +119,6 @@ const RequisitesSimpleRuleSchema = new Schema<RequisitesSimpleRuleProps>({
   },
 }, { _id: false })
 
-interface RequisitesSimpleProps {
-  id: string;
-  type: string;
-  name: string;
-  notes: string;
-  rules: RequisitesSimpleRuleProps[];
-}
-
 const RequisitesSimpleSchema = new Schema<RequisitesSimpleProps>({
   id: {
     type: String,
@@ -169,9 +138,6 @@ const RequisitesSimpleSchema = new Schema<RequisitesSimpleProps>({
   }
 }, { _id: false })
 
-interface RequisitesProps {
-  requisitesSimple: RequisitesSimpleProps
-}
 
 const RequisitesSchema = new Schema({
   requisitesSimple: {
@@ -181,10 +147,3 @@ const RequisitesSchema = new Schema({
 }, { _id: false })
 
 export { RequisitesSchema }
-export type {
-  RequisitesProps,
-  RequisitesSimpleProps,
-  RequisitesSimpleRuleProps,
-  RequisitesSimpleRuleValueProps,
-  RequisitesSimpleRuleValueValuesProps
-}
