@@ -1,5 +1,6 @@
 import { plainToClass } from 'class-transformer';
 import { Requisites } from "./classes/requisites";
+import { StructureCondition } from './classes/structure_condition';
 
 class RequisitesEngine {
   private requisites: Requisites
@@ -20,7 +21,13 @@ class RequisitesEngine {
 }
 
 class StructureConditionEngine {
+  private structureCondition: StructureCondition
+  private facts: any
 
+  constructor(structureCondition: any, facts: any) {
+    this.structureCondition = plainToClass(StructureCondition, structureCondition)
+    this.facts = facts
+  }
 }
 
 export default RequisitesEngine;
