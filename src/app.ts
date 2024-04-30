@@ -1,4 +1,5 @@
 import express from 'express';
+import 'reflect-metadata';
 import { PORT } from './config';
 import loader from './loaders/index';
 
