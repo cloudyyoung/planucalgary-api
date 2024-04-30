@@ -6,7 +6,7 @@ import helmet from 'helmet';
 import bodyParser from 'body-parser';
 
 import { router as programsRouter } from '../api/programs/routes';
-import { router as userRouter} from '../api/user/routes';
+import { router as userRouter} from '../api/account/routes';
 
 export default (app: Express) => {
   process.on('uncaughtException', async (error) => {
@@ -28,7 +28,7 @@ export default (app: Express) => {
   app.disable('etag');
 
   app.use('/programs', programsRouter);
-  app.use('/user', userRouter);
+  app.use('/account', userRouter);
 
   app.get('/', (_req, res) => {
     return res.status(200).json({ message: "ok" }).end();
