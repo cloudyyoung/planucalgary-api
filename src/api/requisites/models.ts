@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 const { Schema } = mongoose;
 
 interface RequisitesSimpleRuleValueValuesProps {
-  logic: string;
+  logic: "and" | "or";
   value: string;
 }
 
@@ -19,7 +19,7 @@ const RequisitesSimpleRuleValueValuesSchema = new Schema<RequisitesSimpleRuleVal
 
 interface RequisitesSimpleRuleValueProps {
   id: string;
-  condition: string;
+  condition: "courses" | "programs" | "courseSets" | "requirementSets" | "requisiteSets" | "none";
   values: RequisitesSimpleRuleValueValuesProps[];
 }
 
@@ -49,7 +49,7 @@ interface RequisitesSimpleRuleProps {
   name: string;
   description: string;
   notes: string;
-  condition: string;
+  condition: "anyOf" | "allOf" | "numberOf" | "completedAllOf" | "completedAtLeastXOf" | "completedAnyOf" | "enrolledIn" | "minimumCredits" | "minimumResidencyCredits" | "minimumGrade" | "averageGrade" | "freeformText" | "completeVariableCoursesAndVariableCredits;
   minCourses: number;
   maxCourses: number;
   minCredits: number;
