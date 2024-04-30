@@ -5,12 +5,12 @@ class RequisitesSimpleRuleValueValues {
   logic: "and" | "or" = "and";
 
   @Expose({ name: "value" })
-  _value: string[] = []; // Dehydrated IDs
+  raw_value: string[] = []; // Dehydrated IDs
 
   value: CatalogSetsProps[] = []; // Hydrated objects
 
   hydrate(sets: Map<String, CatalogSetsProps>) {
-    this.value = this._value.map(id => sets.get(id)).filter(Boolean) as CatalogSetsProps[]
+    this.value = this.raw_value.map(id => sets.get(id)).filter(Boolean) as CatalogSetsProps[]
   }
 }
 
@@ -23,7 +23,7 @@ class RequisitesSimpleRuleValue {
 
   getSetIds() {
     if (this.condition === "courseSets" || this.condition === "requirementSets" || this.condition === "requisiteSets") {
-      return this.values.flatMap(value => value._value)
+      return this.values.flatMap(value => value.raw_value)
     }
     return [];
   }
