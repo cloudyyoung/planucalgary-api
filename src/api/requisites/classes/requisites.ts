@@ -3,7 +3,7 @@ import { CatalogSetsProps } from '../types';
 import { Hydratable } from './interfaces';
 import { CatalogCourseSet } from '../../course_set/models';
 import { CatalogRequisiteSet } from '../../requisite_set/model';
-import { convertEngined } from '../../requisite_set/utils';
+import { convertRequisiteSetEnginedDocument } from '../../requisite_set/utils';
 
 class RequisitesSimpleRuleValueValues {
   logic: "and" | "or" = "and";
@@ -39,12 +39,11 @@ class RequisitesSimpleRuleValue implements Hydratable {
       const sets_array = await CatalogCourseSet.find({ id: { $in: ids } })
       sets_map = Object.fromEntries(sets_array.map(set => [set.id, set]))
     } else if (this.condition === "requisiteSets") {
-      const sets_array = await CatalogRequisiteSet.find({ requisite_set_group_id: { $in: ids } }).exec()
-      const sets_engined_array = sets_array.map(set => convertEngined(set.toJSON()))
+      const sets_array = await CatalogRequisiteSet.find({ requisite_set_group_id: { $in: ids } })
+      const sets_engined_array = sets_array.map(set => convertRequisiteSetEnginedDocument(set.toJSON()))
 
       for (const set of sets_engined_array) {
-        // await set.requisites.hydrate()
-        console.log(set.requisites)
+        await set.requisites.hydrate()
       }
 
       sets_map = Object.fromEntries(sets_engined_array.map(set => [set.requisite_set_group_id, set]))

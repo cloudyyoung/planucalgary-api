@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
 
 import { CatalogProgramModel } from './models';
-import { CatalogProgramDocument, CatalogProgramDocumentEngined } from './types';
-import { RequisitesSimpleEngine } from '../requisites/engine';
+import { CatalogProgramDocument } from './types';
+import { convertProgramEnginedDocument } from './utils';
 
 export const getPrograms = async (req: Request, res: Response) => {
   const programDocuments = await CatalogProgramModel.aggregate<CatalogProgramDocument>([
@@ -85,7 +85,7 @@ export const getProgram = async (req: Request, res: Response) => {
         departments: '$department_details.display_name',
       }
     },
-    
+
     // Limit the result to 1
     { $limit: 1 }
   ])
@@ -96,10 +96,7 @@ export const getProgram = async (req: Request, res: Response) => {
 
   // Engine the document
   const programDocument = programDocuments[0];
-  const programEnginedDocument = {
-    ...programDocument,
-    requisites: new RequisitesSimpleEngine(programDocument.requisites.requisitesSimple)
-  }
+  const programEnginedDocument = convertProgramEnginedDocument(programDocument);
   await programEnginedDocument.requisites.hydrate();
 
   return res.status(200).json(programEnginedDocument);
