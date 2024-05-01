@@ -3,11 +3,9 @@ import { Request, Response } from 'express';
 import { Accounts } from './models';
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
+import User from './interfaces'
 
-interface User {
-  email: string;
-  username: string;
-}
+import mongoose, { Schema } from 'mongoose';
 
 
 function generateAccessToken(user : User, key : string) : string{
@@ -50,6 +48,7 @@ export const signup = async (req: Request, res: Response) => {
 
     
     const userInfo: User = {
+      id:user._id.toString(),
       email: user.email,
       username: user.username
     };
@@ -86,6 +85,7 @@ export const signin = async (req: Request, res: Response) => {
         //If password matches
         if (result){
           const userInfo: User = {
+            id:loginUser._id.toString(),
             email: loginUser.email,
             username: loginUser.username
           };
