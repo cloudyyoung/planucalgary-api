@@ -5,7 +5,7 @@ export const convertCourseSetEnginedDocument = (doc: any): CatalogCourseSetEngin
   const hasStructure = typeof doc.structure !== "undefined"
   const ret = {
     ...doc,
-    structure: hasStructure ? new StructureConditionEngine(doc.structure) : null
+    structure: hasStructure ? new StructureConditionEngine(doc.structure, doc.type) : null
   }
   return ret
 }

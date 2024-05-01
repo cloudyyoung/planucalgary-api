@@ -27,13 +27,18 @@ class RequisitesSimpleEngine extends Engine {
 
 class StructureConditionEngine extends Engine {
   public structure: StructureCondition
+  public type: "static" | "dynamic"
 
-  constructor(structure?: object) {
+  constructor(structure?: object, type: "static" | "dynamic" = "static") {
     super()
     this.structure = plainToClass(StructureCondition, structure)
+    this.type = type
   }
 
   async hydrate() {
+    if (this.type === "static") {
+      await this.structure.hydrate()
+    }
     this.hydrated = true
   }
 }
