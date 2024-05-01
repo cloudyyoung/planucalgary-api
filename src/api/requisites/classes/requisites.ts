@@ -85,7 +85,7 @@ class RequisitesSimpleRule {
   }
 }
 
-class RequisitesSimple {
+class RequisiteSimpleChild {
   id: string = "";
   type: string = "";
   name: string = "";
@@ -103,10 +103,20 @@ class RequisitesSimple {
   }
 }
 
+class RequisitesSimple extends Array<RequisiteSimpleChild> {
+  getSetIds() {
+    return this.flatMap(requisite => requisite.getSetIds())
+  }
+
+  hydrate(sets: Map<String, CatalogSetsProps>) {
+    this.forEach(requisite => requisite.hydrate(sets))
+  }
+}
+
 class Requisites {
   @Type(() => RequisitesSimple)
   @Expose({ name: "requisitesSimple" })
-  requisites_simple: RequisitesSimple[] = []
+  requisites_simple: RequisitesSimple = new RequisitesSimple()
 
   getSetIds() {
     return this.requisites_simple.flatMap(requisite => requisite.getSetIds())
@@ -117,4 +127,4 @@ class Requisites {
   }
 }
 
-export { Requisites }
+export { Requisites, RequisitesSimple }
