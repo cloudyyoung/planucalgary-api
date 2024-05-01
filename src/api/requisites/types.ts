@@ -6,8 +6,6 @@ import { RequisiteSetDocument } from "../requisite_set/types";
 
 type CatalogSetsProps = CatalogCourseSetDocument | CatalogCourseSetDocument;
 
-
-
 interface CatalogCourseSetEnginedDocument extends Omit<CatalogCourseSetDocument, "structure"> {
   structure: StructureConditionEngine;
 }
@@ -23,7 +21,6 @@ interface CatalogProgramEnginedDocument extends Omit<CatalogProgramDocument, "re
 interface RequisiteSetDocumentEngined extends Omit<RequisiteSetDocument, "requisites"> {
   requisites: RequisitesSimpleEngine;
 }
-
 
 export {
   CatalogSetsProps,

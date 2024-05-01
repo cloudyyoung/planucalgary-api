@@ -1,9 +1,11 @@
 import { Expose, Type } from 'class-transformer';
-import { CatalogSetsProps } from '../types';
-import { Hydratable } from './interfaces';
 import { CatalogCourseSet } from '../../course_set/models';
 import { CatalogRequisiteSet } from '../../requisite_set/model';
+import { CatalogCourse } from '../../courses/model';
+import { CatalogProgramModel } from '../../programs/models';
+import { CatalogSetsProps } from '../types';
 import { convertCourseSetEnginedDocument, convertRequisiteSetEnginedDocument } from '../utils';
+import { Hydratable } from './interfaces';
 
 class RequisitesSimpleRuleValueValues {
   logic: "and" | "or" = "and";
@@ -40,11 +42,10 @@ class RequisitesSimpleRuleValue implements Hydratable {
       const sets_array = await CatalogCourseSet.find({ id: { $in: ids } })
       const sets_engined_array = sets_array.map(set => convertCourseSetEnginedDocument(set.toJSON()))
 
-      // YUNFAN: Probably don't need to hydrate here, simply compare course_group_id with facts
       // Hydrate all course sets
-      // for (const set of sets_engined_array) {
-      //   await set.structure.hydrate()
-      // }
+      for (const set of sets_engined_array) {
+        await set.structure.hydrate()
+      }
 
       // Convert into a map for easy lookup
       sets_map = Object.fromEntries(sets_engined_array.map(set => [set.id, set]))
@@ -62,25 +63,22 @@ class RequisitesSimpleRuleValue implements Hydratable {
       // Convert into a map for easy lookup
       sets_map = Object.fromEntries(sets_engined_array.map(set => [set.requisite_set_group_id, set]))
 
+
+    } else if (this.condition === "courses") {
+      // Query for all referenced courses
+      const courses_array = await CatalogCourse.find({ course_group_id: { $in: ids } })
+
+      // Convert into a map for easy lookup
+      sets_map = Object.fromEntries(courses_array.map(set => [set.course_group_id, set]))
+
+
+    } else if (this.condition === "programs") {
+      // Query for all referenced programs
+      const programs_array = await CatalogProgramModel.find({ program_group_id: { $in: ids } })
+
+      // Convert into a map for easy lookup
+      sets_map = Object.fromEntries(programs_array.map(set => [set.program_group_id, set]))
     }
-
-
-    // YUNFAN: Dont need to hydrate here, simply compare ids with facts
-    // } else if (this.condition === "courses") {
-    //   // Query for all referenced courses
-    //   const courses_array = await CatalogCourse.find({ course_group_id: { $in: ids } })
-
-    //   // Convert into a map for easy lookup
-    //   sets_map = Object.fromEntries(courses_array.map(set => [set.course_group_id, set]))
-
-
-    // } else if (this.condition === "programs") {
-    //   // Query for all referenced programs
-    //   const programs_array = await CatalogProgramModel.find({ program_group_id: { $in: ids } })
-
-    //   // Convert into a map for easy lookup
-    //   sets_map = Object.fromEntries(programs_array.map(set => [set.program_group_id, set]))
-    // }
 
     for (const value of this.values) {
       await value.hydrate(sets_map)
