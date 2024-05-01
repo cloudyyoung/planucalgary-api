@@ -5,7 +5,7 @@ import { CatalogCourse } from '../../api/catalog_courses/model';
 import { CatalogProgramModel } from '../../api/catalog_programs/models';
 import { CatalogSetsProps } from '../types';
 import { convertCourseSetEnginedDocument, convertRequisiteSetEnginedDocument } from '../utils';
-import { Hydratable } from './interfaces';
+import { Hydratable } from '../interfaces';
 
 class RequisitesSimpleRuleValueValues {
   logic: "and" | "or" = "and";

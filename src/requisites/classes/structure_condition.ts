@@ -1,5 +1,5 @@
 import { Expose, Type } from 'class-transformer';
-import { Hydratable } from './interfaces';
+import { Hydratable } from '../interfaces';
 import { CourseDocument } from '../../api/catalog_courses/types';
 import { CatalogCourse } from '../../api/catalog_courses/model';
 
