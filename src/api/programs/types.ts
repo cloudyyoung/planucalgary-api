@@ -1,5 +1,3 @@
-import { RequisitesSimpleEngine } from "../requisites/engine";
-
 interface CatalogProgramDocument {
   active: boolean;
   admission_info: string;
@@ -22,8 +20,5 @@ interface CatalogProgramDocument {
   version: number;
 }
 
-interface CatalogProgramEnginedDocument extends Omit<CatalogProgramDocument, "requisites"> {
-  requisites: RequisitesSimpleEngine;
-}
 
-export type { CatalogProgramDocument, CatalogProgramEnginedDocument };
+export type { CatalogProgramDocument };

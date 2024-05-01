@@ -3,8 +3,7 @@ import { CatalogSetsProps } from '../types';
 import { Hydratable } from './interfaces';
 import { CatalogCourseSet } from '../../course_set/models';
 import { CatalogRequisiteSet } from '../../requisite_set/model';
-import { convertRequisiteSetEnginedDocument } from '../../requisite_set/utils';
-import { convertCourseSetEnginedDocument } from '../../course_set/utils';
+import { convertCourseSetEnginedDocument, convertRequisiteSetEnginedDocument } from '../utils';
 
 class RequisitesSimpleRuleValueValues {
   logic: "and" | "or" = "and";

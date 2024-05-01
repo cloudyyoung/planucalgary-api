@@ -1,4 +1,3 @@
-import { StructureConditionEngine } from "../requisites/engine";
 
 interface CourseDocument {
   active: boolean;
@@ -33,8 +32,5 @@ interface CourseDocument {
   version: number;
 }
 
-interface CourseEnginedDocument extends Omit<CourseDocument, "requisites"> {
-  requisites: StructureConditionEngine;
-}
 
-export { CourseDocument, CourseEnginedDocument }
+export { CourseDocument }
