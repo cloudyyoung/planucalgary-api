@@ -5,6 +5,8 @@ import { CatalogCourseSet } from '../../course_set/models';
 import { CatalogRequisiteSet } from '../../requisite_set/model';
 import { convertRequisiteSetEnginedDocument } from '../../requisite_set/utils';
 import { convertCourseSetEnginedDocument } from '../../course_set/utils';
+import { CatalogCourse } from '../../courses/model';
+import { CatalogProgramModel } from '../../programs/models';
 
 class RequisitesSimpleRuleValueValues {
   logic: "and" | "or" = "and";
@@ -61,6 +63,22 @@ class RequisitesSimpleRuleValue implements Hydratable {
 
       // Convert into a map for easy lookup
       sets_map = Object.fromEntries(sets_engined_array.map(set => [set.requisite_set_group_id, set]))
+
+
+    } else if (this.condition === "courses") {
+      // Query for all referenced courses
+      const courses_array = await CatalogCourse.find({ course_group_id: { $in: ids } })
+
+      // Convert into a map for easy lookup
+      sets_map = Object.fromEntries(courses_array.map(set => [set.course_group_id, set]))
+
+
+    } else if (this.condition === "programs") {
+      // Query for all referenced programs
+      const programs_array = await CatalogProgramModel.find({ program_group_id: { $in: ids } })
+
+      // Convert into a map for easy lookup
+      sets_map = Object.fromEntries(programs_array.map(set => [set.program_group_id, set]))
     }
 
     for (const value of this.values) {
