@@ -6,25 +6,23 @@ import { CatalogRequisiteSet } from '../requisite_set/model';
 
 class RequisitesEngine {
   public requisites: Requisites
-  private facts: any
+  public hydrated = false
 
-  constructor(requisites: any, facts: any) {
+  constructor(requisites: any) {
     this.requisites = plainToClass(Requisites, requisites)
-    this.facts = facts
   }
 
   async hydrate() {
     await this.requisites.hydrate()
+    this.hydrated = true
   }
 }
 
 class StructureConditionEngine {
   private structure: StructureCondition
-  private facts: any
 
-  constructor(structure: any, facts: any) {
+  constructor(structure: any) {
     this.structure = plainToClass(StructureCondition, structure)
-    this.facts = facts
   }
 
   async hydrate() {
