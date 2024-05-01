@@ -9,13 +9,13 @@ class RequisitesSimpleRuleValueValues {
   logic: "and" | "or" = "and";
 
   @Expose({ name: "value" })
-  raw_value: string[] = []; // Dehydrated IDs
+  ids: string[] = []; // Dehydrated IDs
 
   @Expose()
-  value: CatalogSetsProps[] = []; // Hydrated objects
+  values: CatalogSetsProps[] = []; // Hydrated objects
 
   hydrate(sets: { [key: string]: CatalogSetsProps }) {
-    this.value = this.raw_value.map(id => sets[id]).filter(Boolean) as CatalogSetsProps[]
+    this.values = this.ids.map(id => sets[id]).filter(Boolean) as CatalogSetsProps[]
   }
 }
 
@@ -27,7 +27,7 @@ class RequisitesSimpleRuleValue implements Hydratable {
   values: RequisitesSimpleRuleValueValues[] = [];
 
   getIds() {
-    return this.values.flatMap(value => value.raw_value)
+    return this.values.flatMap(value => value.ids)
   }
 
   async hydrate() {
