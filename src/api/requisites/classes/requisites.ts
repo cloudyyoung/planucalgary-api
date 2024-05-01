@@ -5,8 +5,6 @@ import { CatalogCourseSet } from '../../course_set/models';
 import { CatalogRequisiteSet } from '../../requisite_set/model';
 import { convertRequisiteSetEnginedDocument } from '../../requisite_set/utils';
 import { convertCourseSetEnginedDocument } from '../../course_set/utils';
-import { CatalogCourse } from '../../courses/model';
-import { CatalogProgramModel } from '../../programs/models';
 
 class RequisitesSimpleRuleValueValues {
   logic: "and" | "or" = "and";
