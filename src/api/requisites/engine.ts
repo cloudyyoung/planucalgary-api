@@ -26,28 +26,15 @@ class RequisitesSimpleEngine extends Engine {
 }
 
 class StructureConditionEngine extends Engine {
-  private structure: StructureCondition
+  public structure: StructureCondition
 
-  constructor(structure: any) {
+  constructor(structure?: object) {
     super()
     this.structure = plainToClass(StructureCondition, structure)
   }
 
   async hydrate() {
-    await this.getCourses()
-  }
-
-  async getCoursesIds() {
-    return this.structure.getCourseIds()
-  }
-
-  async getCourses() {
-    const course_ids = await this.getCoursesIds()
-    const courses = await CatalogCourseSet.find({ id: { $in: course_ids } })
-    const course_map = new Map<String, any>()
-    courses.forEach(course => course_map.set(course.id, course))
-    console.log(course_map)
-    return course_map
+    this.hydrated = true
   }
 }
 

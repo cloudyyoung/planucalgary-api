@@ -1,17 +1,18 @@
 import { Type } from 'class-transformer';
+import { Hydratable } from './interfaces';
 
 class StructureConditionRule {
   value?: string = "";
 }
 
-class StructureCondition {
+class StructureCondition implements Hydratable {
   condition: "all" | "any" = "any";
 
   @Type(() => StructureConditionRule)
   rules: StructureConditionRule[] = [];
 
-  getCourseIds(): string[] {
-    return this.rules.flatMap(rule => rule.value).filter(value => value !== undefined) as string[];
+  async hydrate() {
+    
   }
 }
 

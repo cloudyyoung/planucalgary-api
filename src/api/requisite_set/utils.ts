@@ -1,5 +1,5 @@
 import { RequisitesSimpleEngine } from "../requisites/engine";
-import { RequisiteSetDocument, RequisiteSetDocumentEngined } from "./types";
+import { RequisiteSetDocumentEngined } from "./types";
 
 export const convertRequisiteSetEnginedDocument = (doc: any): RequisiteSetDocumentEngined => {
   const hasRequisites = typeof doc.requisites !== "undefined" && doc.requisites.length > 0
