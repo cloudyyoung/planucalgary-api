@@ -1,5 +1,5 @@
-import { CatalogCourseSetProps } from "../course_set/types";
+import { CatalogCourseSetDocument } from "../course_set/types";
 
-type CatalogSetsProps = CatalogCourseSetProps | CatalogCourseSetProps;
+type CatalogSetsProps = CatalogCourseSetDocument | CatalogCourseSetDocument;
 
 export { CatalogSetsProps }

@@ -1,5 +1,6 @@
+import { StructureConditionEngine } from "../requisites/engine";
 
-interface CatalogCourseSetProps {
+interface CatalogCourseSetDocument {
   course_list: string[];
   description: string | null;
   id: string;
@@ -8,4 +9,8 @@ interface CatalogCourseSetProps {
   type: "static" | "dynamic";
 }
 
-export { CatalogCourseSetProps }
+interface CatalogCourseSetEnginedDocument extends Omit<CatalogCourseSetDocument, "structure"> {
+  structure: StructureConditionEngine;
+}
+
+export { CatalogCourseSetDocument, CatalogCourseSetEnginedDocument }
