@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 
 import { CatalogProgramModel } from './models';
 import { CatalogProgramDocument } from './types';
-import { convertProgramEnginedDocument } from "../requisites/utils";
+import { convertProgramEnginedDocument } from "../../requisites/utils";
 
 export const getPrograms = async (req: Request, res: Response) => {
   const programDocuments = await CatalogProgramModel.aggregate<CatalogProgramDocument>([

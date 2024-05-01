@@ -1,7 +1,7 @@
 import { Expose, Type } from 'class-transformer';
 import { Hydratable } from './interfaces';
-import { CourseDocument } from '../../courses/types';
-import { CatalogCourse } from '../../courses/model';
+import { CourseDocument } from '../../api/courses/types';
+import { CatalogCourse } from '../../api/courses/model';
 
 class StructureConditionRule {
   @Expose({ name: "value" })
