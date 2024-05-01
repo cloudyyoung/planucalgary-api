@@ -1,4 +1,6 @@
-interface CatalogProgramProps {
+import { RequisitesEngine } from "../requisites/engine";
+
+interface CatalogProgramDocument {
   active: boolean;
   admission_info: string;
   career: string;
@@ -20,4 +22,8 @@ interface CatalogProgramProps {
   version: number;
 }
 
-export type { CatalogProgramProps };
+interface CatalogProgramDocumentEngined extends Omit<CatalogProgramDocument, "requisites"> {
+  requisites: RequisitesEngine;
+}
+
+export type { CatalogProgramDocument, CatalogProgramDocumentEngined };

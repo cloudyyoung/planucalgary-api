@@ -1,10 +1,11 @@
 import { Request, Response } from 'express';
 
-import { CatalogProgram } from './models';
+import { CatalogProgramModel as CatalogProgramModel } from './models';
+import { CatalogProgramDocument, CatalogProgramDocumentEngined } from './types';
 import { RequisitesEngine } from '../requisites/engine';
 
 export const getPrograms = async (req: Request, res: Response) => {
-  const programs = await CatalogProgram.aggregate([
+  const programs = await CatalogProgramModel.aggregate([
     // Match programs that are active
     { $match: { active: true } },
     // Join with the Department collection
@@ -49,7 +50,7 @@ export const getPrograms = async (req: Request, res: Response) => {
 
 export const getProgram = async (req: Request, res: Response) => {
   const { id } = req.params;
-  const programs = await CatalogProgram.aggregate([
+  const program_documents = await CatalogProgramModel.aggregate([
     // Match the specific program by coursedog_id
     { $match: id.match(/-\d{4}-\d{2}-\d{2}$/) ? { coursedog_id: id } : { code: id } },
     // Sort by cid descending
@@ -85,14 +86,20 @@ export const getProgram = async (req: Request, res: Response) => {
     { $limit: 1 }
   ])
 
-  if (!programs || programs.length < 1) {
+  if (!program_documents || program_documents.length < 1) {
     return res.status(404).json({ message: 'Program not found' });
   }
 
-  const program = programs[0];
+  const programDocument = program_documents[0];
+  const programDocumentEngined = convertEngined(programDocument);
+  await programDocumentEngined.requisites.hydrate();
 
-  const engine = new RequisitesEngine(program.requisites, {});
-  await engine.hydrate()
+  return res.status(200).json(programDocumentEngined);
+}
 
-  return res.status(200).json(engine.requisites);
+const convertEngined = (program: CatalogProgramDocument): CatalogProgramDocumentEngined => {
+  return {
+    ...program,
+    requisites: new RequisitesEngine(program.requisites)
+  }
 }

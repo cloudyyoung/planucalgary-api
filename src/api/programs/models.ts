@@ -1,9 +1,9 @@
 import mongoose from 'mongoose';
-import { CatalogProgramProps } from './types';
+import { CatalogProgramDocument } from './types';
 
 const { Schema, connection } = mongoose;
 
-const CatalogProgramSchema = new Schema<CatalogProgramProps>({
+const CatalogProgramSchema = new Schema<CatalogProgramDocument>({
   active: {
     type: Boolean,
     default: true
@@ -81,10 +81,8 @@ const CatalogProgramSchema = new Schema<CatalogProgramProps>({
     type: Number,
     required: true
   }
-}, {
-  timestamps: true
-});
+}, {});
 
-const catalog = connection.useDb('catalog');
-const CatalogProgram = catalog.model('Program', CatalogProgramSchema)
-export { CatalogProgram }
+const CatalogDb = connection.useDb('catalog');
+const CatalogProgramModel = CatalogDb.model('Program', CatalogProgramSchema)
+export { CatalogProgramModel }

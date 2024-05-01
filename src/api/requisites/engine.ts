@@ -2,7 +2,6 @@ import { plainToClass } from 'class-transformer';
 import { Requisites } from "./classes/requisites";
 import { StructureCondition } from './classes/structure_condition';
 import { CatalogCourseSet } from '../course_set/models';
-import { CatalogRequisiteSet } from '../requisite_set/model';
 
 class RequisitesEngine {
   public requisites: Requisites
