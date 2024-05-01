@@ -14,34 +14,7 @@ class RequisitesEngine {
   }
 
   async hydrate() {
-    await this.requisites.hydrate(await this.getSets())
-  }
-
-  async getSetIds() {
-    return this.requisites.getSetIds()
-  }
-
-  async getSets() {
-    const set_ids = await this.getSetIds()
-
-    const course_sets = await CatalogCourseSet.find({ id: { $in: set_ids } })
-    const requisite_sets = await CatalogRequisiteSet.find({ requisite_set_group_id: { $in: set_ids } })
-
-    await course_sets.forEach(set => {
-      const engine = new StructureConditionEngine(set.structure, this.facts)
-      engine.hydrate()
-      set.structure = engine
-    })
-    await requisite_sets.forEach(set => {
-      const engine = new RequisitesEngine({ "requisitesSimple": Array(set.requisites) }, this.facts)
-      engine.hydrate()
-      set.requisites = engine
-    })
-
-    const sets = new Map<String, any>()
-    course_sets.forEach(set => sets.set(set.id, set))
-    requisite_sets.forEach(set => sets.set(set.requisite_set_group_id, set))
-    return sets
+    await this.requisites.hydrate()
   }
 }
 

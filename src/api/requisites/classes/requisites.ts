@@ -1,17 +1,20 @@
 import { Expose, Type } from 'class-transformer';
 import { CatalogSetsProps } from '../types';
 import { Hydratable } from './interfaces';
+import { CatalogCourseSet } from '../../course_set/models';
+import { CatalogRequisiteSet } from '../../requisite_set/model';
 
-class RequisitesSimpleRuleValueValues implements Hydratable {
+class RequisitesSimpleRuleValueValues {
   logic: "and" | "or" = "and";
 
   @Expose({ name: "value" })
   raw_value: string[] = []; // Dehydrated IDs
 
+  @Expose()
   value: CatalogSetsProps[] = []; // Hydrated objects
 
-  hydrate(sets: Map<String, CatalogSetsProps>) {
-    this.value = this.raw_value.map(id => sets.get(id)).filter(Boolean) as CatalogSetsProps[]
+  hydrate(sets: { [key: string]: CatalogSetsProps }) {
+    this.value = this.raw_value.map(id => sets[id]).filter(Boolean) as CatalogSetsProps[]
   }
 }
 
@@ -22,15 +25,24 @@ class RequisitesSimpleRuleValue implements Hydratable {
   @Type(() => RequisitesSimpleRuleValueValues)
   values: RequisitesSimpleRuleValueValues[] = [];
 
-  getSetIds() {
-    if (this.condition === "courseSets" || this.condition === "requirementSets" || this.condition === "requisiteSets") {
-      return this.values.flatMap(value => value.raw_value)
-    }
-    return [];
+  getIds() {
+    return this.values.flatMap(value => value.raw_value)
   }
 
-  hydrate(sets: Map<String, CatalogSetsProps>) {
-    this.values.forEach(value => value.hydrate(sets))
+  async hydrate() {
+    const ids = await this.getIds()
+
+    let sets_array: CatalogSetsProps[] = []
+    if (this.condition === "courseSets") {
+      sets_array = await CatalogCourseSet.find({ id: { $in: ids } })
+    } else if (this.condition === "requisiteSets") {
+      sets_array = await CatalogRequisiteSet.find({ requisite_set_group_id: { $in: ids } })
+    }
+
+    const sets_map = Object.fromEntries(sets_array.map(set => [set.id, set]))
+    for (const value of this.values) {
+      await value.hydrate(sets_map)
+    }
   }
 }
 
@@ -68,25 +80,20 @@ class RequisitesSimpleRule implements Hydratable {
   @Type(() => RequisitesSimpleRuleValue)
   value: string | RequisitesSimpleRuleValue = "";
 
-  getSetIds() {
+  async hydrate() {
     if (this.value instanceof RequisitesSimpleRuleValue) {
-      return this.value.getSetIds()
-    }
-    return [];
-  }
-
-  hydrate(sets: Map<String, CatalogSetsProps>) {
-    if (this.value instanceof RequisitesSimpleRuleValue) {
-      this.value.values.forEach(value => value.hydrate(sets))
+      await this.value.hydrate()
     }
 
     if (this.sub_rules) {
-      this.sub_rules.forEach(sub_rule => sub_rule.hydrate(sets))
+      for (const rule of this.sub_rules) {
+        await rule.hydrate()
+      }
     }
   }
 }
 
-class RequisiteSimpleChild implements Hydratable {
+class RequisiteSimpleMember implements Hydratable {
   id: string = "";
   type: string = "";
   name: string = "";
@@ -95,36 +102,30 @@ class RequisiteSimpleChild implements Hydratable {
   @Type(() => RequisitesSimpleRule)
   rules: RequisitesSimpleRule[] = [];
 
-  getSetIds() {
-    return this.rules.flatMap(rule => rule.getSetIds())
-  }
-
-  hydrate(sets: Map<String, CatalogSetsProps>) {
-    this.rules.forEach(rule => rule.hydrate(sets))
+  async hydrate() {
+    for (const rule of this.rules) {
+      await rule.hydrate()
+    }
   }
 }
 
-class RequisitesSimple extends Array<RequisiteSimpleChild> implements Hydratable {
-  getSetIds() {
-    return this.flatMap(requisite => requisite.getSetIds())
-  }
-
-  hydrate(sets: Map<String, CatalogSetsProps>) {
-    this.forEach(requisite => requisite.hydrate(sets))
+class RequisitesSimple extends Array<RequisiteSimpleMember> implements Hydratable {
+  async hydrate() {
+    for (const member of this) {
+      await member.hydrate()
+    }
   }
 }
 
 class Requisites implements Hydratable {
-  @Type(() => RequisitesSimple)
+  @Type(() => RequisiteSimpleMember)
   @Expose({ name: "requisitesSimple" })
   requisites_simple: RequisitesSimple = new RequisitesSimple()
 
-  getSetIds() {
-    return this.requisites_simple.flatMap(requisite => requisite.getSetIds())
-  }
-
-  hydrate(sets: Map<String, CatalogSetsProps>) {
-    this.requisites_simple.forEach(requisite => requisite.hydrate(sets))
+  async hydrate() {
+    for (const member of this.requisites_simple) {
+      await member.hydrate()
+    }
   }
 }
 
