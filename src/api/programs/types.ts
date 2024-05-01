@@ -1,4 +1,4 @@
-import { RequisitesEngine } from "../requisites/engine";
+import { RequisitesSimpleEngine } from "../requisites/engine";
 
 interface CatalogProgramDocument {
   active: boolean;
@@ -14,7 +14,7 @@ interface CatalogProgramDocument {
   long_name: string;
   name: string;
   program_group_id: string;
-  requisites: Map<string, any>;
+  requisites: { [key: string]: any };
   start_term: Map<string, any>;
   transcript_description: string;
   transcript_level: string;
@@ -23,7 +23,7 @@ interface CatalogProgramDocument {
 }
 
 interface CatalogProgramDocumentEngined extends Omit<CatalogProgramDocument, "requisites"> {
-  requisites: RequisitesEngine;
+  requisites: RequisitesSimpleEngine;
 }
 
 export type { CatalogProgramDocument, CatalogProgramDocumentEngined };

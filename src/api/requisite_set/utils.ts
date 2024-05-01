@@ -1,9 +1,9 @@
-import { RequisitesEngine } from "../requisites/engine";
+import { RequisitesSimpleEngine } from "../requisites/engine";
 import { RequisiteSetDocument, RequisiteSetDocumentEngined } from "./types";
 
 export const convertEngined = (doc: RequisiteSetDocument): RequisiteSetDocumentEngined => {
   return {
     ...doc,
-    requisites: new RequisitesEngine(doc.requisites)
+    requisites: new RequisitesSimpleEngine(doc.requisites)
   }
 }

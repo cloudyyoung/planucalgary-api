@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 
 import { CatalogProgramModel as CatalogProgramModel } from './models';
 import { CatalogProgramDocument, CatalogProgramDocumentEngined } from './types';
-import { RequisitesEngine } from '../requisites/engine';
+import { RequisitesSimpleEngine } from '../requisites/engine';
 
 export const getPrograms = async (req: Request, res: Response) => {
   const programs = await CatalogProgramModel.aggregate([
@@ -98,8 +98,12 @@ export const getProgram = async (req: Request, res: Response) => {
 }
 
 const convertEngined = (program: CatalogProgramDocument): CatalogProgramDocumentEngined => {
+  if (!program.requisites || !program.requisites.requisitesSimple) {
+    return program as CatalogProgramDocumentEngined;
+  }
+
   return {
     ...program,
-    requisites: new RequisitesEngine(program.requisites)
+    requisites: new RequisitesSimpleEngine(program.requisites.requisitesSimple)
   }
 }

@@ -3,25 +3,12 @@ import { Requisites, RequisitesSimple, RequisitesSimpleMember } from "./classes/
 import { StructureCondition } from './classes/structure_condition';
 import { CatalogCourseSet } from '../course_set/models';
 
-class RequisitesEngine {
-  public requisites: Requisites
-  public hydrated = false
 
-  constructor(requisites: any) {
-    this.requisites = plainToClass(Requisites, requisites)
-  }
-
-  async hydrate() {
-    await this.requisites.hydrate()
-    this.hydrated = true
-  }
-}
-
-class RequisitesSimpleEngine extends RequisitesEngine {
+class RequisitesSimpleEngine {
   public requisites: RequisitesSimple
+  public hydrated: boolean = false
 
   constructor(requisites: any[]) {
-    super(requisites)
     const members = requisites.map(member => plainToClass(RequisitesSimpleMember, member))
     this.requisites = RequisitesSimple.fromArray(members)
   }
@@ -59,4 +46,4 @@ class StructureConditionEngine {
   }
 }
 
-export { RequisitesEngine, RequisitesSimpleEngine, StructureConditionEngine };
+export { RequisitesSimpleEngine, StructureConditionEngine };
