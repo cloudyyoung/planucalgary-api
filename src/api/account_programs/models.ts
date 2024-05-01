@@ -8,5 +8,6 @@ const accountProgramSchema = new Schema({
   timestamps: true
 });
 
-const AccountProgram = mongoose.model("AccountProgram", accountProgramSchema)
+const accountDb = connection.useDb('account');
+const AccountProgram = accountDb.model("AccountProgram", accountProgramSchema, 'account_programs')
 export { AccountProgram }
