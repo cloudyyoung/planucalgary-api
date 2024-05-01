@@ -22,8 +22,8 @@ interface CatalogProgramDocument {
   version: number;
 }
 
-interface CatalogProgramDocumentEngined extends Omit<CatalogProgramDocument, "requisites"> {
+interface CatalogProgramEnginedDocument extends Omit<CatalogProgramDocument, "requisites"> {
   requisites: RequisitesSimpleEngine;
 }
 
-export type { CatalogProgramDocument, CatalogProgramDocumentEngined };
+export type { CatalogProgramDocument, CatalogProgramEnginedDocument };
