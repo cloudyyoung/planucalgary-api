@@ -1,8 +1,8 @@
 import { RequisitesSimpleEngine, StructureConditionEngine } from "./engine";
-import { CatalogCourseSetDocument } from "../api/course_set/types";
-import { CourseDocument } from "../api/courses/types";
-import { CatalogProgramDocument } from "../api/programs/types";
-import { RequisiteSetDocument } from "../api/requisite_set/types";
+import { CatalogCourseSetDocument } from "../api/catalog_course_sets/types";
+import { CourseDocument } from "../api/catalog_courses/types";
+import { CatalogProgramDocument } from "../api/catalog_programs/types";
+import { RequisiteSetDocument } from "../api/catalog_requisite_sets/types";
 
 type CatalogSetsProps = CatalogCourseSetDocument | CatalogCourseSetDocument;
 

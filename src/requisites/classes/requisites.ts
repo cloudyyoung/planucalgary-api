@@ -1,8 +1,8 @@
 import { Expose, Type } from 'class-transformer';
-import { CatalogCourseSet } from '../../api/course_set/models';
-import { CatalogRequisiteSet } from '../../api/requisite_set/model';
-import { CatalogCourse } from '../../api/courses/model';
-import { CatalogProgramModel } from '../../api/programs/models';
+import { CatalogCourseSet } from '../../api/catalog_course_sets/models';
+import { CatalogRequisiteSet } from '../../api/catalog_requisite_sets/model';
+import { CatalogCourse } from '../../api/catalog_courses/model';
+import { CatalogProgramModel } from '../../api/catalog_programs/models';
 import { CatalogSetsProps } from '../types';
 import { convertCourseSetEnginedDocument, convertRequisiteSetEnginedDocument } from '../utils';
 import { Hydratable } from './interfaces';

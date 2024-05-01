@@ -1,7 +1,7 @@
 import { plainToClass } from 'class-transformer';
 import { RequisitesSimple } from "./classes/requisites";
 import { StructureCondition } from './classes/structure_condition';
-import { CatalogCourseSet } from '../api/course_set/models';
+import { CatalogCourseSet } from '../api/catalog_course_sets/models';
 
 abstract class Engine {
   public hydrated: boolean = false

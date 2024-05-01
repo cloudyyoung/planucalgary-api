@@ -5,9 +5,9 @@ import morgan from 'morgan';
 import helmet from 'helmet';
 import bodyParser from 'body-parser';
 
-import { router as programsRouter } from '../api/programs/routes';
-import { router as userRouter} from '../api/account/routes';
-import { router as accountProgramRouter} from '../api/account_program/routes';
+import { router as programsRouter } from '../api/catalog_programs/routes';
+import { router as userRouter } from '../api/account/routes';
+import { router as accountProgramRouter } from '../api/account_program/routes';
 
 export default (app: Express) => {
   process.on('uncaughtException', async (error) => {
