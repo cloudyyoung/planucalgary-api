@@ -1,11 +1,11 @@
 import { Request, Response } from 'express';
 
-import { CatalogProgramModel as CatalogProgramModel } from './models';
+import { CatalogProgramModel } from './models';
 import { CatalogProgramDocument, CatalogProgramDocumentEngined } from './types';
 import { RequisitesSimpleEngine } from '../requisites/engine';
 
 export const getPrograms = async (req: Request, res: Response) => {
-  const programs = await CatalogProgramModel.aggregate([
+  const programDocuments = await CatalogProgramModel.aggregate<CatalogProgramDocument>([
     // Match programs that are active
     { $match: { active: true } },
     // Join with the Department collection
@@ -44,17 +44,19 @@ export const getPrograms = async (req: Request, res: Response) => {
   ]);
 
 
-  return res.status(200).json(programs);
+  return res.status(200).json(programDocuments);
 };
 
 
 export const getProgram = async (req: Request, res: Response) => {
   const { id } = req.params;
-  const program_documents = await CatalogProgramModel.aggregate([
+  const programDocuments = await CatalogProgramModel.aggregate<CatalogProgramDocument>([
     // Match the specific program by coursedog_id
     { $match: id.match(/-\d{4}-\d{2}-\d{2}$/) ? { coursedog_id: id } : { code: id } },
+
     // Sort by cid descending
     { $sort: { cid: -1 } },
+
     // Join with the Department collection
     {
       $lookup: {
@@ -72,6 +74,7 @@ export const getProgram = async (req: Request, res: Response) => {
         as: 'faculty_details' // The result of the join will be stored in this field
       }
     },
+
     // Add fields
     {
       $addFields: {
@@ -82,28 +85,22 @@ export const getProgram = async (req: Request, res: Response) => {
         departments: '$department_details.display_name',
       }
     },
+    
     // Limit the result to 1
     { $limit: 1 }
   ])
 
-  if (!program_documents || program_documents.length < 1) {
+  if (!programDocuments || programDocuments.length < 1) {
     return res.status(404).json({ message: 'Program not found' });
   }
 
-  const programDocument = program_documents[0];
-  const programDocumentEngined = convertEngined(programDocument);
-  await programDocumentEngined.requisites.hydrate();
-
-  return res.status(200).json(programDocumentEngined);
-}
-
-const convertEngined = (program: CatalogProgramDocument): CatalogProgramDocumentEngined => {
-  if (!program.requisites || !program.requisites.requisitesSimple) {
-    return program as CatalogProgramDocumentEngined;
+  // Engine the document
+  const programDocument = programDocuments[0];
+  const programEnginedDocument = {
+    ...programDocument,
+    requisites: new RequisitesSimpleEngine(programDocument.requisites.requisitesSimple)
   }
+  await programEnginedDocument.requisites.hydrate();
 
-  return {
-    ...program,
-    requisites: new RequisitesSimpleEngine(program.requisites.requisitesSimple)
-  }
+  return res.status(200).json(programEnginedDocument);
 }
