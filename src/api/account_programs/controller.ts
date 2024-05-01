@@ -4,8 +4,8 @@ import { Request, Response } from 'express';
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import { JwtPayload, jwtDecode } from "jwt-decode";
-import User from './../account/interfaces'
-import { Accounts } from '../account/models';
+import User from '../accounts/interfaces'
+import { Accounts } from '../accounts/models';
 interface JwtContent {
   payload: content,
   exp: number,
