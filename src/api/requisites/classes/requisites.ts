@@ -38,14 +38,18 @@ class RequisitesSimpleRuleValue implements Hydratable {
     if (this.condition === "courseSets") {
       const sets_array = await CatalogCourseSet.find({ id: { $in: ids } })
       sets_map = Object.fromEntries(sets_array.map(set => [set.id, set]))
+
     } else if (this.condition === "requisiteSets") {
+      // Query for all referenced requisite sets, and establish engines
       const sets_array = await CatalogRequisiteSet.find({ requisite_set_group_id: { $in: ids } })
       const sets_engined_array = sets_array.map(set => convertRequisiteSetEnginedDocument(set.toJSON()))
 
+      // Hydrate all requisite sets
       for (const set of sets_engined_array) {
         await set.requisites.hydrate()
       }
 
+      // Convert into a map for easy lookup
       sets_map = Object.fromEntries(sets_engined_array.map(set => [set.requisite_set_group_id, set]))
     }
 
