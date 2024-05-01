@@ -1,8 +1,12 @@
-import { Type } from 'class-transformer';
+import { Expose, Type } from 'class-transformer';
 import { Hydratable } from './interfaces';
+import { CourseDocument } from '../../courses/types';
 
 class StructureConditionRule {
-  value?: string = "";
+  @Expose({ name: "value" })
+  id: string = "";
+
+  value: CourseDocument | {} = {};
 }
 
 class StructureCondition implements Hydratable {
@@ -11,8 +15,16 @@ class StructureCondition implements Hydratable {
   @Type(() => StructureConditionRule)
   rules: StructureConditionRule[] = [];
 
+  getIds() {
+    return this.rules.map(rule => rule.id)
+  }
+
   async hydrate() {
-    
+    const ids = await this.getIds()
+
+    for (const rule of this.rules) {
+      // await rule.hydrate()
+    }
   }
 }
 

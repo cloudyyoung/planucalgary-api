@@ -32,7 +32,7 @@ class RequisitesSimpleRuleValue implements Hydratable {
   }
 
   async hydrate() {
-    const ids = await this.getIds()
+    const ids = this.getIds()
 
     let sets_map = {}
 
