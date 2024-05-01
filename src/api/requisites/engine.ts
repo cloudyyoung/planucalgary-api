@@ -1,5 +1,5 @@
 import { plainToClass } from 'class-transformer';
-import { Requisites } from "./classes/requisites";
+import { Requisites, RequisitesSimple, RequisitesSimpleMember } from "./classes/requisites";
 import { StructureCondition } from './classes/structure_condition';
 import { CatalogCourseSet } from '../course_set/models';
 
@@ -13,6 +13,23 @@ class RequisitesEngine {
 
   async hydrate() {
     await this.requisites.hydrate()
+    this.hydrated = true
+  }
+}
+
+class RequisitesSimpleEngine extends RequisitesEngine {
+  public requisites: RequisitesSimple
+
+  constructor(requisites: any[]) {
+    super(requisites)
+    const members = requisites.map(member => plainToClass(RequisitesSimpleMember, member))
+    this.requisites = RequisitesSimple.fromArray(members)
+  }
+
+  async hydrate(): Promise<void> {
+    for (const member of this.requisites) {
+      await member.hydrate()
+    }
     this.hydrated = true
   }
 }
@@ -42,4 +59,4 @@ class StructureConditionEngine {
   }
 }
 
-export { RequisitesEngine, StructureConditionEngine };
+export { RequisitesEngine, RequisitesSimpleEngine, StructureConditionEngine };

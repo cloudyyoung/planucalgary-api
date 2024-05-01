@@ -3,6 +3,7 @@ import { CatalogSetsProps } from '../types';
 import { Hydratable } from './interfaces';
 import { CatalogCourseSet } from '../../course_set/models';
 import { CatalogRequisiteSet } from '../../requisite_set/model';
+import { convertEngined } from '../../requisite_set/utils';
 
 class RequisitesSimpleRuleValueValues {
   logic: "and" | "or" = "and";
@@ -32,14 +33,21 @@ class RequisitesSimpleRuleValue implements Hydratable {
   async hydrate() {
     const ids = await this.getIds()
 
-    let sets_array = []
     let sets_map = {}
+
     if (this.condition === "courseSets") {
-      sets_array = await CatalogCourseSet.find({ id: { $in: ids } })
+      const sets_array = await CatalogCourseSet.find({ id: { $in: ids } })
       sets_map = Object.fromEntries(sets_array.map(set => [set.id, set]))
     } else if (this.condition === "requisiteSets") {
-      sets_array = await CatalogRequisiteSet.find({ requisite_set_group_id: { $in: ids } })
-      sets_map = Object.fromEntries(sets_array.map(set => [set.requisite_set_group_id, set]))
+      const sets_array = await CatalogRequisiteSet.find({ requisite_set_group_id: { $in: ids } }).exec()
+      const sets_engined_array = sets_array.map(set => convertEngined(set.toJSON()))
+
+      for (const set of sets_engined_array) {
+        // await set.requisites.hydrate()
+        console.log(set.requisites)
+      }
+
+      sets_map = Object.fromEntries(sets_engined_array.map(set => [set.requisite_set_group_id, set]))
     }
 
     for (const value of this.values) {
@@ -95,7 +103,7 @@ class RequisitesSimpleRule implements Hydratable {
   }
 }
 
-class RequisiteSimpleMember implements Hydratable {
+class RequisitesSimpleMember implements Hydratable {
   id: string = "";
   type: string = "";
   name: string = "";
@@ -111,16 +119,22 @@ class RequisiteSimpleMember implements Hydratable {
   }
 }
 
-class RequisitesSimple extends Array<RequisiteSimpleMember> implements Hydratable {
+class RequisitesSimple extends Array<RequisitesSimpleMember> implements Hydratable {
   async hydrate() {
     for (const member of this) {
       await member.hydrate()
     }
   }
+
+  static fromArray(array: RequisitesSimpleMember[]) {
+    const simple = new RequisitesSimple()
+    simple.push(...array)
+    return simple
+  }
 }
 
 class Requisites implements Hydratable {
-  @Type(() => RequisiteSimpleMember)
+  @Type(() => RequisitesSimpleMember)
   @Expose({ name: "requisitesSimple" })
   requisites_simple?: RequisitesSimple = new RequisitesSimple()
 
@@ -133,4 +147,4 @@ class Requisites implements Hydratable {
   }
 }
 
-export { Requisites, RequisitesSimple }
+export { Requisites, RequisitesSimple, RequisitesSimpleMember }

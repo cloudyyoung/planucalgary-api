@@ -1,8 +1,8 @@
 import mongoose from 'mongoose';
-import { RequisiteSetProps } from './types';
+import { RequisiteSetDocument } from './types';
 const { Schema, connection } = mongoose;
 
-const CatalogRequisiteSetSchema = new Schema<RequisiteSetProps>({
+const CatalogRequisiteSetSchema = new Schema<RequisiteSetDocument>({
   description: {
     type: String,
   },
@@ -19,7 +19,7 @@ const CatalogRequisiteSetSchema = new Schema<RequisiteSetProps>({
     required: true
   },
   requisites: {
-    type: Array,
+    type: [Object],
     required: true
   },
   version: {
