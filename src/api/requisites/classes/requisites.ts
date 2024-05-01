@@ -103,7 +103,7 @@ class RequisitesSimpleRule implements Hydratable {
   }
 }
 
-class RequisitesSimpleMember implements Hydratable {
+class RequisitesSimple implements Hydratable {
   id: string = "";
   type: string = "";
   name: string = "";
@@ -119,18 +119,4 @@ class RequisitesSimpleMember implements Hydratable {
   }
 }
 
-class RequisitesSimple extends Array<RequisitesSimpleMember> implements Hydratable {
-  async hydrate() {
-    for (const member of this) {
-      await member.hydrate()
-    }
-  }
-
-  static fromArray(array: RequisitesSimpleMember[]) {
-    const simple = new RequisitesSimple()
-    simple.push(...array)
-    return simple
-  }
-}
-
-export { RequisitesSimple, RequisitesSimpleMember }
+export { RequisitesSimple }

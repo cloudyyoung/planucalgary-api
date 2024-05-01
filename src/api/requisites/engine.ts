@@ -1,5 +1,5 @@
 import { plainToClass } from 'class-transformer';
-import { RequisitesSimple, RequisitesSimpleMember } from "./classes/requisites";
+import { RequisitesSimple } from "./classes/requisites";
 import { StructureCondition } from './classes/structure_condition';
 import { CatalogCourseSet } from '../course_set/models';
 
@@ -9,16 +9,16 @@ abstract class Engine {
 }
 
 class RequisitesSimpleEngine extends Engine {
-  public requisites: RequisitesSimple
+  public rules: RequisitesSimple[]
 
   constructor(requisites: any[]) {
     super()
-    const members = requisites.map(member => plainToClass(RequisitesSimpleMember, member))
-    this.requisites = RequisitesSimple.fromArray(members)
+    const members = requisites.map(member => plainToClass(RequisitesSimple, member))
+    this.rules = members
   }
 
   async hydrate(): Promise<void> {
-    for (const member of this.requisites) {
+    for (const member of this.rules) {
       await member.hydrate()
     }
     this.hydrated = true
