@@ -32,14 +32,16 @@ class RequisitesSimpleRuleValue implements Hydratable {
   async hydrate() {
     const ids = await this.getIds()
 
-    let sets_array: CatalogSetsProps[] = []
+    let sets_array = []
+    let sets_map = {}
     if (this.condition === "courseSets") {
       sets_array = await CatalogCourseSet.find({ id: { $in: ids } })
+      sets_map = Object.fromEntries(sets_array.map(set => [set.id, set]))
     } else if (this.condition === "requisiteSets") {
       sets_array = await CatalogRequisiteSet.find({ requisite_set_group_id: { $in: ids } })
+      sets_map = Object.fromEntries(sets_array.map(set => [set.requisite_set_group_id, set]))
     }
 
-    const sets_map = Object.fromEntries(sets_array.map(set => [set.id, set]))
     for (const value of this.values) {
       await value.hydrate(sets_map)
     }
