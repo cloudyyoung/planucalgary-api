@@ -1,7 +1,8 @@
 import { Expose, Type } from 'class-transformer';
 import { CatalogSetsProps } from '../types';
+import { Hydratable } from './interfaces';
 
-class RequisitesSimpleRuleValueValues {
+class RequisitesSimpleRuleValueValues implements Hydratable {
   logic: "and" | "or" = "and";
 
   @Expose({ name: "value" })
@@ -14,7 +15,7 @@ class RequisitesSimpleRuleValueValues {
   }
 }
 
-class RequisitesSimpleRuleValue {
+class RequisitesSimpleRuleValue implements Hydratable {
   id: string = "";
   condition: "courses" | "programs" | "courseSets" | "requirementSets" | "requisiteSets" | "none" = "none";
 
@@ -33,7 +34,7 @@ class RequisitesSimpleRuleValue {
   }
 }
 
-class RequisitesSimpleRule {
+class RequisitesSimpleRule implements Hydratable {
   id: string = "";
   name: string = "";
   description: string = "";
@@ -85,7 +86,7 @@ class RequisitesSimpleRule {
   }
 }
 
-class RequisiteSimpleChild {
+class RequisiteSimpleChild implements Hydratable {
   id: string = "";
   type: string = "";
   name: string = "";
@@ -103,7 +104,7 @@ class RequisiteSimpleChild {
   }
 }
 
-class RequisitesSimple extends Array<RequisiteSimpleChild> {
+class RequisitesSimple extends Array<RequisiteSimpleChild> implements Hydratable {
   getSetIds() {
     return this.flatMap(requisite => requisite.getSetIds())
   }
@@ -113,7 +114,7 @@ class RequisitesSimple extends Array<RequisiteSimpleChild> {
   }
 }
 
-class Requisites {
+class Requisites implements Hydratable {
   @Type(() => RequisitesSimple)
   @Expose({ name: "requisitesSimple" })
   requisites_simple: RequisitesSimple = new RequisitesSimple()
