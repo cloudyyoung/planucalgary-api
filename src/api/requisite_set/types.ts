@@ -1,4 +1,4 @@
-import { RequisitesEngine } from "../requisites/engine";
+import { RequisitesSimpleEngine } from "../requisites/engine";
 
 interface RequisiteSetDocument {
   id: string;
@@ -10,7 +10,7 @@ interface RequisiteSetDocument {
 }
 
 interface RequisiteSetDocumentEngined extends Omit<RequisiteSetDocument, "requisites"> {
-  requisites: RequisitesEngine;
+  requisites: RequisitesSimpleEngine;
 }
 
 export { RequisiteSetDocument, RequisiteSetDocumentEngined }
