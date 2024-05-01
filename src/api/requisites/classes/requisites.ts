@@ -133,18 +133,4 @@ class RequisitesSimple extends Array<RequisitesSimpleMember> implements Hydratab
   }
 }
 
-class Requisites implements Hydratable {
-  @Type(() => RequisitesSimpleMember)
-  @Expose({ name: "requisitesSimple" })
-  requisites_simple?: RequisitesSimple = new RequisitesSimple()
-
-  async hydrate() {
-    if (!this.requisites_simple) return
-
-    for (const member of this.requisites_simple) {
-      await member.hydrate()
-    }
-  }
-}
-
-export { Requisites, RequisitesSimple, RequisitesSimpleMember }
+export { RequisitesSimple, RequisitesSimpleMember }
