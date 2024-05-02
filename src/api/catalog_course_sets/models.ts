@@ -1,36 +1,39 @@
-import mongoose from 'mongoose';
-import { CatalogCourseSetDocument } from './types';
-const { Schema, connection } = mongoose;
+import mongoose from "mongoose"
+import { CatalogCourseSetDocument } from "./types"
+const { Schema, connection } = mongoose
 
-const CatalogCourseSetSchema = new Schema<CatalogCourseSetDocument>({
-  course_list: {
-    type: [String],
-    required: true
+const CatalogCourseSetSchema = new Schema<CatalogCourseSetDocument>(
+  {
+    course_list: {
+      type: [String],
+      required: true,
+    },
+    description: {
+      type: String,
+    },
+    id: {
+      type: String,
+      required: true,
+    },
+    name: {
+      type: String,
+      required: true,
+    },
+    structure: {
+      type: Map,
+      required: true,
+    },
+    type: {
+      type: String,
+      required: true,
+      enum: ["static", "dynamic"],
+    },
   },
-  description: {
-    type: String,
+  {
+    timestamps: true,
   },
-  id: {
-    type: String,
-    required: true
-  },
-  name: {
-    type: String,
-    required: true
-  },
-  structure: {
-    type: Map,
-    required: true
-  },
-  type: {
-    type: String,
-    required: true,
-    enum: ["static", "dynamic"]
-  }
-}, {
-  timestamps: true
-});
+)
 
-const catalog = connection.useDb('catalog');
-const CatalogCourseSet = catalog.model('CourseSet', CatalogCourseSetSchema, 'course_sets');
+const catalog = connection.useDb("catalog")
+const CatalogCourseSet = catalog.model("CourseSet", CatalogCourseSetSchema, "course_sets")
 export { CatalogCourseSet }

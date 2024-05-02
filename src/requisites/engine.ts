@@ -1,7 +1,6 @@
-import { plainToClass } from 'class-transformer';
-import { RequisitesSimple } from "./classes/requisites";
-import { StructureCondition } from './classes/structure_condition';
-import { CatalogCourseSet } from '../api/catalog_course_sets/models';
+import { plainToClass } from "class-transformer"
+import { RequisitesSimple } from "./classes/requisites"
+import { StructureCondition } from "./classes/structure_condition"
 
 abstract class Engine {
   public hydrated: boolean = false
@@ -11,9 +10,9 @@ abstract class Engine {
 class RequisitesSimpleEngine extends Engine {
   public rules: RequisitesSimple[]
 
-  constructor(requisites: any[]) {
+  constructor(requisites: unknown[]) {
     super()
-    const members = requisites.map(member => plainToClass(RequisitesSimple, member))
+    const members = requisites.map((member) => plainToClass(RequisitesSimple, member))
     this.rules = members
   }
 
@@ -43,4 +42,4 @@ class StructureConditionEngine extends Engine {
   }
 }
 
-export { RequisitesSimpleEngine, StructureConditionEngine };
+export { RequisitesSimpleEngine, StructureConditionEngine }

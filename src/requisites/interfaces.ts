@@ -1,5 +1,5 @@
 interface Hydratable {
-  hydrate(): void;
+  hydrate(): void
 }
 
 export { Hydratable }

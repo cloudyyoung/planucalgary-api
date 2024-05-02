@@ -1,0 +1,18 @@
+{
+  "singleQuote": false,
+  "semi": false,
+  "printWidth": 120,
+  "trailingComma": "all",
+  "overrides": [
+    {
+      "files": [
+        "*.ts",
+        "*.mts",
+        "*.tsx"
+      ],
+      "options": {
+        "parser": "typescript"
+      }
+    }
+  ]
+}

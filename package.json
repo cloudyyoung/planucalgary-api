@@ -38,18 +38,9 @@
     "type": "git",
     "url": "git+https://github.com/bahricanyesil/nodejs-starter-template.git"
   },
-  "keywords": [
-    "node.js",
-    "boilerplate",
-    "starter",
-    "template"
-  ],
+  "keywords": [],
   "author": "Yunfan Yang, Ned Liu",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/bahricanyesil/nodejs-starter-template/issues"
-  },
-  "homepage": "https://github.com/bahricanyesil/nodejs-starter-template#readme",
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
     "@types/compression": "^1.7.5",
@@ -58,8 +49,18 @@
     "@types/jsonwebtoken": "^9.0.6",
     "@types/morgan": "^1.9.9",
     "@types/node": "^20.12.7",
+    "@typescript-eslint/eslint-plugin": "^7.8.0",
+    "@typescript-eslint/parser": "^7.8.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "~9.1",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-jsx-a11y": "^6.8.0",
+    "eslint-plugin-react": "^7.34.1",
+    "eslint-plugin-react-hooks": "^4.6.2",
     "nodemon": "^3.1.0",
+    "prettier": "~3.2",
     "ts-node": "^10.9.2",
-    "typescript": "^5.4.5"
+    "typescript": "^5.4.5",
+    "typescript-eslint": "^7.8.0"
   }
 }
