@@ -24,7 +24,7 @@ interface CourseDocument {
   notes: string | null
   prereq: string | null
   repeatable: boolean
-  requisites: object
+  requisites: object[]
   start_term: object
   subject_code: string | null
   topics: object[]

@@ -13,7 +13,6 @@ export const convertCourseSetEnginedDocument = (doc: CatalogCourseSetMap): Catal
 
 export const convertProgramEnginedDocument = (programDocument: CatalogProgramMap): CatalogProgramEnginedMap => {
   const hasRequisites = typeof programDocument.requisites !== "undefined"
-
   const ret = {
     ...programDocument,
     requisites: new RequisitesSimpleEngine(hasRequisites ? programDocument.requisites : []),
@@ -22,7 +21,7 @@ export const convertProgramEnginedDocument = (programDocument: CatalogProgramMap
 }
 
 export const convertRequisiteSetEnginedDocument = (doc: CatalogRequisiteSetMap): RequisiteSetDocumentEnginedMap => {
-  const hasRequisites = typeof doc.requisites !== "undefined" && doc.requisites.length > 0
+  const hasRequisites = typeof doc.requisites !== "undefined"
   const ret = {
     ...doc,
     requisites: new RequisitesSimpleEngine(hasRequisites ? doc.requisites : []),

@@ -3,7 +3,7 @@ interface RequisiteSetDocument {
   name: string;
   description: string;
   requisite_set_group_id: string;
-  requisites: Array<object>;
+  requisites: object[];
   version: number;
 }
 

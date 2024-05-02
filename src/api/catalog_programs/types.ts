@@ -12,7 +12,7 @@ interface CatalogProgramDocument {
   long_name: string
   name: string
   program_group_id: string
-  requisites: unknown[]
+  requisites: object[]
   start_term: Map<string, unknown>
   transcript_description: string
   transcript_level: string

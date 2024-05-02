@@ -80,7 +80,7 @@ const CatalogCourseSchema = new Schema(
       type: Boolean,
     },
     requisites: {
-      type: Map,
+      type: [Schema.Types.Mixed],
     },
     start_term: {
       type: Map,
