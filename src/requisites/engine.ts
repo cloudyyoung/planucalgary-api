@@ -1,5 +1,5 @@
 import { plainToClass } from "class-transformer"
-import { RequisitesSimple } from "./classes/requisites"
+import { Requisite } from "./classes/requisites"
 import { StructureCondition } from "./classes/structure_condition"
 
 abstract class Engine {
@@ -8,11 +8,11 @@ abstract class Engine {
 }
 
 class RequisitesSimpleEngine extends Engine {
-  public rules: RequisitesSimple[]
+  public rules: Requisite[]
 
   constructor(requisites: unknown[]) {
     super()
-    const members = requisites.map((member) => plainToClass(RequisitesSimple, member))
+    const members = requisites.map((member) => plainToClass(Requisite, member))
     this.rules = members
   }
 

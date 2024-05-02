@@ -7,7 +7,7 @@ import { CatalogSetsMap } from "../types"
 import { convertCourseSetEnginedDocument, convertRequisiteSetEnginedDocument } from "../utils"
 import { Hydratable } from "../interfaces"
 
-class RequisitesSimpleRuleValueValues {
+class RequisiteRuleValueValues {
   logic: "and" | "or" = "and"
 
   @Expose({ name: "value" })
@@ -21,12 +21,12 @@ class RequisitesSimpleRuleValueValues {
   }
 }
 
-class RequisitesSimpleRuleValue implements Hydratable {
+class RequisiteRuleValue implements Hydratable {
   id: string = ""
   condition: "courses" | "programs" | "courseSets" | "requirementSets" | "requisiteSets" | "none" = "none"
 
-  @Type(() => RequisitesSimpleRuleValueValues)
-  values: RequisitesSimpleRuleValueValues[] = []
+  @Type(() => RequisiteRuleValueValues)
+  values: RequisiteRuleValueValues[] = []
 
   getIds() {
     return this.values.flatMap((value) => value.ids)
@@ -81,7 +81,7 @@ class RequisitesSimpleRuleValue implements Hydratable {
   }
 }
 
-class RequisitesSimpleRule implements Hydratable {
+class RequisiteRule implements Hydratable {
   id: string = ""
   name: string = ""
   description: string = ""
@@ -100,36 +100,24 @@ class RequisitesSimpleRule implements Hydratable {
     | "averageGrade"
     | "freeformText"
     | "completeVariableCoursesAndVariableCredits" = "anyOf"
-
-  @Expose({ name: "minCourses" })
   min_courses: number = 0
-
-  @Expose({ name: "maxCourses" })
   max_courses: number = 0
-
-  @Expose({ name: "minCredits" })
   min_credits: number = 0
-
-  @Expose({ name: "maxCredits" })
   max_credits: number = 0
-
   credits: number = 0
   number: number = 0
   restriction: string = ""
   grade: string = ""
-
-  @Expose({ name: "gradeType" })
   grade_type: string = ""
 
-  @Type(() => RequisitesSimpleRule)
-  @Expose({ name: "subRules" })
-  sub_rules: RequisitesSimpleRule[] = []
+  @Type(() => RequisiteRule)
+  sub_rules: RequisiteRule[] = []
 
-  @Type(() => RequisitesSimpleRuleValue)
-  value: string | RequisitesSimpleRuleValue = ""
+  @Type(() => RequisiteRuleValue)
+  value: string | RequisiteRuleValue = ""
 
   async hydrate() {
-    if (this.value instanceof RequisitesSimpleRuleValue) {
+    if (this.value instanceof RequisiteRuleValue) {
       await this.value.hydrate()
     }
 
@@ -141,14 +129,14 @@ class RequisitesSimpleRule implements Hydratable {
   }
 }
 
-class RequisitesSimple implements Hydratable {
+class Requisite implements Hydratable {
   id: string = ""
   type: string = ""
   name: string = ""
   notes: string | null = null
 
-  @Type(() => RequisitesSimpleRule)
-  rules: RequisitesSimpleRule[] = []
+  @Type(() => RequisiteRule)
+  rules: RequisiteRule[] = []
 
   async hydrate() {
     for (const rule of this.rules) {
@@ -157,4 +145,4 @@ class RequisitesSimple implements Hydratable {
   }
 }
 
-export { RequisitesSimple }
+export { Requisite }
