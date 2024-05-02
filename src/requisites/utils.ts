@@ -12,16 +12,11 @@ export const convertCourseSetEnginedDocument = (doc: CatalogCourseSetMap): Catal
 }
 
 export const convertProgramEnginedDocument = (programDocument: CatalogProgramMap): CatalogProgramEnginedMap => {
-  const hasRequisites =
-    typeof programDocument.requisites !== "undefined" &&
-    typeof programDocument.requisites.requisitesSimple !== "undefined" &&
-    Array.isArray(programDocument.requisites.requisitesSimple)
-
-  const requisitesSimple = programDocument.requisites.requisitesSimple
+  const hasRequisites = typeof programDocument.requisites !== "undefined"
 
   const ret = {
     ...programDocument,
-    requisites: new RequisitesSimpleEngine(hasRequisites ? requisitesSimple : []),
+    requisites: new RequisitesSimpleEngine(hasRequisites ? programDocument.requisites : []),
   }
   return ret
 }

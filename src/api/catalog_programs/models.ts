@@ -59,7 +59,7 @@ const CatalogProgramSchema = new Schema<CatalogProgramDocument>(
       required: true,
     },
     requisites: {
-      type: Map,
+      type: [Schema.Types.Mixed],
       required: true,
     },
     start_term: {
