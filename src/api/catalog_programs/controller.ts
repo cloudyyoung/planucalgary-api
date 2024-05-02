@@ -54,7 +54,7 @@ export const getProgram = async (req: Request, res: Response) => {
     return res.status(404).json({ message: "Program not found" })
   }
 
-  // Engine the document
+  // Hydrate requisites
   const programEnginedDocument = convertProgramEnginedDocument(programDocument.toJSON())
   await programEnginedDocument.requisites.hydrate()
 
