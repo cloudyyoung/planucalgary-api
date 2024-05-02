@@ -131,7 +131,8 @@ class RequisiteRule implements Hydratable {
 
 class Requisite implements Hydratable {
   id: string = ""
-  type: string = ""
+  type: "Prerequisite" | "Corequisite" | "Antirequisite" | "Completion Requirement" | "Narrative Text" =
+    "Narrative Text"
   name: string = ""
   notes: string | null = null
 
