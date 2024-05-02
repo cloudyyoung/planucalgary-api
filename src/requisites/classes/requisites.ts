@@ -84,7 +84,7 @@ class RequisiteRuleValue implements Hydratable {
 class RequisiteRule implements Hydratable {
   id: string = ""
   name: string = ""
-  description: string = ""
+  description: string | null = null
   notes: string | null = null
   condition:
     | "anyOf"
@@ -100,15 +100,15 @@ class RequisiteRule implements Hydratable {
     | "averageGrade"
     | "freeformText"
     | "completeVariableCoursesAndVariableCredits" = "anyOf"
-  min_courses: number = 0
-  max_courses: number = 0
-  min_credits: number = 0
-  max_credits: number = 0
-  credits: number = 0
-  number: number = 0
-  restriction: string = ""
-  grade: string = ""
-  grade_type: string = ""
+  min_courses: number | null = null
+  max_courses: number | null = null
+  min_credits: number | null = null
+  max_credits: number | null = null
+  credits: number | null = null
+  number: number | null = null
+  restriction: number | null = null
+  grade: string | null = null
+  grade_type: string | null = null
 
   @Type(() => RequisiteRule)
   sub_rules: RequisiteRule[] = []
