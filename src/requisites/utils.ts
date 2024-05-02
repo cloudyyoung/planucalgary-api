@@ -1,10 +1,8 @@
 import { StructureConditionEngine, RequisitesSimpleEngine } from "./engine"
-import { CatalogCourseSetEnginedDocument, CatalogProgramEnginedDocument, RequisiteSetDocumentEngined } from "./types"
-import { CatalogCourseSetDocument } from "../api/catalog_course_sets/types"
-import { RequisiteSetDocument } from "../api/catalog_requisite_sets/types"
-import { CatalogProgramDocument } from "../api/catalog_programs/types"
+import { CatalogCourseSetEnginedMap, CatalogProgramEnginedMap, RequisiteSetDocumentEnginedMap } from "./types"
+import { CatalogCourseSetMap, CatalogProgramMap, CatalogRequisiteSetMap } from "./types"
 
-export const convertCourseSetEnginedDocument = (doc: CatalogCourseSetDocument): CatalogCourseSetEnginedDocument => {
+export const convertCourseSetEnginedDocument = (doc: CatalogCourseSetMap): CatalogCourseSetEnginedMap => {
   const hasStructure = typeof doc.structure !== "undefined"
   const ret = {
     ...doc,
@@ -13,9 +11,7 @@ export const convertCourseSetEnginedDocument = (doc: CatalogCourseSetDocument): 
   return ret
 }
 
-export const convertProgramEnginedDocument = (
-  programDocument: CatalogProgramDocument,
-): CatalogProgramEnginedDocument => {
+export const convertProgramEnginedDocument = (programDocument: CatalogProgramMap): CatalogProgramEnginedMap => {
   const hasRequisites =
     typeof programDocument.requisites !== "undefined" &&
     typeof programDocument.requisites.requisitesSimple !== "undefined" &&
@@ -30,7 +26,7 @@ export const convertProgramEnginedDocument = (
   return ret
 }
 
-export const convertRequisiteSetEnginedDocument = (doc: RequisiteSetDocument): RequisiteSetDocumentEngined => {
+export const convertRequisiteSetEnginedDocument = (doc: CatalogRequisiteSetMap): RequisiteSetDocumentEnginedMap => {
   const hasRequisites = typeof doc.requisites !== "undefined" && doc.requisites.length > 0
   const ret = {
     ...doc,

@@ -3,29 +3,42 @@ import { CatalogCourseSetDocument } from "../api/catalog_course_sets/types"
 import { CourseDocument } from "../api/catalog_courses/types"
 import { CatalogProgramDocument } from "../api/catalog_programs/types"
 import { RequisiteSetDocument } from "../api/catalog_requisite_sets/types"
+import { FlattenMaps } from "mongoose"
 
-type CatalogSetsProps = CatalogCourseSetDocument | CatalogCourseSetDocument
+type CatalogCourseSetMap = FlattenMaps<CatalogCourseSetDocument>
 
-interface CatalogCourseSetEnginedDocument extends Omit<CatalogCourseSetDocument, "structure"> {
+type CatalogCourseMap = FlattenMaps<CourseDocument>
+
+type CatalogProgramMap = FlattenMaps<CatalogProgramDocument>
+
+type CatalogRequisiteSetMap = FlattenMaps<RequisiteSetDocument>
+
+type CatalogSetsMap = CatalogCourseSetMap | CatalogCourseSetMap
+
+interface CatalogCourseSetEnginedMap extends Omit<CatalogCourseSetMap, "structure"> {
   structure: StructureConditionEngine
 }
 
-interface CourseEnginedDocument extends Omit<CourseDocument, "requisites"> {
+interface CourseEnginedMap extends Omit<CatalogCourseMap, "requisites"> {
   requisites: RequisitesSimpleEngine
 }
 
-interface CatalogProgramEnginedDocument extends Omit<CatalogProgramDocument, "requisites"> {
+interface CatalogProgramEnginedMap extends Omit<CatalogProgramMap, "requisites"> {
   requisites: RequisitesSimpleEngine
 }
 
-interface RequisiteSetDocumentEngined extends Omit<RequisiteSetDocument, "requisites"> {
+interface RequisiteSetDocumentEnginedMap extends Omit<CatalogRequisiteSetMap, "requisites"> {
   requisites: RequisitesSimpleEngine
 }
 
 export {
-  CatalogSetsProps,
-  CatalogCourseSetEnginedDocument,
-  CourseEnginedDocument,
-  CatalogProgramEnginedDocument,
-  RequisiteSetDocumentEngined,
+  CatalogSetsMap,
+  CatalogCourseSetMap,
+  CatalogCourseMap,
+  CatalogProgramMap,
+  CatalogRequisiteSetMap,
+  CatalogCourseSetEnginedMap,
+  CourseEnginedMap,
+  CatalogProgramEnginedMap,
+  RequisiteSetDocumentEnginedMap,
 }
