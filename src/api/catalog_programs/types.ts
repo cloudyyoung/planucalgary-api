@@ -12,8 +12,10 @@ interface CatalogProgramDocument {
   long_name: string
   name: string
   program_group_id: string
-  requisites: { [key: string]: any }
-  start_term: Map<string, any>
+  requisites: {
+    requisitesSimple: unknown[]
+  }
+  start_term: Map<string, unknown>
   transcript_description: string
   transcript_level: string
   type: string
