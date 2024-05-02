@@ -1,12 +1,8 @@
 import { Request, Response } from 'express';
-
 import { Accounts } from './models';
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import User from './interfaces'
-
-import mongoose, { Schema } from 'mongoose';
-
 
 function generateAccessToken(user : User, key : string) : string{
   return jwt.sign({payload:{user}}, key, { expiresIn: '3600s' });
@@ -43,7 +39,8 @@ export const signup = async (req: Request, res: Response) => {
     const user = await Accounts.create({
       email,
       username,
-      password: passwordHash
+      password: passwordHash,
+      programs:[]
     })
 
     

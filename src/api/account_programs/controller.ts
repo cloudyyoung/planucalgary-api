@@ -22,13 +22,17 @@ export const getAccountPrograms = async (req: Request, res: Response) => {
     const decoded = jwtDecode<JwtContent>(token);
     const id = decoded.payload.user.id;
     console.log(id)
-    const programs = await AccountProgram.find({ account_id: id });
+    const user = await Accounts.findOne({ "_id": id });
+    if (user){
+      const programIds = user.programs;
+      const ProgramList = await CatalogProgramModel.find({ '_id': { $in: programIds } })
+      console.log(ProgramList)      
+      return res.status(200).json({ "Programs": ProgramList });
+    } else {
+      return res.status(400).json({ "error": "Cannot find the user." });
+    }
 
-    const programIds = programs.map(x => x.program_id);
-
-    const ProgramList = await CatalogProgramModel.find({ '_id': { $in: programIds } })
-    console.log(ProgramList)
-    return res.status(200).json({ "Programs": ProgramList });
+    
   } catch (error) {
     console.log(error)
     return res.status(400).json({ "error": "Something went wrong." });
@@ -56,12 +60,27 @@ export const AddAccountPrograms = async (req: Request, res: Response) => {
       return res.status(400).json({ "error": "Course does not exist." });
     }
 
+    /*
     const checkConnect = await AccountProgram.findOne({ account_id: account_id, program_id: program_id })
     if (checkConnect) {
       return res.status(400).json({ "error": "You are in the program already." });
     }
 
-    const user = await AccountProgram.create({ account_id, program_id })
+    const user = await AccountProgram.create({ account_id, program_id })*/
+
+    if (checkAccount.programs.some(x => x === program_id.toString())){
+      return res.status(400).json({ "error": "You are in the program already." });
+    }
+
+    checkAccount.programs.push(program_id);
+    //const updatedPrograms = Array.from(new Set(checkAccount.programs))
+    console.log(checkAccount.programs)
+    Accounts.updateOne({"_id": account_id},{$set:{programs:checkAccount.programs}}, (err: any,doc: any)=>{
+      if (err){
+        console.log(err)
+      }
+      console.log(doc)
+    })
 
     return res.status(200).json({ "message": "You successfully added the program." });
   } catch (error) {

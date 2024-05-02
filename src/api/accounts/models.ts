@@ -2,6 +2,11 @@ import mongoose from 'mongoose';
 const { Schema, connection } = mongoose;
 
 const userSchema = new mongoose.Schema({
+  programs:{
+    type:[String],
+    required:true,
+    default:[]
+  },
   username: {
     type: String,
     required: true,
