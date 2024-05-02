@@ -8,6 +8,7 @@ import bodyParser from 'body-parser';
 import { router as programsRouter } from '../api/catalog_programs/routes';
 import { router as userRouter } from '../api/accounts/routes';
 import { router as accountProgramRouter } from '../api/account_programs/routes';
+import { router as accountCoursesRouter } from '../api/account_courses/routes';
 
 export default (app: Express) => {
   process.on('uncaughtException', async (error) => {
@@ -31,7 +32,7 @@ export default (app: Express) => {
   app.use('/programs', programsRouter);
   app.use('/account', userRouter);
   app.use('/accountPrograms', accountProgramRouter);
-
+  app.use('/accountCourses', accountCoursesRouter);
 
   app.get('/', (_req, res) => {
     return res.status(200).json({ message: "ok" }).end();

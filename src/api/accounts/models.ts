@@ -1,9 +1,16 @@
 import mongoose from 'mongoose';
 const { Schema, connection } = mongoose;
 
+
 const userSchema = new mongoose.Schema({
   programs:{
     type:[String],
+    required:true,
+    default:[]
+  },
+
+  courses:{
+    type:[Schema.Types.Mixed],
     required:true,
     default:[]
   },

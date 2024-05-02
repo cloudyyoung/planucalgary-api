@@ -40,7 +40,8 @@ export const signup = async (req: Request, res: Response) => {
       email,
       username,
       password: passwordHash,
-      programs:[]
+      programs:[],
+      courses:[]
     })
 
     
