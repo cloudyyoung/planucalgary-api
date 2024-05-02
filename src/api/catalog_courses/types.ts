@@ -25,7 +25,11 @@ interface CourseDocument {
   prereq: string | null
   repeatable: boolean
   requisites: object[]
-  start_term: object
+  start_term: {
+    id: string
+    year: number
+    term: string
+  }
   subject_code: string | null
   topics: object[]
   version: number
