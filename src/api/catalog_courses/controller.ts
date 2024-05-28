@@ -40,28 +40,28 @@ export const checkPrereq = async (req: Request, res: Response) => {
 
 
 const processPrereq = (prereq, courseList, programList) => {
-  let checkList: any[] = []
-  const checkResults : boolean[]= []
-  // Loop through each key in the object
-  if ("and" in prereq){
-      checkList = prereq["and"]
-  } else {
-      checkList = prereq["or"]
-  }
-  
-  for (const item of checkList)
-  {
-      //{'course': 'ENSF300'}
-      if ('course' in item){
-          const course = item['course']
-          if (course in courseList){
-              checkResults.push(true)
-          } else {
-              checkResults.push(false)
-          }
+    let checkList: any[] = []
+    const checkResults : boolean[]= []
+    // Loop through each key in the object
+    if ("and" in prereq){
+        checkList = prereq["and"]
+    } else {
+        checkList = prereq["or"]
+    }
+
+    for (const item of checkList)
+    {
+        //{'course': 'ENSF300'}
+        if ('course' in item ){
+            const course = item['course']
+            if (course in courseList){
+                checkResults.push(true)
+            } else {
+                checkResults.push(false)
+            }
           
-      // {"units": {"required": 3, "from": [{"course": "GEOG211"}, {"course": "GEOG308"}, {"course": "GEOG310"}]}}
-      } else if ('units' in item && 'from' in item.units && Array.isArray(item.units.from)){
+        // {"units": {"required": 3, "from": [{"course": "GEOG211"}, {"course": "GEOG308"}, {"course": "GEOG310"}]}}
+        } else if ('units' in item && 'from' in item.units && Array.isArray(item.units.from)){
         // Initialize an empty list to store the courses
         const courses : string[] = [];
         
@@ -70,9 +70,9 @@ const processPrereq = (prereq, courseList, programList) => {
         
         // Loop through the 'from' array and extract the 'course' values
         fromArray.forEach(item => {
-          if (item.course) {
-            courses.push(item.course);
-          }
+            if (item.course) {
+                courses.push(item.course);
+            }
         });
         
         // Access the 'required' attribute
@@ -88,12 +88,12 @@ const processPrereq = (prereq, courseList, programList) => {
         
         // If completed more than or equals then we pass
         if (completed >= required){
-              checkResults.push(true)
-          } else {
-              checkResults.push(false)
-          }
-      // {"units": {"required": 15, "from": {"subject_code": "ART"}}}
-      } else if ('units' in item && 'from' in item.units && item.units.from != null){
+                checkResults.push(true)
+            } else {
+                checkResults.push(false)
+            }
+        // {"units": {"required": 15, "from": {"subject_code": "ART"}}}
+        } else if ('units' in item && 'from' in item.units && item.units.from != null){
           const required = parseInt(item.units.required) / 3;
           const subjectCode = item.units.from.subject_code
           const takenList = courseList.filter(x => x.startsWith('subjectCode'))
@@ -103,44 +103,58 @@ const processPrereq = (prereq, courseList, programList) => {
           } else {
               checkResults.push(false)
           }
-      // {"units": {"required": 54}}
-      } else if ('units' in item && 'from' in item.units && item.units.from == null) {
-          const required = parseInt(item.units.required) / 3;
-          if (courseList.length >= required){
-              checkResults.push(true)
-          } else {
-              checkResults.push(false)
-          }
-      }
-      // {"admission": "Honours in Visual Studies"}
-      else if ('admission' in item){
-          const program = item['admission']
-          if (program in programList){
-              checkResults.push(true)
-          } else {
-              checkResults.push(false)
-          }
+        // {"units": {"required": 54}}
+        } else if ('units' in item && 'from' in item.units && item.units.from == null) {
+            const required = parseInt(item.units.required) / 3;
+            if (courseList.length >= required){
+                checkResults.push(true)
+            } else {
+                checkResults.push(false)
+            }
+        }
+        // {"admission": "Honours in Visual Studies"}
+        else if ('admission' in item){
+            const program = item['admission']
+            if (program in programList){
+                checkResults.push(true)
+            } else {
+                checkResults.push(false)
+            }
           // {"consent": "the Department"}
-      } else if ('consent' in item){
-          checkResults.push(true)
+        } else if ('consent' in item){
+            checkResults.push(true)
           
-          //{"courses": {"required": 1, "from": [{"course": "BMEN319"}, {"course": "ENGG319"}, {"course": "ENEL419"}]}}
-      } else if (false) {
-          
-      }
-  }
+        //{"courses": {"required": 1, "from": [{"course": "BMEN319"}, {"course": "ENGG319"}, {"course": "ENEL419"}]}}
+        } else if ('courses' in item) {
+            const required = parseInt(item.courses.required) ;
+            // Extract the courses and store them in a list
+            const requiredList = item.courses.from.map(item => item.course);
+            let fulfilled = 0
+            for (const c in requiredList){
+                if (c in courseList){
+                    fulfilled += 1
+                }
+            }
+            // If completed more than or equals then we pass
+            if (fulfilled >= required){
+                checkResults.push(true)
+            } else {
+                checkResults.push(false)
+            }
+        }
+    }
   console.log(checkResults, ("and" in prereq))
   
   if ("and" in prereq){
-      if (checkResults.includes(false)){
-          return false
-      } else {
-          return true
-      }
+    if (checkResults.includes(false)){
+        return false
+    } else {
+        return true
+    }
   } else {
-      if (checkResults.includes(true)){
-          return true
-      }
+    if (checkResults.includes(true)){
+        return true
+    }
   }
   return false
 }
