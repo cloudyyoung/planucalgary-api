@@ -39,6 +39,11 @@ export const checkPrereq = async (req: Request, res: Response) => {
 // Process the prereq json logic
 
 
+/* 
+ * prereq: The pre-req json logic structure
+ * courseList: The list of courses the user took
+ * programList: The list of programs that the user is in
+ */
 const processPrereq = (prereq, courseList, programList) => {
     let checkList: any[] = []
     const checkResults : boolean[]= []
@@ -143,18 +148,19 @@ const processPrereq = (prereq, courseList, programList) => {
             }
         }
     }
-  console.log(checkResults, ("and" in prereq))
-  
-  if ("and" in prereq){
-    if (checkResults.includes(false)){
-        return false
+
+    //And condition check
+    if ("and" in prereq){
+        if (checkResults.includes(false)){
+            return false
+        } else {
+            return true
+        }
+    //Or condition check
     } else {
-        return true
+        if (checkResults.includes(true)){
+            return true
+        }
     }
-  } else {
-    if (checkResults.includes(true)){
-        return true
-    }
-  }
-  return false
+    return false
 }
