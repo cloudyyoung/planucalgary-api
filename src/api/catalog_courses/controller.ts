@@ -50,8 +50,10 @@ const processPrereq = (prereq, courseList, programList) => {
     // Loop through each key in the object
     if ("and" in prereq){
         checkList = prereq["and"]
-    } else {
+    } else if ("or" in prereq) {
         checkList = prereq["or"]
+    } else {
+        checkList = [prereq]
     }
 
     for (const item of checkList)
@@ -59,7 +61,8 @@ const processPrereq = (prereq, courseList, programList) => {
         //{'course': 'ENSF300'}
         if ('course' in item ){
             const course = item['course']
-            if (course in courseList){
+            //console.log(courseList.includes(course))
+            if (courseList.includes(course)){
                 checkResults.push(true)
             } else {
                 checkResults.push(false)
@@ -82,15 +85,15 @@ const processPrereq = (prereq, courseList, programList) => {
         
         // Access the 'required' attribute
         const required = parseInt(item.units.required) / 3;
-        
+
         // Check how many of these courses the user completed
         let completed = 0
         for (const c in courses){
-            if (c in courseList){
+            if (courseList.includes(courses[c])){
                 completed += 1
             }
         }
-        
+        console.log(completed)
         // If completed more than or equals then we pass
         if (completed >= required){
                 checkResults.push(true)
@@ -101,7 +104,7 @@ const processPrereq = (prereq, courseList, programList) => {
         } else if ('units' in item && 'from' in item.units && item.units.from != null){
           const required = parseInt(item.units.required) / 3;
           const subjectCode = item.units.from.subject_code
-          const takenList = courseList.filter(x => x.startsWith('subjectCode'))
+          const takenList = courseList.filter(x => x.startsWith(subjectCode))
           
           if (takenList.length >= required){
               checkResults.push(true)
@@ -109,7 +112,8 @@ const processPrereq = (prereq, courseList, programList) => {
               checkResults.push(false)
           }
         // {"units": {"required": 54}}
-        } else if ('units' in item && 'from' in item.units && item.units.from == null) {
+        } else if ('units' in item && item.units.from == null) {
+          console.log("SAAA")
             const required = parseInt(item.units.required) / 3;
             if (courseList.length >= required){
                 checkResults.push(true)
@@ -120,7 +124,7 @@ const processPrereq = (prereq, courseList, programList) => {
         // {"admission": "Honours in Visual Studies"}
         else if ('admission' in item){
             const program = item['admission']
-            if (program in programList){
+            if (programList.includes(program)){
                 checkResults.push(true)
             } else {
                 checkResults.push(false)
@@ -136,7 +140,7 @@ const processPrereq = (prereq, courseList, programList) => {
             const requiredList = item.courses.from.map(item => item.course);
             let fulfilled = 0
             for (const c in requiredList){
-                if (c in courseList){
+                if (courseList.includes(requiredList[c])){
                     fulfilled += 1
                 }
             }
@@ -148,7 +152,7 @@ const processPrereq = (prereq, courseList, programList) => {
             }
         }
     }
-
+    console.log(checkResults, checkList)
     //And condition check
     if ("and" in prereq){
         if (checkResults.includes(false)){
@@ -164,3 +168,15 @@ const processPrereq = (prereq, courseList, programList) => {
     }
     return false
 }
+
+/*
+const testList : any[] = [
+  {"course": "CHEM351"},
+  {"units": {"required": 3, "from": [{"course": "GEOG211"}, {"course": "GEOG308"}, {"course": "GEOG310"}]}},
+  {"units": {"required": 15, "from": {"subject_code": "ART"}}},
+  {"and": [{"admission": "Honours in Visual Studies"}, {"course": "ART561"}]},
+  {"and": [{"course": "ENEL471"}, {"courses": {"required": 1, "from": [{"course": "BMEN319"}, {"course": "ENGG319"}, {"course": "ENEL419"}]}}]},
+  {"and": [{"units": {"required": 15}}, {"consent": "the Department"}]}
+]
+
+console.log(processPrereq(testList[5], ["ENEL471", "GEOG211", "ENGG319", "ART123", "ART124", "ART125","ART561"],["Honours in Visual Studies"]))*/
