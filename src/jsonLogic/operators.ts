@@ -1,29 +1,33 @@
 import { CourseDocument } from "../api/catalog_courses/types"
-import { CatalogProgramDocument } from "../api/catalog_programs/types"
 
-export function courses(data: any) {
-  return data.courses ? data.courses : []
+export function courses(data: any, from: CourseDocument[], required: number): boolean {
+  const count = from.length
+  return count >= required
 }
 
-export function course(data: any, code: string, number: string) {
-  let courses = data.courses ? data.courses : []
-  for (let i = 0; i < courses.length; i++) {
-    if (courses[i].code === code && courses[i].number.startsWith(number)) {
-      return courses[i]
+export function from(data: any, ...courses: (CourseDocument | null)[]) {
+  return courses.filter(Boolean) as CourseDocument[]
+}
+
+export function course(data: { courses?: CourseDocument[] }, code: string) {
+  const courses: CourseDocument[] = data.courses ? data.courses : []
+  for (const course of courses) {
+    if (course.code === code) {
+      return course
     }
   }
   return null
 }
 
-export function units(data: any, ...courses: any[]) {
-  let totalUnits = 0
-  let flattenCourses: CourseDocument[] = courses.flat()
-  flattenCourses.forEach((course) => {
+export function units(data: { courses?: CourseDocument[] }, from: CourseDocument[] | null, required: number): boolean {
+  let unitsCount = 0
+  const coursesToCheck: CourseDocument[] = from || data.courses || []
+  coursesToCheck.forEach((course) => {
     if (course && course.credits) {
-      totalUnits += course.credits
+      unitsCount += course.credits
     }
   })
-  return totalUnits
+  return unitsCount >= required
 }
 
 export function consent(data: any, ...consenter: any[]) {
@@ -31,8 +35,7 @@ export function consent(data: any, ...consenter: any[]) {
   return true
 }
 
-export function program(data: any, ...conditionedPrograms: any[]) {
-  const programs: CatalogProgramDocument[] = data.programs || []
-  // how to access program components?
-  // return programs.find((program) => conditionedPrograms.every((c) => program.components.includes(c))) || null
+export function admission(data: any, ...admissionTo: any[]) {
+  console.log("Admission to: " + (admissionTo.length > 0 ? admissionTo.join(", ") : "None"))
+  return true
 }
