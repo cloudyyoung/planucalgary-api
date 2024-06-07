@@ -39,3 +39,13 @@ export function admission(data: any, ...admissionTo: any[]) {
   console.log("Admission to: " + (admissionTo.length > 0 ? admissionTo.join(", ") : "None"))
   return true
 }
+
+// for antireqs
+export function and_to_or(data: any, ...args: any) {
+  args.forEach((arg: any) => {
+    if (arg) {
+      return true
+    }
+  })
+  return false
+}
