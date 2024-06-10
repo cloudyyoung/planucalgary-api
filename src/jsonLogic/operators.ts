@@ -1,16 +1,25 @@
 import { CourseDocument } from "../api/catalog_courses/types"
 
-export function courses(from: CourseDocument[], required: number): boolean {
-  const count = from.length
-  return count >= required
+export function courses(
+  this: { courses: CourseDocument[] },
+  data: { from?: { course: string }[]; required: number },
+): boolean {
+  const { from = [], required } = data
+  const userCourses: CourseDocument[] = this.courses || []
+
+  const matchingCourses: CourseDocument[] = from
+    .map((courseItem) => userCourses.find((course) => course.code === courseItem.course))
+    .filter((course): course is CourseDocument => !!course)
+
+  return matchingCourses.length >= required
 }
 
 export function from(...courses: (CourseDocument | null)[]) {
   return courses.filter(Boolean) as CourseDocument[]
 }
 
-export function course(data: { courses?: CourseDocument[] }, code: string) {
-  const courses: CourseDocument[] = data.courses ? data.courses : []
+export function course(this: { courses: CourseDocument[] }, code: string) {
+  const courses = this.courses
   for (const course of courses) {
     if (course.code === code) {
       return course
@@ -19,14 +28,20 @@ export function course(data: { courses?: CourseDocument[] }, code: string) {
   return null
 }
 
-export function units(data: { courses?: CourseDocument[] }, from: CourseDocument[] | null, required: number): boolean {
+export function units(this: { courses: CourseDocument[] }, data: { from?: { course: string }[]; required: number }) {
+  const { from, required } = data
+  const userCourses: CourseDocument[] = this.courses || []
   let unitsCount = 0
-  const coursesToCheck: CourseDocument[] = from || data.courses || []
-  coursesToCheck.forEach((course) => {
-    if (course && course.credits) {
-      unitsCount += course.credits
-    }
-  })
+
+  const coursesToCheck: CourseDocument[] =
+    from && from.length
+      ? from
+          .map((courseItem: { course: string }) => userCourses.find((course) => course.code === courseItem.course))
+          .filter((course: CourseDocument | undefined): course is CourseDocument => !!course)
+      : userCourses
+
+  unitsCount = coursesToCheck.reduce((total: number, course) => total + (course.credits || 0), 0)
+
   return unitsCount >= required
 }
 
@@ -40,12 +55,6 @@ export function admission(...admissionTo: string[]) {
   return true
 }
 
-// for antireqs
-export function and_to_or(...args: any) {
-  args.forEach((arg: any) => {
-    if (arg) {
-      return true
-    }
-  })
-  return false
+export function required(data: number) {
+  return required
 }
