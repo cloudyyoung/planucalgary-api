@@ -1,5 +1,4 @@
 import JsonLogic from "./jsonLogic"
-import { course, courses } from "./operators"
 
 describe("preReqChecker", () => {
   it("Basic test", () => {
