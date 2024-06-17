@@ -131,7 +131,6 @@ describe("preReqChecker", () => {
       and: [
         {
           units: {
-            from: [],
             required: 6,
           },
         },

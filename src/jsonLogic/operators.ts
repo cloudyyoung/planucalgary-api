@@ -56,5 +56,5 @@ export function admission(...admissionTo: string[]) {
 }
 
 export function required(data: number) {
-  return required
+  return { required: data }
 }
