@@ -14,12 +14,12 @@ describe("preReqChecker", () => {
         {
           code: "ACSC327",
           name: "Life Contingencies I",
-          credits: 3.0,
+          units: 3.0,
         },
         {
           code: "ACCT201",
           name: "FinAcctForNon-BusinessStudent",
-          credits: 3.0,
+          units: 3.0,
         },
       ],
     }
@@ -35,12 +35,12 @@ describe("preReqChecker", () => {
         {
           code: "ACSC327",
           name: "Life Contingencies I",
-          credits: 3.0,
+          units: 3.0,
         },
         {
           code: "ACCT201",
           name: "FinAcctForNon-BusinessStudent",
-          credits: 3.0,
+          units: 3.0,
         },
       ],
     }
@@ -56,7 +56,7 @@ describe("preReqChecker", () => {
         {
           code: "ACSC327",
           name: "Life Contingencies I",
-          credits: 3.0,
+          units: 3.0,
         },
       ],
     }
@@ -80,17 +80,17 @@ describe("preReqChecker", () => {
         {
           code: "STAT323",
           name: "Introduction to Theoretical Statistics",
-          credits: 3.0,
+          units: 3.0,
         },
         {
           code: "MATH311",
           name: "Linear Methods II",
-          credits: 3.0,
+          units: 3.0,
         },
         {
           code: "MATH313",
           name: "Linear Methods II",
-          credits: 3.0,
+          units: 3.0,
         },
       ],
     }
@@ -114,12 +114,12 @@ describe("preReqChecker", () => {
         {
           code: "STAT323",
           name: "Introduction to Theoretical Statistics",
-          credits: 3.0,
+          units: 3.0,
         },
         {
           code: "MATH311",
           name: "Linear Methods II",
-          credits: 3.0,
+          units: 3.0,
         },
       ],
     }
@@ -141,12 +141,12 @@ describe("preReqChecker", () => {
         {
           code: "STAT323",
           name: "Introduction to Theoretical Statistics",
-          credits: 3.0,
+          units: 3.0,
         },
         {
           code: "MATH311",
           name: "Linear Methods II",
-          credits: 3.0,
+          units: 3.0,
         },
       ],
     }
@@ -169,7 +169,7 @@ describe("preReqChecker", () => {
         {
           code: "STAT323",
           name: "Introduction to Theoretical Statistics",
-          credits: 3.0,
+          units: 3.0,
         },
       ],
     }
@@ -193,12 +193,12 @@ describe("preReqChecker", () => {
         {
           code: "CHEM351",
           name: "Organic Chemistry I",
-          credits: 3.0,
+          units: 3.0,
         },
         {
           code: "CHEM353",
           name: "Organic Chemistry II",
-          credits: 3.0,
+          units: 3.0,
         },
       ],
     }
@@ -222,7 +222,7 @@ describe("preReqChecker", () => {
         {
           code: "CHEM351",
           name: "Organic Chemistry I",
-          credits: 3.0,
+          units: 3.0,
         },
       ],
     }
@@ -242,17 +242,17 @@ describe("preReqChecker", () => {
         {
           code: "CHEM201",
           name: "",
-          credits: 3.0,
+          units: 3.0,
         },
         {
           code: "CHEM203",
           name: "",
-          credits: 3.0,
+          units: 3.0,
         },
         {
           code: "CHEM351",
           name: "",
-          credits: 3.0,
+          units: 3.0,
         },
       ],
     }
@@ -272,12 +272,12 @@ describe("preReqChecker", () => {
         {
           code: "CHEM201",
           name: "",
-          credits: 3.0,
+          units: 3.0,
         },
         {
           code: "CHEM203",
           name: "",
-          credits: 3.0,
+          units: 3.0,
         },
       ],
     }
@@ -298,7 +298,7 @@ describe("preReqChecker", () => {
         {
           code: "CHEM203",
           name: "",
-          credits: 3.0,
+          units: 3.0,
         },
       ],
     }
@@ -312,10 +312,38 @@ describe("preReqChecker", () => {
         {
           code: "MATH277",
           name: "",
-          credits: 3.0,
+          units: 3.0,
         },
       ],
     }
     expect(Boolean(JsonLogic.apply(rule, data))).toBe(true)
+  })
+
+  it("Courses with a from list", () => {
+    const rule = {
+      and: [
+        {
+          courses: {
+            from: [{ course: "CHEM353" }, { course: "CHEM355" }, { course: "CHEM356" }, { course: "CHEM357" }],
+            required: 3,
+          },
+        },
+      ],
+    }
+    const data = {
+      courses: [
+        {
+          code: "CHEM351",
+          name: "Organic Chemistry I",
+          units: 3.0,
+        },
+        {
+          code: "CHEM353",
+          name: "Organic Chemistry II",
+          units: 3.0,
+        },
+      ],
+    }
+    expect(Boolean(JsonLogic.apply(rule, data))).toBe(false)
   })
 })

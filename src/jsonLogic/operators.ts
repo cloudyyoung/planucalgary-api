@@ -1,48 +1,34 @@
-import { CourseDocument } from "../api/catalog_courses/types"
+import { StudentRecord, StudentRecordCourse } from "../api/accounts/types"
+import { CoursesOperatorBody, JsonLogicCourse, UnitsOperatorBody } from "./interfaces"
 
-export function courses(
-  this: { courses: CourseDocument[] },
-  data: { from?: { course: string }[]; required: number },
-): boolean {
-  const { from = [], required } = data
-  const userCourses: CourseDocument[] = this.courses || []
-
-  const matchingCourses: CourseDocument[] = from
-    .map((courseItem) => userCourses.find((course) => course.code === courseItem.course))
-    .filter((course): course is CourseDocument => !!course)
-
-  return matchingCourses.length >= required
-}
-
-export function from(...courses: (CourseDocument | null)[]) {
-  return courses.filter(Boolean) as CourseDocument[]
-}
-
-export function course(this: { courses: CourseDocument[] }, code: string) {
+export function course(this: StudentRecord, courseCode: string) {
   const courses = this.courses
   for (const course of courses) {
-    if (course.code === code) {
+    if (course.code === courseCode) {
       return course
     }
   }
   return null
 }
 
-export function units(this: { courses: CourseDocument[] }, data: { from?: { course: string }[]; required: number }) {
-  const { from, required } = data
-  const userCourses: CourseDocument[] = this.courses || []
-  let unitsCount = 0
+export function courses(this: StudentRecord, data: CoursesOperatorBody): boolean {
+  const { required, from: fromCourses } = data
+  const studentCourses = this.courses
+  const matchingCourses = matchCourses(studentCourses, fromCourses)
+  return matchingCourses.length >= required
+}
 
-  const coursesToCheck: CourseDocument[] =
-    from && from.length
-      ? from
-          .map((courseItem: { course: string }) => userCourses.find((course) => course.code === courseItem.course))
-          .filter((course: CourseDocument | undefined): course is CourseDocument => !!course)
-      : userCourses
-
-  unitsCount = coursesToCheck.reduce((total: number, course) => total + (course.credits || 0), 0)
-
+export function units(this: StudentRecord, data: UnitsOperatorBody) {
+  const { required, from: fromCourses } = data
+  const studentCourses = this.courses
+  const matchingCourses = matchCourses(studentCourses, fromCourses)
+  const unitsCount = matchingCourses.reduce((total, course) => total + course.units, 0)
   return unitsCount >= required
+}
+
+function matchCourses(sr: StudentRecordCourse[], from?: JsonLogicCourse[]) {
+  if (!from) return sr
+  return from.map((frc) => sr.find((src) => src.code === frc.course)).filter(Boolean) as StudentRecordCourse[]
 }
 
 export function consent(...consenter: string[]) {
@@ -55,6 +41,10 @@ export function admission(...admissionTo: string[]) {
   return true
 }
 
-export function required(data: number) {
-  return { required: data }
+export function required(this: StudentRecord, required: number) {
+  return { required: required }
+}
+
+export function from(this: StudentRecord, from: number) {
+  return { from: from }
 }

@@ -1,14 +1,19 @@
 import JsonLogic from "json-logic-js"
-import { admission, consent, course, courses, from, required, units } from "./operators"
+import { admission, consent, course, courses, units, required, from } from "./operators"
 
-const operators: any = {
-  from: from,
+interface OperatorsDict {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [key: string]: (...args: any) => any
+}
+
+const operators: OperatorsDict = {
   courses: courses,
   course: course,
   units: units,
   consent: consent,
   admission: admission,
   required: required,
+  from: from,
 }
 
 Object.keys(operators).forEach((operator) => {
