@@ -2,10 +2,10 @@ import { StudentRecord, StudentRecordCourse } from "../api/accounts/types"
 import { CoursesOperatorBody, JsonLogicCourse, UnitsOperatorBody } from "./interfaces"
 
 export function course(this: StudentRecord, courseCode: string) {
-  const courses = this.courses
-  for (const course of courses) {
-    if (course.code === courseCode) {
-      return course
+  const studentCourses = this.courses
+  for (const studentCourse of studentCourses) {
+    if (studentCourse.code === courseCode) {
+      return studentCourse
     }
   }
   return null
