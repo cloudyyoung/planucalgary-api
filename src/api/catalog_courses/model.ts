@@ -11,6 +11,9 @@ const CatalogCourseSchema = new Schema(
       type: String,
     },
     antireq: {
+      type: Object,
+    },
+    antireq_text: {
       type: String,
     },
     career: {
@@ -26,6 +29,9 @@ const CatalogCourseSchema = new Schema(
       type: [String],
     },
     coreq: {
+      type: Object,
+    },
+    coreq_text: {
       type: String,
     },
     course_group_id: {
@@ -37,7 +43,7 @@ const CatalogCourseSchema = new Schema(
     coursedog_id: {
       type: String,
     },
-    credits: {
+    units: {
       type: Number,
     },
     departments: {
@@ -74,13 +80,13 @@ const CatalogCourseSchema = new Schema(
       type: String,
     },
     prereq: {
+      type: Object,
+    },
+    prereq_text: {
       type: String,
     },
     repeatable: {
       type: Boolean,
-    },
-    requisites: {
-      type: [Schema.Types.Mixed],
     },
     start_term: {
       type: Map,
