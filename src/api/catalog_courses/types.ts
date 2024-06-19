@@ -10,7 +10,7 @@ interface CourseDocument {
   course_group_id: string | null
   course_number: string | null
   coursedog_id: string | null
-  credits: number | null
+  units: number | null
   departments: string[]
   description: string | null
   faculty_code: string | null

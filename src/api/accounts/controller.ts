@@ -2,9 +2,9 @@ import { Request, Response } from "express"
 import { Accounts } from "./models"
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
-import User from "./interfaces"
+import Account from "./types"
 
-function generateAccessToken(user: User, key: string): string {
+function generateAccessToken(user: Account, key: string): string {
   return jwt.sign({ payload: { user } }, key, { expiresIn: "3600s" })
 }
 
@@ -44,7 +44,7 @@ export const signup = async (req: Request, res: Response) => {
       courses: [],
     })
 
-    const userInfo: User = {
+    const userInfo: Account = {
       id: user._id.toString(),
       email: user.email,
       username: user.username,
@@ -78,7 +78,7 @@ export const signin = async (req: Request, res: Response) => {
       } else {
         //If password matches
         if (result) {
-          const userInfo: User = {
+          const userInfo: Account = {
             id: loginUser._id.toString(),
             email: loginUser.email,
             username: loginUser.username,

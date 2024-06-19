@@ -24,6 +24,7 @@ export const getAccountPrograms = async (req: Request, res: Response) => {
     return res.status(400).json({ error: "Something went wrong." })
   }
 }
+
 export const AddAccountPrograms = async (req: Request, res: Response) => {
   try {
     const { token, program_id } = req.body
