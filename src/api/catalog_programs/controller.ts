@@ -2,7 +2,6 @@ import { Request, Response } from "express"
 
 import { CatalogProgramModel } from "./models"
 import { CatalogProgramDocument } from "./types"
-import { convertProgramEnginedDocument } from "../../requisites/utils"
 
 export const getPrograms = async (req: Request, res: Response) => {
   const programDocuments = await CatalogProgramModel.aggregate<CatalogProgramDocument>([
@@ -54,9 +53,5 @@ export const getProgram = async (req: Request, res: Response) => {
     return res.status(404).json({ message: "Program not found" })
   }
 
-  // Hydrate requisites
-  const programEnginedDocument = convertProgramEnginedDocument(programDocument.toJSON())
-  await programEnginedDocument.requisites.hydrate()
-
-  return res.status(200).json(programEnginedDocument)
+  return res.status(200).json(programDocument)
 }
