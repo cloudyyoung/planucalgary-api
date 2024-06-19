@@ -3,11 +3,7 @@ import { Request, Response } from "express"
 import { jwtDecode } from "jwt-decode"
 import JwtContent from "./interfaces"
 import { Accounts } from "../accounts/models"
-
-interface CourseId {
-  id: string
-  term: object
-}
+import { CourseId } from "./interfaces"
 
 export const getAccountCourses = async (req: Request, res: Response) => {
   try {
