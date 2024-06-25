@@ -1,9 +1,9 @@
 import { Router } from "express"
-import { Courses } from "./controller"
+import { getCourses } from "./controller"
 
 const router = Router()
 
-router.get("/", Courses)
+router.get("/", getCourses)
 
 export default router
 export { router }
