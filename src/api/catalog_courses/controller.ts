@@ -7,32 +7,42 @@ import { course, courseData, RequisiteList } from "../../models/interfaces.gen"
 import { CatalogProgram } from "../../models/catalog_program"
 import JsonLogic from "../../jsonLogic/jsonLogic"
 
-export const getCourses = async (req: Request, res: Response) => {
+export const Courses = async (req: Request, res: Response) => {
   try {
-    const allCourses = await CatalogCourse.find({}).limit(10)
+    const allCourses = await CatalogCourse.find({}).limit(30)
     return res.status(200).json({ message: allCourses })
   } catch (error) {
+    console.log(error)
     return res.status(400).json({ error: "Something went wrong." })
   }
 }
 
-export const checkPrereq = async (req: Request, res: Response) => {
-  const { token, course_id } = req.body
+export const checkPrereq = async (token: string, course_id: string) => {
+  //const { token, course_id } = req.body
   const decoded = jwtDecode<JwtContent>(token)
   const account_id = decoded.payload.user.id
   if (!token || !course_id) {
-    return res.status(400).json({ error: "Missing attributes." })
+    return { error: "Missing attributes." }
   }
 
   const checkAccount = await Account.findById({ _id: account_id })
   if (!checkAccount) {
-    return res.status(400).json({ error: "Account does not exist." })
+    return { error: "Account does not exist." }
   }
 
   const checkCourse = await CatalogCourse.findOne({ coursedog_id: course_id })
   if (!checkCourse) {
-    return res.status(400).json({ error: "Course does not exist." })
+    return { error: "Course does not exist." }
   }
+
+  /*
+  if (
+    (checkCourse.prereq == null && checkCourse.antireq == null) ||
+    (Object.keys(checkCourse.prereq).length && Object.keys(checkCourse.antireq).length)
+  ) {
+    return res.status(400).json({ status: true })
+  }*/
+  //checkCourse.?requisites
 
   const courseIds: string[] = checkAccount.courses.map((x) => x.id)
   console.log(courseIds)
@@ -54,9 +64,17 @@ export const checkPrereq = async (req: Request, res: Response) => {
     .select("code -_id")
     .lean()
 
+  const prereqList = checkCourse
+    .filter((x: RequisiteList) => x.type == "Prerequisite")
+    .map((x: RequisiteList) => x.rules)
+  const antiReqList = checkCourse.requisites
+    .filter((x: RequisiteList) => x.type == "Antirequisite")
+    .map((x: RequisiteList) => x.rules)
+    .map()
+
   /* Add json logic function part here */
 
-  return res.status(200).json({ course: courseListFinal, program: ProgramList })
+  return { course: courseListFinal, program: ProgramList }
 }
 // open main.py under bianco,
 // Run the script. It will create course anti/pre/co-req.
