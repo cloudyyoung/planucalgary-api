@@ -340,6 +340,94 @@ updatedAt?: Date;
 }
 
 /**
+ * Lean version of CatalogDepartmentDocument
+ * 
+ * This has all Mongoose getters & functions removed. This type will be returned from `CatalogDepartmentDocument.toObject()`. To avoid conflicts with model names, use the type alias `CatalogDepartmentObject`.
+ * ```
+ * const catalogdepartmentObject = catalogdepartment.toObject();
+ * ```
+ */
+export type CatalogDepartment = {
+id: string;
+display_name: string;
+name: string;
+_id: mongoose.Types.ObjectId;
+createdAt?: Date;
+updatedAt?: Date;
+}
+
+/**
+ * Lean version of CatalogDepartmentDocument (type alias of `CatalogDepartment`)
+ * 
+ * Use this type alias to avoid conflicts with model names:
+ * ```
+ * import { CatalogDepartment } from "../models"
+ * import { CatalogDepartmentObject } from "../interfaces/mongoose.gen.ts"
+ * 
+ * const catalogdepartmentObject: CatalogDepartmentObject = catalogdepartment.toObject();
+ * ```
+ */
+export type CatalogDepartmentObject = CatalogDepartment
+
+/**
+ * Mongoose Query type
+ * 
+ * This type is returned from query functions. For most use cases, you should not need to use this type explicitly.
+ */
+export type CatalogDepartmentQuery = mongoose.Query<any, CatalogDepartmentDocument, CatalogDepartmentQueries> & CatalogDepartmentQueries
+
+/**
+ * Mongoose Query helper types
+ * 
+ * This type represents `CatalogDepartmentSchema.query`. For most use cases, you should not need to use this type explicitly.
+ */
+export type CatalogDepartmentQueries = {
+}
+
+export type CatalogDepartmentMethods = {
+}
+
+export type CatalogDepartmentStatics = {
+}
+
+/**
+ * Mongoose Model type
+ * 
+ * Pass this type to the Mongoose Model constructor:
+ * ```
+ * const CatalogDepartment = mongoose.model<CatalogDepartmentDocument, CatalogDepartmentModel>("CatalogDepartment", CatalogDepartmentSchema);
+ * ```
+ */
+export type CatalogDepartmentModel = mongoose.Model<CatalogDepartmentDocument, CatalogDepartmentQueries> & CatalogDepartmentStatics
+
+/**
+ * Mongoose Schema type
+ * 
+ * Assign this type to new CatalogDepartment schema instances:
+ * ```
+ * const CatalogDepartmentSchema: CatalogDepartmentSchema = new mongoose.Schema({ ... })
+ * ```
+ */
+export type CatalogDepartmentSchema = mongoose.Schema<CatalogDepartmentDocument, CatalogDepartmentModel, CatalogDepartmentMethods, CatalogDepartmentQueries>
+
+/**
+ * Mongoose Document type
+ * 
+ * Pass this type to the Mongoose Model constructor:
+ * ```
+ * const CatalogDepartment = mongoose.model<CatalogDepartmentDocument, CatalogDepartmentModel>("CatalogDepartment", CatalogDepartmentSchema);
+ * ```
+ */
+export type CatalogDepartmentDocument = mongoose.Document<mongoose.Types.ObjectId, CatalogDepartmentQueries> & CatalogDepartmentMethods & {
+id: string;
+display_name: string;
+name: string;
+_id: mongoose.Types.ObjectId;
+createdAt?: Date;
+updatedAt?: Date;
+}
+
+/**
  * Lean version of CatalogRequisiteSetDocument
  * 
  * This has all Mongoose getters & functions removed. This type will be returned from `CatalogRequisiteSetDocument.toObject()`. To avoid conflicts with model names, use the type alias `CatalogRequisiteSetObject`.

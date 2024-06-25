@@ -1,7 +1,9 @@
 import mongoose from "mongoose"
 const { Schema, connection } = mongoose
 
-const CatalogDepartmentSchema = new Schema(
+import { CatalogDepartmentDocument, CatalogDepartmentModel, CatalogDepartmentSchema } from "./interfaces.gen"
+
+const schema: CatalogDepartmentSchema = new Schema(
   {
     id: {
       type: String,
@@ -22,5 +24,9 @@ const CatalogDepartmentSchema = new Schema(
 )
 
 const catalog = connection.useDb("catalog")
-const CatalogDepartment = catalog.model("Department", CatalogDepartmentSchema)
+const CatalogDepartment = catalog.model<CatalogDepartmentDocument, CatalogDepartmentModel>(
+  "CatalogDepartment",
+  schema,
+  "departments",
+)
 export { CatalogDepartment }
