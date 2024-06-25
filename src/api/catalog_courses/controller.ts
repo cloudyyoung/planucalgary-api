@@ -20,7 +20,7 @@ export const Courses = async (req: Request, res: Response) => {
 export const checkPrereq = async (token: string, course_id: string) => {
   //const { token, course_id } = req.body
   const decoded = jwtDecode<JwtContent>(token)
-  const account_id = decoded.payload.user.id
+  const account_id = decoded.payload.user._id
   if (!token || !course_id) {
     return { error: "Missing attributes." }
   }
