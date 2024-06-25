@@ -100,6 +100,100 @@ updatedAt?: Date;
 }
 
 /**
+ * Lean version of CatalogCourseSetDocument
+ * 
+ * This has all Mongoose getters & functions removed. This type will be returned from `CatalogCourseSetDocument.toObject()`. To avoid conflicts with model names, use the type alias `CatalogCourseSetObject`.
+ * ```
+ * const catalogcoursesetObject = catalogcourseset.toObject();
+ * ```
+ */
+export type CatalogCourseSet = {
+course_list: string[];
+description?: string;
+id: string;
+name: string;
+structure: Map<string, any>;
+type: "static" | "dynamic";
+_id: mongoose.Types.ObjectId;
+createdAt?: Date;
+updatedAt?: Date;
+}
+
+/**
+ * Lean version of CatalogCourseSetDocument (type alias of `CatalogCourseSet`)
+ * 
+ * Use this type alias to avoid conflicts with model names:
+ * ```
+ * import { CatalogCourseSet } from "../models"
+ * import { CatalogCourseSetObject } from "../interfaces/mongoose.gen.ts"
+ * 
+ * const catalogcoursesetObject: CatalogCourseSetObject = catalogcourseset.toObject();
+ * ```
+ */
+export type CatalogCourseSetObject = CatalogCourseSet
+
+/**
+ * Mongoose Query type
+ * 
+ * This type is returned from query functions. For most use cases, you should not need to use this type explicitly.
+ */
+export type CatalogCourseSetQuery = mongoose.Query<any, CatalogCourseSetDocument, CatalogCourseSetQueries> & CatalogCourseSetQueries
+
+/**
+ * Mongoose Query helper types
+ * 
+ * This type represents `CatalogCourseSetSchema.query`. For most use cases, you should not need to use this type explicitly.
+ */
+export type CatalogCourseSetQueries = {
+}
+
+export type CatalogCourseSetMethods = {
+}
+
+export type CatalogCourseSetStatics = {
+}
+
+/**
+ * Mongoose Model type
+ * 
+ * Pass this type to the Mongoose Model constructor:
+ * ```
+ * const CatalogCourseSet = mongoose.model<CatalogCourseSetDocument, CatalogCourseSetModel>("CatalogCourseSet", CatalogCourseSetSchema);
+ * ```
+ */
+export type CatalogCourseSetModel = mongoose.Model<CatalogCourseSetDocument, CatalogCourseSetQueries> & CatalogCourseSetStatics
+
+/**
+ * Mongoose Schema type
+ * 
+ * Assign this type to new CatalogCourseSet schema instances:
+ * ```
+ * const CatalogCourseSetSchema: CatalogCourseSetSchema = new mongoose.Schema({ ... })
+ * ```
+ */
+export type CatalogCourseSetSchema = mongoose.Schema<CatalogCourseSetDocument, CatalogCourseSetModel, CatalogCourseSetMethods, CatalogCourseSetQueries>
+
+/**
+ * Mongoose Document type
+ * 
+ * Pass this type to the Mongoose Model constructor:
+ * ```
+ * const CatalogCourseSet = mongoose.model<CatalogCourseSetDocument, CatalogCourseSetModel>("CatalogCourseSet", CatalogCourseSetSchema);
+ * ```
+ */
+export type CatalogCourseSetDocument = mongoose.Document<mongoose.Types.ObjectId, CatalogCourseSetQueries> & CatalogCourseSetMethods & {
+course_list: mongoose.Types.Array<string>;
+description?: string;
+id: string;
+name: string;
+structure: mongoose.Types.Map<any>;
+type: "static" | "dynamic";
+_id: mongoose.Types.ObjectId;
+createdAt?: Date;
+updatedAt?: Date;
+}
+
+/**
  * Lean version of CatalogCourseDocument
  * 
  * This has all Mongoose getters & functions removed. This type will be returned from `CatalogCourseDocument.toObject()`. To avoid conflicts with model names, use the type alias `CatalogCourseObject`.

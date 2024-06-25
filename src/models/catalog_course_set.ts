@@ -1,8 +1,8 @@
-import mongoose from "mongoose"
-import { CatalogCourseSetDocument } from "./types"
-const { Schema, connection } = mongoose
+import { Schema, connection } from "mongoose"
 
-const CatalogCourseSetSchema = new Schema<CatalogCourseSetDocument>(
+import { CatalogCourseSetDocument, CatalogCourseSetModel, CatalogCourseSetSchema } from "./interfaces.gen"
+
+const schema: CatalogCourseSetSchema = new Schema(
   {
     course_list: {
       type: [String],
@@ -35,5 +35,9 @@ const CatalogCourseSetSchema = new Schema<CatalogCourseSetDocument>(
 )
 
 const catalog = connection.useDb("catalog")
-const CatalogCourseSet = catalog.model("CourseSet", CatalogCourseSetSchema, "course_sets")
+const CatalogCourseSet = catalog.model<CatalogCourseSetDocument, CatalogCourseSetModel>(
+  "CatalogCourseSet",
+  schema,
+  "course_sets",
+)
 export { CatalogCourseSet }
