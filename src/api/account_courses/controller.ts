@@ -1,6 +1,6 @@
 import { Request, Response } from "express"
 import { jwtDecode } from "jwt-decode"
-import JwtContent from "./interfaces"
+import { JwtContent } from "../accounts/interfaces"
 
 import { CatalogCourse, Account } from "../../models"
 
@@ -13,7 +13,7 @@ export const getAccountCourses = async (req: Request, res: Response) => {
   try {
     const { token } = req.body
     const decoded = jwtDecode<JwtContent>(token)
-    const id = decoded.payload.user.id
+    const id = decoded.id
     console.log(id)
     const user = await Account.findOne({ _id: id })
     if (user) {
@@ -34,7 +34,7 @@ export const AddAccountCourses = async (req: Request, res: Response) => {
   try {
     const { token, course_id } = req.body
     const decoded = jwtDecode<JwtContent>(token)
-    const account_id = decoded.payload.user.id
+    const account_id = decoded.id
     console.log(token, course_id)
     if (!token || !course_id) {
       return res.status(400).json({ error: "Missing attributes." })

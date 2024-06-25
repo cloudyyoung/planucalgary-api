@@ -3,10 +3,10 @@ import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 
 import { Account } from "../../models"
-import { JWTPayload } from "./interfaces"
+import { JwtContent } from "./interfaces"
 
-function generateAccessToken(payload: JWTPayload, key: string): string {
-  return jwt.sign({ payload: payload }, key, { expiresIn: "3600s" })
+function generateAccessToken(payload: JwtContent, key: string): string {
+  return jwt.sign(payload, key, { expiresIn: "3600s" })
 }
 
 export const signup = async (req: Request, res: Response) => {
@@ -44,7 +44,7 @@ export const signup = async (req: Request, res: Response) => {
       courses: [],
     })
 
-    const payload: JWTPayload = {
+    const payload: JwtContent = {
       id: user._id.toString(),
       email: user.email,
       username: user.username,
@@ -77,7 +77,7 @@ export const signin = async (req: Request, res: Response) => {
       } else {
         //If password matches
         if (result) {
-          const payload: JWTPayload = {
+          const payload: JwtContent = {
             id: loginUser._id.toString(),
             email: loginUser.email,
             username: loginUser.username,
