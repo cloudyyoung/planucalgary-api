@@ -3,7 +3,7 @@ import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 
 import { Account } from "../../models"
-import JWTPayload from "./types"
+import { JWTPayload } from "./interfaces"
 
 function generateAccessToken(payload: JWTPayload, key: string): string {
   return jwt.sign({ payload: payload }, key, { expiresIn: "3600s" })

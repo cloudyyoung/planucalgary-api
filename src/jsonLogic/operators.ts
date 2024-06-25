@@ -1,4 +1,4 @@
-import { StudentRecord, StudentRecordCourse } from "../api/accounts/types"
+import { StudentRecord, StudentRecordCourse } from "../api/accounts/interfaces"
 import { CoursesOperatorBody, JsonLogicCourse, UnitsOperatorBody } from "./interfaces"
 
 export function course(this: StudentRecord, courseCode: string) {
