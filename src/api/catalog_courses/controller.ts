@@ -1,6 +1,7 @@
 import { Request, Response } from "express"
-import { CatalogCourse } from "./models"
 import { jwtDecode } from "jwt-decode"
+
+import { CatalogCourse } from "../../models"
 import JwtContent from "../account_courses/interfaces"
 import { Accounts } from "../accounts/models"
 

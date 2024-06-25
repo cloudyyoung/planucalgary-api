@@ -1,5 +1,6 @@
 import { Schema, connection } from "mongoose"
-import { CatalogCourseDocument } from "../../interfaces/mongoose.gen"
+
+import { CatalogCourseDocument } from "../interfaces/mongoose.gen"
 
 const CatalogCourseSchema = new Schema<CatalogCourseDocument>(
   {
