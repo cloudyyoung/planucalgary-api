@@ -3,7 +3,7 @@ import cors from "cors"
 import compression from "compression"
 import morgan from "morgan"
 import helmet from "helmet"
-import bodyParser from "body-parser"
+import bodyParser, { json } from "body-parser"
 
 import { router as programsRouter } from "../api/catalog_programs/routes"
 import { router as userRouter } from "../api/accounts/routes"
@@ -21,6 +21,7 @@ export default (app: Express) => {
   })
 
   app.enable("trust proxy")
+  app.use(json())
   app.use(cors())
   app.use(bodyParser.urlencoded({ extended: false }))
   app.use(bodyParser.json())

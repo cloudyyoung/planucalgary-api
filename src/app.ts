@@ -7,8 +7,6 @@ const app = express()
 
 loader(app)
 
-app.use(express.json())
-
 app.listen(PORT, () => {
   console.log(`Server is running on ${PORT}`)
 })
