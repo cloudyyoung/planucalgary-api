@@ -7,7 +7,7 @@ import { JwtContent } from "../accounts/interfaces"
 export const getCourses = async (req: Request, res: Response) => {
   try {
     const allCourses = await CatalogCourse.find({}).limit(10)
-    return res.status(200).json({ message: allCourses })
+    return res.status(200).json(allCourses)
   } catch (error) {
     return res.status(400).json({ error: "Something went wrong." })
   }
