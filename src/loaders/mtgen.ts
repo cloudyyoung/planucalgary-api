@@ -9,12 +9,12 @@ export default async function generateTypes() {
       "no-mongoose": false,
       "no-populate-overload": false,
       "dates-as-strings": false,
-      debug: false,
-      output: "./src/interfaces/mongoose.gen.ts",
+      debug: true,
+      output: "./src/models/interfaces.gen.ts",
       project: "./",
     },
     args: {
-      model_path: "./src/**/models.ts",
+      model_path: "./src/models",
     },
   })
   await result.sourceFile.save()

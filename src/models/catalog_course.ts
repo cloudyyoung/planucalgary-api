@@ -1,8 +1,8 @@
 import { Schema, connection } from "mongoose"
 
-import { CatalogCourseDocument } from "../interfaces/mongoose.gen"
+import { CatalogCourseDocument, CatalogCourseModel, CatalogCourseSchema } from "./interfaces.gen"
 
-const CatalogCourseSchema = new Schema<CatalogCourseDocument>(
+const schema: CatalogCourseSchema = new Schema(
   {
     active: {
       type: Boolean,
@@ -108,5 +108,5 @@ const CatalogCourseSchema = new Schema<CatalogCourseDocument>(
 )
 
 const catalog = connection.useDb("catalog")
-const CatalogCourse = catalog.model("CatalogCourse", CatalogCourseSchema, "courses")
+const CatalogCourse = catalog.model<CatalogCourseDocument, CatalogCourseModel>("CatalogCourse", schema, "courses")
 export { CatalogCourse }
