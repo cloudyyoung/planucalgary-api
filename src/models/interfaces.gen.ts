@@ -340,6 +340,100 @@ updatedAt?: Date;
 }
 
 /**
+ * Lean version of CatalogRequisiteSetDocument
+ * 
+ * This has all Mongoose getters & functions removed. This type will be returned from `CatalogRequisiteSetDocument.toObject()`. To avoid conflicts with model names, use the type alias `CatalogRequisiteSetObject`.
+ * ```
+ * const catalogrequisitesetObject = catalogrequisiteset.toObject();
+ * ```
+ */
+export type CatalogRequisiteSet = {
+description?: string;
+id: string;
+name: string;
+requisite_set_group_id: string;
+requisites: any[];
+version: number;
+_id: mongoose.Types.ObjectId;
+createdAt?: Date;
+updatedAt?: Date;
+}
+
+/**
+ * Lean version of CatalogRequisiteSetDocument (type alias of `CatalogRequisiteSet`)
+ * 
+ * Use this type alias to avoid conflicts with model names:
+ * ```
+ * import { CatalogRequisiteSet } from "../models"
+ * import { CatalogRequisiteSetObject } from "../interfaces/mongoose.gen.ts"
+ * 
+ * const catalogrequisitesetObject: CatalogRequisiteSetObject = catalogrequisiteset.toObject();
+ * ```
+ */
+export type CatalogRequisiteSetObject = CatalogRequisiteSet
+
+/**
+ * Mongoose Query type
+ * 
+ * This type is returned from query functions. For most use cases, you should not need to use this type explicitly.
+ */
+export type CatalogRequisiteSetQuery = mongoose.Query<any, CatalogRequisiteSetDocument, CatalogRequisiteSetQueries> & CatalogRequisiteSetQueries
+
+/**
+ * Mongoose Query helper types
+ * 
+ * This type represents `CatalogRequisiteSetSchema.query`. For most use cases, you should not need to use this type explicitly.
+ */
+export type CatalogRequisiteSetQueries = {
+}
+
+export type CatalogRequisiteSetMethods = {
+}
+
+export type CatalogRequisiteSetStatics = {
+}
+
+/**
+ * Mongoose Model type
+ * 
+ * Pass this type to the Mongoose Model constructor:
+ * ```
+ * const CatalogRequisiteSet = mongoose.model<CatalogRequisiteSetDocument, CatalogRequisiteSetModel>("CatalogRequisiteSet", CatalogRequisiteSetSchema);
+ * ```
+ */
+export type CatalogRequisiteSetModel = mongoose.Model<CatalogRequisiteSetDocument, CatalogRequisiteSetQueries> & CatalogRequisiteSetStatics
+
+/**
+ * Mongoose Schema type
+ * 
+ * Assign this type to new CatalogRequisiteSet schema instances:
+ * ```
+ * const CatalogRequisiteSetSchema: CatalogRequisiteSetSchema = new mongoose.Schema({ ... })
+ * ```
+ */
+export type CatalogRequisiteSetSchema = mongoose.Schema<CatalogRequisiteSetDocument, CatalogRequisiteSetModel, CatalogRequisiteSetMethods, CatalogRequisiteSetQueries>
+
+/**
+ * Mongoose Document type
+ * 
+ * Pass this type to the Mongoose Model constructor:
+ * ```
+ * const CatalogRequisiteSet = mongoose.model<CatalogRequisiteSetDocument, CatalogRequisiteSetModel>("CatalogRequisiteSet", CatalogRequisiteSetSchema);
+ * ```
+ */
+export type CatalogRequisiteSetDocument = mongoose.Document<mongoose.Types.ObjectId, CatalogRequisiteSetQueries> & CatalogRequisiteSetMethods & {
+description?: string;
+id: string;
+name: string;
+requisite_set_group_id: string;
+requisites: mongoose.Types.Array<any>;
+version: number;
+_id: mongoose.Types.ObjectId;
+createdAt?: Date;
+updatedAt?: Date;
+}
+
+/**
  * Check if a property on a document is populated:
  * ```
  * import { IsPopulated } from "../interfaces/mongoose.gen.ts"

@@ -1,8 +1,8 @@
-import mongoose from "mongoose"
-import { RequisiteSetDocument } from "./types"
-const { Schema, connection } = mongoose
+import { Schema, connection } from "mongoose"
 
-const CatalogRequisiteSetSchema = new Schema<RequisiteSetDocument>(
+import { CatalogRequisiteSetDocument, CatalogRequisiteSetModel, CatalogRequisiteSetSchema } from "./interfaces.gen"
+
+const schema: CatalogRequisiteSetSchema = new Schema(
   {
     description: {
       type: String,
@@ -34,5 +34,9 @@ const CatalogRequisiteSetSchema = new Schema<RequisiteSetDocument>(
 )
 
 const catalog = connection.useDb("catalog")
-const CatalogRequisiteSet = catalog.model("RequisiteSet", CatalogRequisiteSetSchema, "requisite_sets")
+const CatalogRequisiteSet = catalog.model<CatalogRequisiteSetDocument, CatalogRequisiteSetModel>(
+  "CatalogRequisiteSet",
+  schema,
+  "requisite_sets",
+)
 export { CatalogRequisiteSet }
