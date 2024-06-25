@@ -1,10 +1,9 @@
 import { Request, Response } from "express"
 
-import { CatalogProgramModel } from "./models"
-import { CatalogProgramDocument } from "./types"
+import { CatalogProgram } from "../../models"
 
 export const getPrograms = async (req: Request, res: Response) => {
-  const programDocuments = await CatalogProgramModel.aggregate<CatalogProgramDocument>([
+  const programDocuments = await CatalogProgram.aggregate([
     // Match programs that are active
     { $match: { active: true } },
     // Join with the Department collection
@@ -47,7 +46,7 @@ export const getPrograms = async (req: Request, res: Response) => {
 export const getProgram = async (req: Request, res: Response) => {
   // Query the program by coursedog_id
   const { id } = req.params
-  const programDocument = await CatalogProgramModel.findOne({ coursedog_id: id })
+  const programDocument = await CatalogProgram.findOne({ coursedog_id: id })
 
   if (!programDocument) {
     return res.status(404).json({ message: "Program not found" })

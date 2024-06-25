@@ -1,9 +1,8 @@
-import mongoose from "mongoose"
-import { CatalogProgramDocument } from "./types"
+import { Schema, connection } from "mongoose"
 
-const { Schema, connection } = mongoose
+import { CatalogProgramDocument, CatalogProgramModel, CatalogProgramSchema } from "./interfaces.gen"
 
-const CatalogProgramSchema = new Schema<CatalogProgramDocument>(
+const schema: CatalogProgramSchema = new Schema(
   {
     active: {
       type: Boolean,
@@ -58,10 +57,6 @@ const CatalogProgramSchema = new Schema<CatalogProgramDocument>(
       type: String,
       required: true,
     },
-    requisites: {
-      type: [Schema.Types.Mixed],
-      required: true,
-    },
     start_term: {
       type: Map,
       required: true,
@@ -87,5 +82,5 @@ const CatalogProgramSchema = new Schema<CatalogProgramDocument>(
 )
 
 const CatalogDb = connection.useDb("catalog")
-const CatalogProgramModel = CatalogDb.model("Program", CatalogProgramSchema)
-export { CatalogProgramModel }
+const CatalogProgram = CatalogDb.model<CatalogProgramDocument, CatalogProgramModel>("CatalogProgram", schema)
+export { CatalogProgram }

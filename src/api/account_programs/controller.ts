@@ -1,9 +1,8 @@
-import { CatalogProgramModel } from "../catalog_programs/models"
 import { Request, Response } from "express"
 import { jwtDecode } from "jwt-decode"
-import JwtContent from "../account_courses/interfaces"
 
-import { Account } from "../../models"
+import { Account, CatalogProgram } from "../../models"
+import JwtContent from "../account_courses/interfaces"
 
 export const getAccountPrograms = async (req: Request, res: Response) => {
   try {
@@ -14,7 +13,7 @@ export const getAccountPrograms = async (req: Request, res: Response) => {
     const user = await Account.findOne({ _id: id })
     if (user) {
       const programIds = user.programs
-      const ProgramList = await CatalogProgramModel.find({ _id: { $in: programIds } })
+      const ProgramList = await CatalogProgram.find({ _id: { $in: programIds } })
       console.log(ProgramList)
       return res.status(200).json({ Programs: ProgramList })
     } else {
@@ -38,7 +37,7 @@ export const AddAccountPrograms = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "Account does not exist." })
     }
 
-    const checkProgram = await CatalogProgramModel.findById({ _id: program_id })
+    const checkProgram = await CatalogProgram.findById({ _id: program_id })
     if (!checkProgram) {
       return res.status(400).json({ error: "Course does not exist." })
     }

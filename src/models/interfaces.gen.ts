@@ -428,6 +428,120 @@ updatedAt?: Date;
 }
 
 /**
+ * Lean version of CatalogProgramDocument
+ * 
+ * This has all Mongoose getters & functions removed. This type will be returned from `CatalogProgramDocument.toObject()`. To avoid conflicts with model names, use the type alias `CatalogProgramObject`.
+ * ```
+ * const catalogprogramObject = catalogprogram.toObject();
+ * ```
+ */
+export type CatalogProgram = {
+active?: boolean;
+admission_info: string;
+career: string;
+code: string;
+coursedog_id: string;
+degree_designation_code: string;
+degree_designation_name: string;
+departments: string[];
+display_name: string;
+general_info: string;
+long_name: string;
+name: string;
+program_group_id: string;
+start_term: Map<string, any>;
+transcript_description: string;
+transcript_level: string;
+type: string;
+version: number;
+_id: mongoose.Types.ObjectId;
+}
+
+/**
+ * Lean version of CatalogProgramDocument (type alias of `CatalogProgram`)
+ * 
+ * Use this type alias to avoid conflicts with model names:
+ * ```
+ * import { CatalogProgram } from "../models"
+ * import { CatalogProgramObject } from "../interfaces/mongoose.gen.ts"
+ * 
+ * const catalogprogramObject: CatalogProgramObject = catalogprogram.toObject();
+ * ```
+ */
+export type CatalogProgramObject = CatalogProgram
+
+/**
+ * Mongoose Query type
+ * 
+ * This type is returned from query functions. For most use cases, you should not need to use this type explicitly.
+ */
+export type CatalogProgramQuery = mongoose.Query<any, CatalogProgramDocument, CatalogProgramQueries> & CatalogProgramQueries
+
+/**
+ * Mongoose Query helper types
+ * 
+ * This type represents `CatalogProgramSchema.query`. For most use cases, you should not need to use this type explicitly.
+ */
+export type CatalogProgramQueries = {
+}
+
+export type CatalogProgramMethods = {
+}
+
+export type CatalogProgramStatics = {
+}
+
+/**
+ * Mongoose Model type
+ * 
+ * Pass this type to the Mongoose Model constructor:
+ * ```
+ * const CatalogProgram = mongoose.model<CatalogProgramDocument, CatalogProgramModel>("CatalogProgram", CatalogProgramSchema);
+ * ```
+ */
+export type CatalogProgramModel = mongoose.Model<CatalogProgramDocument, CatalogProgramQueries> & CatalogProgramStatics
+
+/**
+ * Mongoose Schema type
+ * 
+ * Assign this type to new CatalogProgram schema instances:
+ * ```
+ * const CatalogProgramSchema: CatalogProgramSchema = new mongoose.Schema({ ... })
+ * ```
+ */
+export type CatalogProgramSchema = mongoose.Schema<CatalogProgramDocument, CatalogProgramModel, CatalogProgramMethods, CatalogProgramQueries>
+
+/**
+ * Mongoose Document type
+ * 
+ * Pass this type to the Mongoose Model constructor:
+ * ```
+ * const CatalogProgram = mongoose.model<CatalogProgramDocument, CatalogProgramModel>("CatalogProgram", CatalogProgramSchema);
+ * ```
+ */
+export type CatalogProgramDocument = mongoose.Document<mongoose.Types.ObjectId, CatalogProgramQueries> & CatalogProgramMethods & {
+active?: boolean;
+admission_info: string;
+career: string;
+code: string;
+coursedog_id: string;
+degree_designation_code: string;
+degree_designation_name: string;
+departments: mongoose.Types.Array<string>;
+display_name: string;
+general_info: string;
+long_name: string;
+name: string;
+program_group_id: string;
+start_term: mongoose.Types.Map<any>;
+transcript_description: string;
+transcript_level: string;
+type: string;
+version: number;
+_id: mongoose.Types.ObjectId;
+}
+
+/**
  * Lean version of CatalogRequisiteSetDocument
  * 
  * This has all Mongoose getters & functions removed. This type will be returned from `CatalogRequisiteSetDocument.toObject()`. To avoid conflicts with model names, use the type alias `CatalogRequisiteSetObject`.
