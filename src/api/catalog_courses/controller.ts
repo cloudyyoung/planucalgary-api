@@ -1,9 +1,8 @@
 import { Request, Response } from "express"
 import { jwtDecode } from "jwt-decode"
 
-import { CatalogCourse } from "../../models"
+import { CatalogCourse, Account } from "../../models"
 import JwtContent from "../account_courses/interfaces"
-import { Accounts } from "../accounts/models"
 
 export const getCourses = async (req: Request, res: Response) => {
   try {
@@ -22,7 +21,7 @@ export const checkPrereq = async (req: Request, res: Response) => {
     return res.status(400).json({ error: "Missing attributes." })
   }
 
-  const checkAccount = await Accounts.findById({ _id: account_id })
+  const checkAccount = await Account.findById({ _id: account_id })
   if (!checkAccount) {
     return res.status(400).json({ error: "Account does not exist." })
   }

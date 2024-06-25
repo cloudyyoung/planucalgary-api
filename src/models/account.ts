@@ -1,7 +1,8 @@
-import mongoose from "mongoose"
-const { Schema, connection } = mongoose
+import { Schema, connection } from "mongoose"
 
-const userSchema = new mongoose.Schema(
+import { AccountDocument, AccountModel } from "./interfaces.gen"
+
+const schema = new Schema(
   {
     programs: {
       type: [String],
@@ -38,5 +39,5 @@ const userSchema = new mongoose.Schema(
 )
 
 const accountDb = connection.useDb("account")
-const Accounts = accountDb.model("Account", userSchema, "accounts")
-export { Accounts }
+const Account = accountDb.model<AccountDocument, AccountModel>("Account", schema, "accounts")
+export { Account }

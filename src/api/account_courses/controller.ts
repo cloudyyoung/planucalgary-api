@@ -2,8 +2,7 @@ import { Request, Response } from "express"
 import { jwtDecode } from "jwt-decode"
 import JwtContent from "./interfaces"
 
-import { CatalogCourse } from "../../models"
-import { Accounts } from "../accounts/models"
+import { CatalogCourse, Account } from "../../models"
 
 interface CourseId {
   id: string
@@ -16,7 +15,7 @@ export const getAccountCourses = async (req: Request, res: Response) => {
     const decoded = jwtDecode<JwtContent>(token)
     const id = decoded.payload.user.id
     console.log(id)
-    const user = await Accounts.findOne({ _id: id })
+    const user = await Account.findOne({ _id: id })
     if (user) {
       const courseIds: CourseId[] = user.courses.map((x) => x.id)
       const courseList = await CatalogCourse.find({ coursedog_id: { $in: courseIds } })
@@ -41,7 +40,7 @@ export const AddAccountCourses = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "Missing attributes." })
     }
 
-    const checkAccount = await Accounts.findById({ _id: account_id })
+    const checkAccount = await Account.findById({ _id: account_id })
     if (!checkAccount) {
       return res.status(400).json({ error: "Account does not exist." })
     }
@@ -62,7 +61,7 @@ export const AddAccountCourses = async (req: Request, res: Response) => {
 
     checkAccount.courses.push(newObj)
 
-    Accounts.updateOne(
+    Account.updateOne(
       { _id: account_id },
       { $set: { courses: checkAccount.courses } },
       (err: unknown, doc: unknown) => {

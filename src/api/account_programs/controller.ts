@@ -2,7 +2,8 @@ import { CatalogProgramModel } from "../catalog_programs/models"
 import { Request, Response } from "express"
 import { jwtDecode } from "jwt-decode"
 import JwtContent from "../account_courses/interfaces"
-import { Accounts } from "../accounts/models"
+
+import { Account } from "../../models"
 
 export const getAccountPrograms = async (req: Request, res: Response) => {
   try {
@@ -10,7 +11,7 @@ export const getAccountPrograms = async (req: Request, res: Response) => {
     const decoded = jwtDecode<JwtContent>(token)
     const id = decoded.payload.user.id
     console.log(id)
-    const user = await Accounts.findOne({ _id: id })
+    const user = await Account.findOne({ _id: id })
     if (user) {
       const programIds = user.programs
       const ProgramList = await CatalogProgramModel.find({ _id: { $in: programIds } })
@@ -32,7 +33,7 @@ export const AddAccountPrograms = async (req: Request, res: Response) => {
     const account_id = decoded.payload.user.id
     console.log(account_id, program_id, decoded)
 
-    const checkAccount = await Accounts.findById({ _id: account_id })
+    const checkAccount = await Account.findById({ _id: account_id })
     if (!checkAccount) {
       return res.status(400).json({ error: "Account does not exist." })
     }
@@ -48,7 +49,7 @@ export const AddAccountPrograms = async (req: Request, res: Response) => {
 
     checkAccount.programs.push(program_id)
 
-    Accounts.updateOne(
+    Account.updateOne(
       { _id: account_id },
       { $set: { programs: checkAccount.programs } },
       (err: unknown, doc: unknown) => {

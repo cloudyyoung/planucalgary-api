@@ -8,6 +8,98 @@
 import mongoose from "mongoose";
 
 /**
+ * Lean version of AccountDocument
+ * 
+ * This has all Mongoose getters & functions removed. This type will be returned from `AccountDocument.toObject()`. To avoid conflicts with model names, use the type alias `AccountObject`.
+ * ```
+ * const accountObject = account.toObject();
+ * ```
+ */
+export type Account = {
+programs: string[];
+courses: any[];
+username: string;
+email: string;
+password: string;
+_id: mongoose.Types.ObjectId;
+createdAt?: Date;
+updatedAt?: Date;
+}
+
+/**
+ * Lean version of AccountDocument (type alias of `Account`)
+ * 
+ * Use this type alias to avoid conflicts with model names:
+ * ```
+ * import { Account } from "../models"
+ * import { AccountObject } from "../interfaces/mongoose.gen.ts"
+ * 
+ * const accountObject: AccountObject = account.toObject();
+ * ```
+ */
+export type AccountObject = Account
+
+/**
+ * Mongoose Query type
+ * 
+ * This type is returned from query functions. For most use cases, you should not need to use this type explicitly.
+ */
+export type AccountQuery = mongoose.Query<any, AccountDocument, AccountQueries> & AccountQueries
+
+/**
+ * Mongoose Query helper types
+ * 
+ * This type represents `AccountSchema.query`. For most use cases, you should not need to use this type explicitly.
+ */
+export type AccountQueries = {
+}
+
+export type AccountMethods = {
+}
+
+export type AccountStatics = {
+}
+
+/**
+ * Mongoose Model type
+ * 
+ * Pass this type to the Mongoose Model constructor:
+ * ```
+ * const Account = mongoose.model<AccountDocument, AccountModel>("Account", AccountSchema);
+ * ```
+ */
+export type AccountModel = mongoose.Model<AccountDocument, AccountQueries> & AccountStatics
+
+/**
+ * Mongoose Schema type
+ * 
+ * Assign this type to new Account schema instances:
+ * ```
+ * const AccountSchema: AccountSchema = new mongoose.Schema({ ... })
+ * ```
+ */
+export type AccountSchema = mongoose.Schema<AccountDocument, AccountModel, AccountMethods, AccountQueries>
+
+/**
+ * Mongoose Document type
+ * 
+ * Pass this type to the Mongoose Model constructor:
+ * ```
+ * const Account = mongoose.model<AccountDocument, AccountModel>("Account", AccountSchema);
+ * ```
+ */
+export type AccountDocument = mongoose.Document<mongoose.Types.ObjectId, AccountQueries> & AccountMethods & {
+programs: mongoose.Types.Array<string>;
+courses: mongoose.Types.Array<any>;
+username: string;
+email: string;
+password: string;
+_id: mongoose.Types.ObjectId;
+createdAt?: Date;
+updatedAt?: Date;
+}
+
+/**
  * Lean version of CatalogCourseDocument
  * 
  * This has all Mongoose getters & functions removed. This type will be returned from `CatalogCourseDocument.toObject()`. To avoid conflicts with model names, use the type alias `CatalogCourseObject`.
