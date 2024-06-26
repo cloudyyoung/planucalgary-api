@@ -66,7 +66,7 @@ export const checkPrereq = async (token: string, course_id: string) => {
   /* Add json logic function part here */
   const result =
     Boolean(JsonLogic.apply(checkCourse.prereq, courseListFinal)) &&
-    Boolean(JsonLogic.apply(checkCourse.prereq, ProgramList))
+    Boolean(!JsonLogic.apply(checkCourse.antireq, courseListFinal))
   return { result: result }
 }
 // open main.py under bianco,
