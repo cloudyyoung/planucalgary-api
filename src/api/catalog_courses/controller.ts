@@ -9,8 +9,8 @@ import JsonLogic from "../../jsonLogic/jsonLogic"
 
 export const Courses = async (req: Request, res: Response) => {
   try {
-    const allCourses = await CatalogCourse.find({}).limit(30)
-    return res.status(200).json({ message: allCourses })
+    const allCourses = await CatalogCourse.find({}).limit(10)
+    return res.status(200).json(allCourses)
   } catch (error) {
     console.log(error)
     return res.status(400).json({ error: "Something went wrong." })

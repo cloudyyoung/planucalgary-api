@@ -82,5 +82,5 @@ const schema: CatalogProgramSchema = new Schema(
 )
 
 const CatalogDb = connection.useDb("catalog")
-const CatalogProgram = CatalogDb.model<CatalogProgramDocument, CatalogProgramModel>("CatalogProgram", schema)
+const CatalogProgram = CatalogDb.model<CatalogProgramDocument, CatalogProgramModel>("CatalogProgram", schema, "programs")
 export { CatalogProgram }
