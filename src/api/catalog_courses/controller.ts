@@ -1,15 +1,15 @@
 import { Request, Response } from "express"
 import { CatalogCourse } from "../../models/"
 import { jwtDecode } from "jwt-decode"
-import JwtContent from "../../models/interfaces.gen"
+import JwtContent from "../../models/interfaces"
 import { Account } from "../../models/account"
-import { course, courseData, RequisiteList } from "../../models/interfaces.gen"
+import { course, courseData } from "../../models/interfaces"
 import { CatalogProgram } from "../../models/catalog_program"
 import JsonLogic from "../../jsonLogic/jsonLogic"
 
 export const Courses = async (req: Request, res: Response) => {
   try {
-    const allCourses = await CatalogCourse.find({}).limit(10)
+    const allCourses = await CatalogCourse.find({}).limit(30)
     return res.status(200).json(allCourses)
   } catch (error) {
     console.log(error)
@@ -57,24 +57,17 @@ export const checkPrereq = async (token: string, course_id: string) => {
     faculty: x.faculty_code,
     departments: x.departments,
   }))
-  console.log(courseList)
 
   const programIds = checkAccount.programs
   const ProgramList = await CatalogProgram.find({ _id: { $in: programIds } })
     .select("code -_id")
     .lean()
 
-  const prereqList = checkCourse
-    .filter((x: RequisiteList) => x.type == "Prerequisite")
-    .map((x: RequisiteList) => x.rules)
-  const antiReqList = checkCourse.requisites
-    .filter((x: RequisiteList) => x.type == "Antirequisite")
-    .map((x: RequisiteList) => x.rules)
-    .map()
-
   /* Add json logic function part here */
-
-  return { course: courseListFinal, program: ProgramList }
+  const result =
+    Boolean(JsonLogic.apply(checkCourse.prereq, courseListFinal)) &&
+    Boolean(JsonLogic.apply(checkCourse.prereq, ProgramList))
+  return { result: result }
 }
 // open main.py under bianco,
 // Run the script. It will create course anti/pre/co-req.
