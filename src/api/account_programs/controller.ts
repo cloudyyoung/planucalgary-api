@@ -1,14 +1,13 @@
 import { Request, Response } from "express"
+import { Request as JWTRequest } from "express-jwt"
 import { jwtDecode } from "jwt-decode"
 
 import { Account, CatalogProgram } from "../../models"
 import { JwtContent } from "../accounts/interfaces"
 
-export const getAccountPrograms = async (req: Request, res: Response) => {
+export const getAccountPrograms = async (req: JWTRequest, res: Response) => {
   try {
-    const { token } = req.body
-    const decoded = jwtDecode<JwtContent>(token)
-    const id = decoded.id
+    const { id } = req.auth as JwtContent
     console.log(id)
     const user = await Account.findOne({ _id: id })
     if (user) {
@@ -25,12 +24,12 @@ export const getAccountPrograms = async (req: Request, res: Response) => {
   }
 }
 
-export const AddAccountPrograms = async (req: Request, res: Response) => {
+export const AddAccountPrograms = async (req: JWTRequest, res: Response) => {
   try {
-    const { token, program_id } = req.body
-    const decoded = jwtDecode<JwtContent>(token)
-    const account_id = decoded.id
-    console.log(account_id, program_id, decoded)
+    const { program_id } = req.body
+    const { id } = req.auth as JwtContent
+    const account_id = id
+    console.log(account_id, program_id)
 
     const checkAccount = await Account.findById({ _id: account_id })
     if (!checkAccount) {

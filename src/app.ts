@@ -15,6 +15,7 @@ import { router as accountCoursesRouter } from "./api/account_courses/routes"
 import { router as courseRouter } from "./api/catalog_courses/routes"
 
 import { PORT, DB_URI } from "./config"
+import authErrorHandler from "./middlewares/authErrorHandler"
 
 const load = async (app: Express) => {
   mongoose.set("strictQuery", false)
@@ -69,6 +70,8 @@ const load = async (app: Express) => {
   app.use("/accountPrograms", accountProgramRouter)
   app.use("/accountCourses", accountCoursesRouter)
   app.use("/courses", courseRouter)
+
+  app.use(authErrorHandler)
 
   app.get("/", (_req, res) => {
     return res.status(200).json({ message: "ok" }).end()

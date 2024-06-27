@@ -1,10 +1,13 @@
-import { Router } from 'express';
-import { getAccountPrograms, AddAccountPrograms } from './controller';
+import { Router } from "express"
+import { getAccountPrograms, AddAccountPrograms } from "./controller"
+import authMiddleware from "../../middlewares/auth"
 
-const router = Router();
+const router = Router()
 
-router.get('/', getAccountPrograms);
-router.post('/', AddAccountPrograms)
+router.use(authMiddleware)
+
+router.get("/", getAccountPrograms)
+router.post("/", AddAccountPrograms)
 
 export default router
 export { router }

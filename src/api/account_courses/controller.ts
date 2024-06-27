@@ -1,5 +1,5 @@
-import { Request, Response } from "express"
-import { jwtDecode } from "jwt-decode"
+import { Response } from "express"
+import { Request as JWTRequest } from "express-jwt"
 import { JwtContent } from "../accounts/interfaces"
 
 import { CatalogCourse, Account } from "../../models"
@@ -9,11 +9,9 @@ interface CourseId {
   term: object
 }
 
-export const getAccountCourses = async (req: Request, res: Response) => {
+export const getAccountCourses = async (req: JWTRequest, res: Response) => {
   try {
-    const { token } = req.body
-    const decoded = jwtDecode<JwtContent>(token)
-    const id = decoded.id
+    const { id } = req.auth as JwtContent
     console.log(id)
     const user = await Account.findOne({ _id: id })
     if (user) {
@@ -30,13 +28,14 @@ export const getAccountCourses = async (req: Request, res: Response) => {
   }
 }
 
-export const AddAccountCourses = async (req: Request, res: Response) => {
+export const AddAccountCourses = async (req: JWTRequest, res: Response) => {
   try {
-    const { token, course_id } = req.body
-    const decoded = jwtDecode<JwtContent>(token)
-    const account_id = decoded.id
-    console.log(token, course_id)
-    if (!token || !course_id) {
+    const { course_id } = req.body
+    const { id } = req.auth as JwtContent
+    const account_id = id
+    console.log(course_id)
+
+    if (!course_id) {
       return res.status(400).json({ error: "Missing attributes." })
     }
 
