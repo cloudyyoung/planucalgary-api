@@ -10,7 +10,7 @@ export type course = {
 }
 
 export type courseData = {
-  subject_code: string
+  code: string
   course_number: string
   credits: double
   faculty_code: string
@@ -46,8 +46,16 @@ export interface RequisiteList {
   sisId: string
 }
 
-export default interface JwtContent {
+export default interface JwtContent_Old {
   payload: content
+  exp: number
+  iat: number
+}
+
+export default interface JwtContent {
+  id: string
+  email: string
+  username: string
   exp: number
   iat: number
 }

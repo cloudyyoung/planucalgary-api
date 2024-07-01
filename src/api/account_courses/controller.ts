@@ -1,7 +1,7 @@
 import { Request, Response } from "express"
 import { jwtDecode } from "jwt-decode"
 import { JwtContent } from "../accounts/interfaces"
-
+import { checkReq } from "../catalog_courses/controller"
 import { CatalogCourse, Account } from "../../models"
 
 interface CourseId {
@@ -53,26 +53,30 @@ export const AddAccountCourses = async (req: Request, res: Response) => {
     if (checkAccount.courses.some((x) => x.id === course_id.toString())) {
       return res.status(400).json({ error: "You are in the course already." })
     }
+    const result = await checkReq(checkAccount, checkCourse)
+    if (result.result) {
+      const newObj: CourseId = {
+        id: course_id,
+        term: checkCourse?.start_term ?? {},
+      }
 
-    const newObj: CourseId = {
-      id: course_id,
-      term: checkCourse?.start_term ?? {},
+      checkAccount.courses.push(newObj)
+
+      Account.updateOne(
+        { _id: account_id },
+        { $set: { courses: checkAccount.courses } },
+        (err: unknown, doc: unknown) => {
+          if (err) {
+            console.log(err)
+          }
+          console.log(doc)
+        },
+      )
+
+      return res.status(200).json({ message: "You successfully added the course." })
+    } else {
+      return res.status(400).json({ error: "You do not meeting the pre or anti-req of the course." })
     }
-
-    checkAccount.courses.push(newObj)
-
-    Account.updateOne(
-      { _id: account_id },
-      { $set: { courses: checkAccount.courses } },
-      (err: unknown, doc: unknown) => {
-        if (err) {
-          console.log(err)
-        }
-        console.log(doc)
-      },
-    )
-
-    return res.status(200).json({ message: "You successfully added the course." })
   } catch (error) {
     console.log(error)
     return res.status(400).json({ error: "Something went wrong." })

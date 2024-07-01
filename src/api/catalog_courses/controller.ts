@@ -6,6 +6,7 @@ import { Account } from "../../models/account"
 import { course, courseData } from "../../models/interfaces"
 import { CatalogProgram } from "../../models/catalog_program"
 import JsonLogic from "../../jsonLogic/jsonLogic"
+import { CatalogCourse as CourseReturn, AccountDocument } from "../../models/interfaces.gen"
 
 export const Courses = async (req: Request, res: Response) => {
   try {
@@ -17,41 +18,15 @@ export const Courses = async (req: Request, res: Response) => {
   }
 }
 
-export const checkPrereq = async (token: string, course_id: string) => {
-  //const { token, course_id } = req.body
-  const decoded = jwtDecode<JwtContent>(token)
-  const account_id = decoded.payload.user._id
-  if (!token || !course_id) {
-    return { error: "Missing attributes." }
-  }
-
-  const checkAccount = await Account.findById({ _id: account_id })
-  if (!checkAccount) {
-    return { error: "Account does not exist." }
-  }
-
-  const checkCourse = await CatalogCourse.findOne({ coursedog_id: course_id })
-  if (!checkCourse) {
-    return { error: "Course does not exist." }
-  }
-
-  /*
-  if (
-    (checkCourse.prereq == null && checkCourse.antireq == null) ||
-    (Object.keys(checkCourse.prereq).length && Object.keys(checkCourse.antireq).length)
-  ) {
-    return res.status(400).json({ status: true })
-  }*/
-  //checkCourse.?requisites
-
+export const checkReq = async (checkAccount: AccountDocument, checkCourse: CourseReturn) => {
   const courseIds: string[] = checkAccount.courses.map((x) => x.id)
   console.log(courseIds)
   const courseList: courseData[] = await CatalogCourse.find({ coursedog_id: { $in: courseIds } })
-    .select("subject_code course_number credits faculty_code departments -_id")
+    .select("code course_number credits faculty_code departments -_id")
     .lean()
 
   const courseListFinal: course[] = courseList.map((x: courseData) => ({
-    code: x.subject_code,
+    code: x.code,
     number: x.course_number,
     unit: x.credits,
     faculty: x.faculty_code,
@@ -63,155 +38,48 @@ export const checkPrereq = async (token: string, course_id: string) => {
     .select("code -_id")
     .lean()
 
+  const combined = {
+    courses: courseListFinal,
+    programs: ProgramList,
+  }
+
   /* Add json logic function part here */
   const result =
-    Boolean(JsonLogic.apply(checkCourse.prereq, courseListFinal)) &&
-    Boolean(!JsonLogic.apply(checkCourse.antireq, courseListFinal))
-  return { result: result }
+    Boolean(JsonLogic.apply(checkCourse.prereq, combined)) && Boolean(!JsonLogic.apply(checkCourse.antireq, combined))
+  console.log(checkCourse.prereq)
+  return { result: result, prereq: checkCourse.prereq, antireq: checkCourse.antireq, combined: combined }
+}
+
+// testing endpoint
+export const checkPrereq = async (req: Request, res: Response) => {
+  const { token, course_id } = req.body
+  const decoded = jwtDecode<JwtContent>(token)
+  //console.log(decoded)
+  const account_id = decoded.id
+  if (!token || !course_id) {
+    return res.status(400).json({ error: "Missing attributes." })
+  }
+
+  //console.log(account_id)
+  const checkAccount = await Account.findById({ _id: account_id })
+  if (!checkAccount) {
+    return res.status(400).json({ error: "Account does not exist." })
+  }
+
+  const checkCourse = await CatalogCourse.findOne({ coursedog_id: course_id })
+  if (!checkCourse) {
+    return res.status(400).json({ error: "Course does not exist." })
+  }
+  console.log(checkCourse)
+  if (
+    checkCourse.prereq === undefined &&
+    checkCourse.antireq === undefined //||
+  ) {
+    return res.status(400).json({ status: true })
+  }
+
+  return res.status(200).json(await checkReq(checkAccount, checkCourse))
 }
 // open main.py under bianco,
 // Run the script. It will create course anti/pre/co-req.
 // Process the prereq json logic
-
-/*
- * prereq: The pre-req json logic structure
- * courseList: The list of courses the user took
- * programList: The list of programs that the user is in
- */
-/*
-const processPrereq = (prereq, courseList, programList) => {
-  let checkList: unknown[] = []
-  const checkResults: boolean[] = []
-  // Loop through each key in the object
-  if ("and" in prereq) {
-    checkList = prereq["and"]
-  } else if ("or" in prereq) {
-    checkList = prereq["or"]
-  } else {
-    checkList = [prereq]
-  }
-
-  for (const item of checkList) {
-    //{'course': 'ENSF300'}
-    if ("course" in item) {
-      const course = item["course"]
-      //console.log(courseList.includes(course))
-      if (courseList.includes(course)) {
-        checkResults.push(true)
-      } else {
-        checkResults.push(false)
-      }
-
-      // {"units": {"required": 3, "from": [{"course": "GEOG211"}, {"course": "GEOG308"}, {"course": "GEOG310"}]}}
-    } else if ("units" in item && "from" in item.units && Array.isArray(item.units.from)) {
-      // Initialize an empty list to store the courses
-      const courses: string[] = []
-
-      // Access the 'from' array
-      const fromArray = item.units.from
-
-      // Loop through the 'from' array and extract the 'course' values
-      fromArray.forEach((item) => {
-        if (item.course) {
-          courses.push(item.course)
-        }
-      })
-
-      // Access the 'required' attribute
-      const required = parseInt(item.units.required) / 3
-
-      // Check how many of these courses the user completed
-      let completed = 0
-      for (const c in courses) {
-        if (courseList.includes(courses[c])) {
-          completed += 1
-        }
-      }
-      console.log(completed)
-      // If completed more than or equals then we pass
-      if (completed >= required) {
-        checkResults.push(true)
-      } else {
-        checkResults.push(false)
-      }
-      // {"units": {"required": 15, "from": {"subject_code": "ART"}}}
-    } else if ("units" in item && "from" in item.units && item.units.from != null) {
-      const required = parseInt(item.units.required) / 3
-      const subjectCode = item.units.from.subject_code
-      const takenList = courseList.filter((x) => x.startsWith(subjectCode))
-
-      if (takenList.length >= required) {
-        checkResults.push(true)
-      } else {
-        checkResults.push(false)
-      }
-      // {"units": {"required": 54}}
-    } else if ("units" in item && item.units.from == null) {
-      console.log("SAAA")
-      const required = parseInt(item.units.required) / 3
-      if (courseList.length >= required) {
-        checkResults.push(true)
-      } else {
-        checkResults.push(false)
-      }
-    }
-    // {"admission": "Honours in Visual Studies"}
-    else if ("admission" in item) {
-      const program = item["admission"]
-      if (programList.includes(program)) {
-        checkResults.push(true)
-      } else {
-        checkResults.push(false)
-      }
-      // {"consent": "the Department"}
-    } else if ("consent" in item) {
-      checkResults.push(true)
-
-      //{"courses": {"required": 1, "from": [{"course": "BMEN319"}, {"course": "ENGG319"}, {"course": "ENEL419"}]}}
-    } else if ("courses" in item) {
-      const required = parseInt(item.courses.required)
-      // Extract the courses and store them in a list
-      const requiredList = item.courses.from.map((item) => item.course)
-      let fulfilled = 0
-      for (const c in requiredList) {
-        if (courseList.includes(requiredList[c])) {
-          fulfilled += 1
-        }
-      }
-      // If completed more than or equals then we pass
-      if (fulfilled >= required) {
-        checkResults.push(true)
-      } else {
-        checkResults.push(false)
-      }
-    }
-  }
-  console.log(checkResults, checkList)
-  //And condition check
-  if ("and" in prereq) {
-    if (checkResults.includes(false)) {
-      return false
-    } else {
-      return true
-    }
-    //Or condition check
-  } else {
-    if (checkResults.includes(true)) {
-      return true
-    }
-  }
-  return false
-}
-*/
-
-/*
-const testList : any[] = [
-  {"course": "CHEM351"},
-  {"units": {"required": 3, "from": [{"course": "GEOG211"}, {"course": "GEOG308"}, {"course": "GEOG310"}]}},
-  {"units": {"required": 15, "from": {"subject_code": "ART"}}},
-  {"and": [{"admission": "Honours in Visual Studies"}, {"course": "ART561"}]},
-  {"and": [{"course": "ENEL471"}, {"courses": {"required": 1, "from": [{"course": "BMEN319"}, {"course": "ENGG319"}, {"course": "ENEL419"}]}}]},
-  {"and": [{"units": {"required": 15}}, {"consent": "the Department"}]}
-]
-
-console.log(processPrereq(testList[5], ["ENEL471", "GEOG211", "ENGG319", "ART123", "ART124", "ART125","ART561"],["Honours in Visual Studies"]))*/
