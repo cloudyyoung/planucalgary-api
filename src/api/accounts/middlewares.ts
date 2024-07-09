@@ -10,7 +10,7 @@ export const auth = () => {
     if (auth) {
       const account = await Account.findOne({ _id: auth.id })
       if (account) {
-        ; (req as AuthenticatedRequest).account = account
+        ;(req as AuthenticatedRequest).account = account
       }
     }
     next()
