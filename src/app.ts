@@ -73,10 +73,10 @@ const load = async (app: Express) => {
   app.disable("x-powered-by")
   app.disable("etag")
 
-  app.use("/programs", programsRouter)
   app.use("/accounts", accountRouter)
   app.use("/accounts/programs", accountProgramRouter)
   app.use("/accounts/courses", accountCoursesRouter)
+  app.use("/programs", programsRouter)
   app.use("/courses", courseRouter)
 
   app.get("/", (_req, res) => {
