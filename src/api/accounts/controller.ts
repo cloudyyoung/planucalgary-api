@@ -4,41 +4,10 @@ import jwt from "jsonwebtoken"
 
 import { Account } from "../../models"
 import { JwtContent } from "./interfaces"
+import { EmailExistsError, InvalidCredentialsError, UnsatisfiedCredentialsError, UsernameExistsError } from "./errors"
 
 function generateAccessToken(payload: JwtContent, key: string): string {
   return jwt.sign(payload, key, { expiresIn: "3600s" })
-}
-
-class InvalidCredentialsError extends Error {
-  constructor() {
-    super()
-    this.name = "InvalidCredentialsError"
-    this.message = "Invalid credentials provided for authentication."
-  }
-}
-
-class UsernameExistsError extends Error {
-  constructor() {
-    super()
-    this.name = "UsernameExistsError"
-    this.message = "Username already exists."
-  }
-}
-
-class EmailExistsError extends Error {
-  constructor() {
-    super()
-    this.name = "EmailExistsError"
-    this.message = "Email already exists."
-  }
-}
-
-class UnsatisfiedCredentialsError extends Error {
-  constructor() {
-    super()
-    this.name = "UnsatisfiedCredentialsError"
-    this.message = "Username and password does not meet the minimum requirements."
-  }
 }
 
 export const signup = async (req: Request, res: Response) => {
