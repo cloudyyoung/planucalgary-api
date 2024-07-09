@@ -48,7 +48,7 @@ export const signup = async (req: Request, res: Response) => {
   }
 
   const token = generateAccessToken(payload, JWT_SECRET_KEY!)
-  return res.json({ token })
+  return res.status(200).json({ token })
 }
 
 export const signin = async (req: Request, res: Response) => {

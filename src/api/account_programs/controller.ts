@@ -1,53 +1,30 @@
-import { Request, Response } from "express"
-import { jwtDecode } from "jwt-decode"
+import { Response } from "express"
 
-import { Account, CatalogProgram } from "../../models"
-import { JwtContent, AuthenticatedRequest } from "../../interfaces"
+import { CatalogProgram } from "../../models"
+import { AuthenticatedRequest } from "../../interfaces"
+
+import { ProgramEnrolledError, ProgramNotExistsError } from "./errors"
 
 export const getAccountPrograms = async (req: AuthenticatedRequest, res: Response) => {
   const account = req.account!
   const programIds = account.programs
-  const programs = await CatalogProgram.find({ _id: { $in: programIds } })
-  return res.status(200).json({ programs: programs })
+  const programs = await CatalogProgram.find({ coursedog_id: { $in: programIds } })
+  return res.status(200).json({ programs })
 }
 
-export const AddAccountPrograms = async (req: Request, res: Response) => {
-  try {
-    const { token, program_id } = req.body
-    const decoded = jwtDecode<JwtContent>(token)
-    const account_id = decoded.id
-    console.log(account_id, program_id, decoded)
-
-    const checkAccount = await Account.findById({ _id: account_id })
-    if (!checkAccount) {
-      return res.status(400).json({ error: "Account does not exist." })
-    }
-
-    const checkProgram = await CatalogProgram.findById({ _id: program_id })
-    if (!checkProgram) {
-      return res.status(400).json({ error: "Course does not exist." })
-    }
-
-    if (checkAccount.programs.some((x) => x === program_id.toString())) {
-      return res.status(400).json({ error: "You are in the program already." })
-    }
-
-    checkAccount.programs.push(program_id)
-
-    Account.updateOne(
-      { _id: account_id },
-      { $set: { programs: checkAccount.programs } },
-      (err: unknown, doc: unknown) => {
-        if (err) {
-          console.log(err)
-        }
-        console.log(doc)
-      },
-    )
-
-    return res.status(200).json({ message: "You successfully added the program." })
-  } catch (error) {
-    console.log(error)
-    return res.status(400).json({ error: "Something went wrong." })
+export const addAccountPrograms = async (req: AuthenticatedRequest, res: Response) => {
+  const { program_id: program_coursedog_id } = req.body
+  const program = await CatalogProgram.findOne({ coursedog_id: program_coursedog_id })
+  if (!program) {
+    throw new ProgramNotExistsError()
   }
+
+  const account = req.account!
+  if (account.programs.some((x) => x === program_coursedog_id.toString())) {
+    throw new ProgramEnrolledError()
+  }
+
+  account.programs.push(program_coursedog_id)
+  account.save()
+  return res.status(200).json()
 }
