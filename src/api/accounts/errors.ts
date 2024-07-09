@@ -21,11 +21,3 @@ export class EmailExistsError extends Error {
     this.message = "Email already exists."
   }
 }
-
-export class UnsatisfiedCredentialsError extends Error {
-  constructor() {
-    super()
-    this.name = "UnsatisfiedCredentialsError"
-    this.message = "Username and password do not meet the minimum requirements."
-  }
-}

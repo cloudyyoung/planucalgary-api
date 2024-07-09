@@ -6,7 +6,7 @@ import { Account } from "../../models"
 import { JWT_SECRET_KEY } from "../../config"
 import { JwtContent } from "../../interfaces"
 
-import { EmailExistsError, InvalidCredentialsError, UnsatisfiedCredentialsError, UsernameExistsError } from "./errors"
+import { EmailExistsError, InvalidCredentialsError, UsernameExistsError } from "./errors"
 
 function generateAccessToken(payload: JwtContent, key: string): string {
   return jwt.sign(payload, key, { expiresIn: "3600s", algorithm: "HS256", issuer: "plan-ucalgary-api" })
@@ -25,10 +25,6 @@ export const signup = async (req: Request, res: Response) => {
   const emailCheck = await Account.findOne({ email })
   if (emailCheck) {
     throw new EmailExistsError()
-  }
-
-  if (username.length < 6 || password.length < 8) {
-    throw new UnsatisfiedCredentialsError()
   }
 
   const passwordHash = await bcrypt.hash(password, 10)
