@@ -11,12 +11,13 @@ import { expressjwt as jwt } from "express-jwt"
 import "express-async-errors"
 
 import { router as programsRouter } from "./api/catalog_programs/routes"
-import { router as userRouter } from "./api/accounts/routes"
+import { router as accountRouter } from "./api/accounts/routes"
 import { router as accountProgramRouter } from "./api/account_programs/routes"
 import { router as accountCoursesRouter } from "./api/account_courses/routes"
 import { router as courseRouter } from "./api/catalog_courses/routes"
 
 import { PORT, DB_URI, JWT_SECRET_KEY } from "./config"
+import { auth } from "./api/accounts/middlewares"
 
 const load = async (app: Express) => {
   mongoose.set("strictQuery", false)
@@ -67,12 +68,13 @@ const load = async (app: Express) => {
     jwt({ secret: JWT_SECRET_KEY!, algorithms: ["HS256"], issuer: "plan-ucalgary-api" }).unless({
       path: ["/accounts/signin", "/accounts/signup"],
     }),
+    auth(),
   )
   app.disable("x-powered-by")
   app.disable("etag")
 
   app.use("/programs", programsRouter)
-  app.use("/accounts", userRouter)
+  app.use("/accounts", accountRouter)
   app.use("/accountPrograms", accountProgramRouter)
   app.use("/accountCourses", accountCoursesRouter)
   app.use("/courses", courseRouter)

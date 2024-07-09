@@ -2,7 +2,7 @@ import { Request, Response } from "express"
 import { jwtDecode } from "jwt-decode"
 
 import { CatalogCourse, Account } from "../../models"
-import { JwtContent } from "../accounts/interfaces"
+import { JwtContent } from "../../interfaces"
 
 export const getCourses = async (req: Request, res: Response) => {
   try {

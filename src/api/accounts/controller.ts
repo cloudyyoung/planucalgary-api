@@ -4,7 +4,8 @@ import jwt from "jsonwebtoken"
 
 import { Account } from "../../models"
 import { JWT_SECRET_KEY } from "../../config"
-import { JwtContent } from "./interfaces"
+import { JwtContent } from "../../interfaces"
+
 import { EmailExistsError, InvalidCredentialsError, UnsatisfiedCredentialsError, UsernameExistsError } from "./errors"
 
 function generateAccessToken(payload: JwtContent, key: string): string {

@@ -3,7 +3,7 @@ import { Request as JWTRequest } from "express-jwt"
 import { jwtDecode } from "jwt-decode"
 
 import { Account, CatalogProgram } from "../../models"
-import { JwtContent } from "../accounts/interfaces"
+import { JwtContent } from "../../interfaces"
 
 export const getAccountPrograms = async (req: JWTRequest, res: Response) => {
   const auth = req.auth! as JwtContent
