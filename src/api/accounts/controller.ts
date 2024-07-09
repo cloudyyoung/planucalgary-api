@@ -17,54 +17,69 @@ class InvalidCredentialsError extends Error {
   }
 }
 
-export const signup = async (req: Request, res: Response) => {
-  try {
-    const { username, email, password } = req.body
-
-    //Check for missing attributes
-    if (!username || !email || !password) {
-      return res.json({ message: "Missing Attributes.", status: false })
-    }
-
-    //Check for the same username
-    const usernameCheck = await Account.findOne({ username })
-    if (usernameCheck) {
-      return res.json({ message: "Username already exists.", status: false })
-    }
-
-    //check for the same email
-    const emailCheck = await Account.findOne({ email })
-    if (emailCheck) {
-      return res.json({ message: "Email already exists.", status: false })
-    }
-
-    if (username.length < 4 || password.length < 4) {
-      return res.json({ message: "Username and password must have at least 5 characters.", status: false })
-    }
-
-    const passwordHash = await bcrypt.hash(password, 10)
-
-    const user = await Account.create({
-      email,
-      username,
-      password: passwordHash,
-      programs: [],
-      courses: [],
-    })
-
-    const payload: JwtContent = {
-      id: user._id.toString(),
-      email: user.email,
-      username: user.username,
-    }
-
-    //Return login token and user info
-    const secretKey = process.env.JWT_SECRET_KEY ?? ""
-    const token = generateAccessToken(payload, secretKey)
-    return res.json({ status: true, token, userInfo: payload })
-  } catch (error) {
-    return res.json({ status: false })
+class UsernameExistsError extends Error {
+  constructor() {
+    super()
+    this.name = "UsernameExistsError"
+    this.message = "Username already exists."
   }
+}
+
+class EmailExistsError extends Error {
+  constructor() {
+    super()
+    this.name = "EmailExistsError"
+    this.message = "Email already exists."
+  }
+}
+
+class UnsatisfiedCredentialsError extends Error {
+  constructor() {
+    super()
+    this.name = "UnsatisfiedCredentialsError"
+    this.message = "Username and password does not meet the minimum requirements."
+  }
+}
+
+export const signup = async (req: Request, res: Response) => {
+  const { username, email, password } = req.body
+
+  //Check for the same username
+  const usernameCheck = await Account.findOne({ username })
+  if (usernameCheck) {
+    throw new UsernameExistsError()
+  }
+
+  //check for the same email
+  const emailCheck = await Account.findOne({ email })
+  if (emailCheck) {
+    throw new EmailExistsError()
+  }
+
+  if (username.length < 6 || password.length < 8) {
+    throw new UnsatisfiedCredentialsError()
+  }
+
+  const passwordHash = await bcrypt.hash(password, 10)
+
+  const user = await Account.create({
+    email,
+    username,
+    password: passwordHash,
+    programs: [],
+    courses: [],
+  })
+
+  const payload: JwtContent = {
+    id: user._id.toString(),
+    email: user.email,
+    username: user.username,
+  }
+
+  //Return login token and user info
+  const secretKey = process.env.JWT_SECRET_KEY ?? ""
+  const token = generateAccessToken(payload, secretKey)
+  return res.json({ token })
 }
 
 export const signin = async (req: Request, res: Response) => {
