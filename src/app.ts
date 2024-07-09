@@ -9,6 +9,7 @@ import mongoose from "mongoose"
 import MongooseTsgen from "mongoose-tsgen"
 import { expressjwt as jwt } from "express-jwt"
 import "express-async-errors"
+import { errors } from "celebrate"
 
 import { router as programsRouter } from "./api/catalog_programs/routes"
 import { router as accountRouter } from "./api/accounts/routes"
@@ -83,12 +84,13 @@ const load = async (app: Express) => {
     return res.status(200).json({ message: "ok" }).end()
   })
 
+  app.use(errors())
   app.use((err: Error, _req: Request, res: Response, next: NextFunction) => {
     console.log(err.stack)
     if (err.name === "UnauthorizedError") {
-      res.status(401).json({ message: err.message }).end()
+      res.status(401).json({ statusCode: 401, error: "UnauthorizedError", message: err.message }).end()
     } else {
-      res.status(500).json({ message: err.message }).end()
+      res.status(400).json({ statusCode: 400, error: err.name, message: err.message }).end()
     }
     next(err)
   })
