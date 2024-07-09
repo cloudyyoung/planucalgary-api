@@ -1,5 +1,5 @@
 import "reflect-metadata"
-import express, { Express } from "express"
+import express, { Express, Request, Response, NextFunction } from "express"
 import cors from "cors"
 import compression from "compression"
 import morgan from "morgan"
@@ -7,14 +7,17 @@ import helmet from "helmet"
 import bodyParser, { json } from "body-parser"
 import mongoose from "mongoose"
 import MongooseTsgen from "mongoose-tsgen"
+import { expressjwt as jwt } from "express-jwt"
+import "express-async-errors"
 
 import { router as programsRouter } from "./api/catalog_programs/routes"
-import { router as userRouter } from "./api/accounts/routes"
+import { router as accountRouter } from "./api/accounts/routes"
 import { router as accountProgramRouter } from "./api/account_programs/routes"
 import { router as accountCoursesRouter } from "./api/account_courses/routes"
 import { router as courseRouter } from "./api/catalog_courses/routes"
 
-import { PORT, DB_URI } from "./config"
+import { PORT, DB_URI, JWT_SECRET_KEY } from "./config"
+import { auth } from "./api/accounts/middlewares"
 
 const load = async (app: Express) => {
   mongoose.set("strictQuery", false)
@@ -61,17 +64,33 @@ const load = async (app: Express) => {
   app.use(morgan("dev"))
   app.use(helmet())
   app.use(compression())
+  app.use(
+    jwt({ secret: JWT_SECRET_KEY!, algorithms: ["HS256"], issuer: "plan-ucalgary-api" }).unless({
+      path: ["/accounts/signin", "/accounts/signup"],
+    }),
+    auth(),
+  )
   app.disable("x-powered-by")
   app.disable("etag")
 
+  app.use("/accounts", accountRouter)
+  app.use("/accounts/programs", accountProgramRouter)
+  app.use("/accounts/courses", accountCoursesRouter)
   app.use("/programs", programsRouter)
-  app.use("/account", userRouter)
-  app.use("/accountPrograms", accountProgramRouter)
-  app.use("/accountCourses", accountCoursesRouter)
   app.use("/courses", courseRouter)
 
   app.get("/", (_req, res) => {
     return res.status(200).json({ message: "ok" }).end()
+  })
+
+  app.use((err: Error, _req: Request, res: Response, next: NextFunction) => {
+    console.log(err.stack)
+    if (err.name === "UnauthorizedError") {
+      res.status(401).json({ message: err.message }).end()
+    } else {
+      res.status(500).json({ message: err.message }).end()
+    }
+    next(err)
   })
 
   app.listen(PORT, () => {

@@ -3,99 +3,76 @@ import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 
 import { Account } from "../../models"
-import { JwtContent } from "./interfaces"
+import { JWT_SECRET_KEY } from "../../config"
+import { JwtContent } from "../../interfaces"
+
+import { EmailExistsError, InvalidCredentialsError, UnsatisfiedCredentialsError, UsernameExistsError } from "./errors"
 
 function generateAccessToken(payload: JwtContent, key: string): string {
-  return jwt.sign(payload, key, { expiresIn: "3600s" })
+  return jwt.sign(payload, key, { expiresIn: "3600s", algorithm: "HS256", issuer: "plan-ucalgary-api" })
 }
 
 export const signup = async (req: Request, res: Response) => {
-  try {
-    const { username, email, password } = req.body
+  const { username, email, password } = req.body
 
-    //Check for missing attributes
-    if (!username || !email || !password) {
-      return res.json({ message: "Missing Attributes.", status: false })
-    }
-
-    //Check for the same username
-    const usernameCheck = await Account.findOne({ username })
-    if (usernameCheck) {
-      return res.json({ message: "Username already exists.", status: false })
-    }
-
-    //check for the same email
-    const emailCheck = await Account.findOne({ email })
-    if (emailCheck) {
-      return res.json({ message: "Email already exists.", status: false })
-    }
-
-    if (username.length < 4 || password.length < 4) {
-      return res.json({ message: "Username and password must have at least 5 characters.", status: false })
-    }
-
-    const passwordHash = await bcrypt.hash(password, 10)
-
-    const user = await Account.create({
-      email,
-      username,
-      password: passwordHash,
-      programs: [],
-      courses: [],
-    })
-
-    const payload: JwtContent = {
-      id: user._id.toString(),
-      email: user.email,
-      username: user.username,
-    }
-
-    //Return login token and user info
-    const secretKey = process.env.JWT_SECRET_KEY ?? ""
-    const token = generateAccessToken(payload, secretKey)
-    return res.json({ status: true, token, userInfo: payload })
-  } catch (error) {
-    return res.json({ status: false })
+  //Check for the same username
+  const usernameCheck = await Account.findOne({ username })
+  if (usernameCheck) {
+    throw new UsernameExistsError()
   }
+
+  //check for the same email
+  const emailCheck = await Account.findOne({ email })
+  if (emailCheck) {
+    throw new EmailExistsError()
+  }
+
+  if (username.length < 6 || password.length < 8) {
+    throw new UnsatisfiedCredentialsError()
+  }
+
+  const passwordHash = await bcrypt.hash(password, 10)
+
+  const user = await Account.create({
+    email,
+    username,
+    password: passwordHash,
+    programs: [],
+    courses: [],
+  })
+
+  const payload: JwtContent = {
+    id: user._id.toString(),
+    email: user.email,
+    username: user.username,
+  }
+
+  const token = generateAccessToken(payload, JWT_SECRET_KEY!)
+  return res.status(200).json({ token })
 }
 
 export const signin = async (req: Request, res: Response) => {
-  try {
-    const { username, password } = req.body
+  const { username, password } = req.body
 
-    //Check for similar username
-    const loginUser = await Account.findOne({ username })
-    if (!loginUser) {
-      return res.json({ message: "Incorrect Username or Password", status: false })
-    }
-
-    //Compare the password
-    bcrypt.compare(password, loginUser.password, (error, result) => {
-      if (error) {
-        console.log(error)
-        return res.json({ message: "Incorrect Username or Password", status: false })
-      } else {
-        //If password matches
-        if (result) {
-          const payload: JwtContent = {
-            id: loginUser._id.toString(),
-            email: loginUser.email,
-            username: loginUser.username,
-          }
-
-          const secretKey = process.env.JWT_SECRET_KEY ?? ""
-          const token = generateAccessToken(payload, secretKey)
-
-          return res.json({ status: true, userInfo: payload, token })
-
-          //If password does not match
-        } else {
-          return res.json({ message: "Incorrect Username or Password", status: false })
-        }
-      }
-    })
-  } catch (error) {
-    console.log(error)
-    return res.json({ status: false })
+  //Check for similar username
+  const authAccount = await Account.findOne({ username })
+  if (!authAccount) {
+    throw new InvalidCredentialsError()
   }
+
+  //Compare the password
+  const match = await bcrypt.compare(password, authAccount.password)
+  if (!match) {
+    throw new InvalidCredentialsError()
+  }
+
+  const payload: JwtContent = {
+    id: authAccount._id.toString(),
+    email: authAccount.email,
+    username: authAccount.username,
+  }
+
+  const token = generateAccessToken(payload, JWT_SECRET_KEY!)
+
+  return res.status(200).json({ token })
 }

@@ -1,10 +1,10 @@
-import { Router } from 'express';
-import { getAccountPrograms, AddAccountPrograms } from './controller';
+import { Router } from "express"
+import { getAccountPrograms, addAccountProgram } from "./controller"
 
-const router = Router();
+const router = Router()
 
-router.get('/', getAccountPrograms);
-router.post('/', AddAccountPrograms)
+router.get("/", getAccountPrograms)
+router.post("/", addAccountProgram)
 
 export default router
 export { router }
