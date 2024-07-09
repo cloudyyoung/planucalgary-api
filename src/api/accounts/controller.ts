@@ -3,11 +3,12 @@ import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 
 import { Account } from "../../models"
+import { JWT_SECRET_KEY } from "../../config"
 import { JwtContent } from "./interfaces"
 import { EmailExistsError, InvalidCredentialsError, UnsatisfiedCredentialsError, UsernameExistsError } from "./errors"
 
 function generateAccessToken(payload: JwtContent, key: string): string {
-  return jwt.sign(payload, key, { expiresIn: "3600s" })
+  return jwt.sign(payload, key, { expiresIn: "3600s", algorithm: "HS256", issuer: "plan-ucalgary-api" })
 }
 
 export const signup = async (req: Request, res: Response) => {
@@ -45,8 +46,7 @@ export const signup = async (req: Request, res: Response) => {
     username: user.username,
   }
 
-  const secretKey = process.env.JWT_SECRET_KEY ?? ""
-  const token = generateAccessToken(payload, secretKey)
+  const token = generateAccessToken(payload, JWT_SECRET_KEY!)
   return res.json({ token })
 }
 
@@ -71,8 +71,7 @@ export const signin = async (req: Request, res: Response) => {
     username: authAccount.username,
   }
 
-  const secretKey = process.env.JWT_SECRET_KEY ?? ""
-  const token = generateAccessToken(payload, secretKey)
+  const token = generateAccessToken(payload, JWT_SECRET_KEY!)
 
   return res.status(200).json({ token })
 }

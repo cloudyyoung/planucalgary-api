@@ -1,28 +1,21 @@
 import { Request, Response } from "express"
+import { Request as JWTRequest } from "express-jwt"
 import { jwtDecode } from "jwt-decode"
 
 import { Account, CatalogProgram } from "../../models"
 import { JwtContent } from "../accounts/interfaces"
 
-export const getAccountPrograms = async (req: Request, res: Response) => {
-  try {
-    const { token } = req.body
-    const decoded = jwtDecode<JwtContent>(token)
-    const id = decoded.id
-    console.log(id)
-    const user = await Account.findOne({ _id: id })
-    if (user) {
-      const programIds = user.programs
-      const ProgramList = await CatalogProgram.find({ _id: { $in: programIds } })
-      console.log(ProgramList)
-      return res.status(200).json({ Programs: ProgramList })
-    } else {
-      return res.status(400).json({ error: "Cannot find the user." })
-    }
-  } catch (error) {
-    console.log(error)
-    return res.status(400).json({ error: "Something went wrong." })
+export const getAccountPrograms = async (req: JWTRequest, res: Response) => {
+  const auth = req.auth! as JwtContent
+  const account = await Account.findOne({ _id: auth.id })
+
+  if (!account) {
+    throw new Error("Account not found.")
   }
+
+  const programIds = account.programs
+  const programs = await CatalogProgram.find({ _id: { $in: programIds } })
+  return res.status(200).json({ programs: programs })
 }
 
 export const AddAccountPrograms = async (req: Request, res: Response) => {

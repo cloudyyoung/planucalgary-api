@@ -64,7 +64,7 @@ const load = async (app: Express) => {
   app.use(helmet())
   app.use(compression())
   app.use(
-    jwt({ secret: JWT_SECRET_KEY!, algorithms: ["RS256"], issuer: "plan-ucalgary-api" }).unless({
+    jwt({ secret: JWT_SECRET_KEY!, algorithms: ["HS256"], issuer: "plan-ucalgary-api" }).unless({
       path: ["/accounts/signin", "/accounts/signup"],
     }),
   )
