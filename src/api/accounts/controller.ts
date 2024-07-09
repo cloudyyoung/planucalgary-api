@@ -9,6 +9,14 @@ function generateAccessToken(payload: JwtContent, key: string): string {
   return jwt.sign(payload, key, { expiresIn: "3600s" })
 }
 
+class InvalidCredentialsError extends Error {
+  constructor() {
+    super()
+    this.name = "InvalidCredentialsError"
+    this.message = "Invalid credentials provided for authentication."
+  }
+}
+
 export const signup = async (req: Request, res: Response) => {
   try {
     const { username, email, password } = req.body
@@ -60,42 +68,29 @@ export const signup = async (req: Request, res: Response) => {
 }
 
 export const signin = async (req: Request, res: Response) => {
-  try {
-    const { username, password } = req.body
+  const { username, password } = req.body
 
-    //Check for similar username
-    const loginUser = await Account.findOne({ username })
-    if (!loginUser) {
-      return res.json({ message: "Incorrect Username or Password", status: false })
+  //Check for similar username
+  const authAccount = await Account.findOne({ username })
+  if (!authAccount) {
+    throw new InvalidCredentialsError()
+  }
+
+  //Compare the password
+  const match = await bcrypt.compare(password, authAccount.password)
+
+  if (match) {
+    const payload: JwtContent = {
+      id: authAccount._id.toString(),
+      email: authAccount.email,
+      username: authAccount.username,
     }
 
-    //Compare the password
-    bcrypt.compare(password, loginUser.password, (error, result) => {
-      if (error) {
-        console.log(error)
-        return res.json({ message: "Incorrect Username or Password", status: false })
-      } else {
-        //If password matches
-        if (result) {
-          const payload: JwtContent = {
-            id: loginUser._id.toString(),
-            email: loginUser.email,
-            username: loginUser.username,
-          }
+    const secretKey = process.env.JWT_SECRET_KEY ?? ""
+    const token = generateAccessToken(payload, secretKey)
 
-          const secretKey = process.env.JWT_SECRET_KEY ?? ""
-          const token = generateAccessToken(payload, secretKey)
-
-          return res.json({ status: true, userInfo: payload, token })
-
-          //If password does not match
-        } else {
-          return res.json({ message: "Incorrect Username or Password", status: false })
-        }
-      }
-    })
-  } catch (error) {
-    console.log(error)
-    return res.json({ status: false })
+    return res.status(200).json({ token })
+  } else {
+    throw new InvalidCredentialsError()
   }
 }

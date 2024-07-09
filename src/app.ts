@@ -65,14 +65,14 @@ const load = async (app: Express) => {
   app.use(compression())
   app.use(
     jwt({ secret: JWT_SECRET_KEY!, algorithms: ["RS256"], issuer: "plan-ucalgary-api" }).unless({
-      path: ["/account/signin", "/account/signup"],
+      path: ["/accounts/signin", "/accounts/signup"],
     }),
   )
   app.disable("x-powered-by")
   app.disable("etag")
 
   app.use("/programs", programsRouter)
-  app.use("/account", userRouter)
+  app.use("/accounts", userRouter)
   app.use("/accountPrograms", accountProgramRouter)
   app.use("/accountCourses", accountCoursesRouter)
   app.use("/courses", courseRouter)
