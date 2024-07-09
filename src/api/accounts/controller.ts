@@ -45,7 +45,6 @@ export const signup = async (req: Request, res: Response) => {
     username: user.username,
   }
 
-  //Return login token and user info
   const secretKey = process.env.JWT_SECRET_KEY ?? ""
   const token = generateAccessToken(payload, secretKey)
   return res.json({ token })
@@ -62,19 +61,18 @@ export const signin = async (req: Request, res: Response) => {
 
   //Compare the password
   const match = await bcrypt.compare(password, authAccount.password)
-
-  if (match) {
-    const payload: JwtContent = {
-      id: authAccount._id.toString(),
-      email: authAccount.email,
-      username: authAccount.username,
-    }
-
-    const secretKey = process.env.JWT_SECRET_KEY ?? ""
-    const token = generateAccessToken(payload, secretKey)
-
-    return res.status(200).json({ token })
-  } else {
+  if (!match) {
     throw new InvalidCredentialsError()
   }
+
+  const payload: JwtContent = {
+    id: authAccount._id.toString(),
+    email: authAccount.email,
+    username: authAccount.username,
+  }
+
+  const secretKey = process.env.JWT_SECRET_KEY ?? ""
+  const token = generateAccessToken(payload, secretKey)
+
+  return res.status(200).json({ token })
 }
