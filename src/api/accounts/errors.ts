@@ -26,6 +26,6 @@ export class UnsatisfiedCredentialsError extends Error {
   constructor() {
     super()
     this.name = "UnsatisfiedCredentialsError"
-    this.message = "Username and password does not meet the minimum requirements."
+    this.message = "Username and password do not meet the minimum requirements."
   }
 }
