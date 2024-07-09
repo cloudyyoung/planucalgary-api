@@ -5,7 +5,7 @@ import JwtContent from "../../models/interfaces"
 import { Account } from "../../models/account"
 import { course, courseData } from "../../models/interfaces"
 import { CatalogProgram } from "../../models/catalog_program"
-import JsonLogic from "../../jsonLogic/jsonLogic"
+import JsonLogic from "../../jsonlogic/jsonLogic"
 import { CatalogCourse as CourseReturn, AccountDocument } from "../../models/interfaces.gen"
 
 export const getCourses = async (req: Request, res: Response) => {
