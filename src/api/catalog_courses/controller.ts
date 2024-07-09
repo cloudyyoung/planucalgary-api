@@ -8,7 +8,7 @@ import { CatalogProgram } from "../../models/catalog_program"
 import JsonLogic from "../../jsonLogic/jsonLogic"
 import { CatalogCourse as CourseReturn, AccountDocument } from "../../models/interfaces.gen"
 
-export const Courses = async (req: Request, res: Response) => {
+export const getCourses = async (req: Request, res: Response) => {
   try {
     const allCourses = await CatalogCourse.find({}).limit(30)
     return res.status(200).json(allCourses)
