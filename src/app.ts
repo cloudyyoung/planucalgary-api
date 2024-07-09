@@ -75,7 +75,7 @@ const load = async (app: Express) => {
 
   app.use("/programs", programsRouter)
   app.use("/accounts", accountRouter)
-  app.use("/accountPrograms", accountProgramRouter)
+  app.use("/accounts/programs", accountProgramRouter)
   app.use("/accountCourses", accountCoursesRouter)
   app.use("/courses", courseRouter)
 

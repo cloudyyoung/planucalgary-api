@@ -12,7 +12,7 @@ export const getAccountPrograms = async (req: AuthenticatedRequest, res: Respons
   return res.status(200).json({ programs })
 }
 
-export const addAccountPrograms = async (req: AuthenticatedRequest, res: Response) => {
+export const addAccountProgram = async (req: AuthenticatedRequest, res: Response) => {
   const { program_id: program_coursedog_id } = req.body
   const program = await CatalogProgram.findOne({ coursedog_id: program_coursedog_id })
   if (!program) {

@@ -1,10 +1,10 @@
 import { Router } from "express"
-import { getAccountPrograms, addAccountPrograms } from "./controller"
+import { getAccountPrograms, addAccountProgram } from "./controller"
 
 const router = Router()
 
 router.get("/", getAccountPrograms)
-router.post("/", addAccountPrograms)
+router.post("/", addAccountProgram)
 
 export default router
 export { router }
