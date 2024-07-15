@@ -1,6 +1,8 @@
 import { Schema, connection } from "mongoose"
 
 import { AccountDocument, AccountModel } from "./interfaces.gen"
+import { CatalogCourse } from "./catalog_course"
+import { CatalogProgram } from "./catalog_program"
 
 const schema = new Schema(
   {
@@ -37,6 +39,16 @@ const schema = new Schema(
     timestamps: true,
   },
 )
+
+schema.methods.getStudentRecord = function (this: AccountDocument) {
+  const courseIds = this.courses.map((x) => x.id)
+  const courses = CatalogCourse.find({ coursedog_id: { $in: courseIds } })
+
+  const programIds = this.programs
+  const programs = CatalogProgram.find({ coursedog_id: { $in: programIds } })
+
+  return { courses, programs }
+}
 
 const accountDb = connection.useDb("account")
 const Account = accountDb.model<AccountDocument, AccountModel>("Account", schema, "accounts")
