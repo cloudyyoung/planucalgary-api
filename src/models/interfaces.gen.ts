@@ -55,6 +55,7 @@ export type AccountQueries = {
 }
 
 export type AccountMethods = {
+getStudentRecord: (this: AccountDocument, ...args: any[]) => any;
 }
 
 export type AccountStatics = {
