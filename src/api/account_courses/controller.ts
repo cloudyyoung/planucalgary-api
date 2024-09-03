@@ -36,5 +36,5 @@ export const addAccountCourses = async (req: AuthenticatedRequest, res: Response
 
   account.courses.push(courseObj)
   account.save()
-  return res.status(200).json()
+  return res.status(200).json(course)
 }
