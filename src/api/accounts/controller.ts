@@ -9,7 +9,7 @@ import { JwtContent } from "../../interfaces"
 import { EmailExistsError, InvalidCredentialsError, UsernameExistsError } from "./errors"
 
 function generateAccessToken(payload: JwtContent, key: string): string {
-  return jwt.sign(payload, key, { expiresIn: "3600s", algorithm: "HS256", issuer: "plan-ucalgary-api" })
+  return jwt.sign(payload, key, { expiresIn: "36000s", algorithm: "HS256", issuer: "plan-ucalgary-api" })
 }
 
 export const signup = async (req: Request, res: Response) => {
