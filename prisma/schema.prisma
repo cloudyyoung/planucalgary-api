@@ -6,11 +6,13 @@
 
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["multiSchema"]
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  schemas  = ["planucalgary", "catalog"]
 }
 
 model Account {
@@ -22,4 +24,181 @@ model Account {
   updated_at DateTime @default(now()) @updatedAt
 
   @@map("accounts")
+  @@schema("planucalgary")
+}
+
+enum CourseComponent {
+  LAB
+  LECTURE
+  SECTION
+  SEMINAR
+  SUPERVISED_STUDY
+  TUTORIAL
+
+  @@schema("catalog")
+}
+
+enum Career {
+  UNDERGRADUATE_PROGRAM
+  GRADUATE_PROGRAM
+  MEDICINE_PROGRAM
+
+  @@schema("catalog")
+}
+
+model Course {
+  id          String   @id @default(uuid())
+  created_at  DateTime @default(now())
+  updated_at  DateTime @default(now()) @updatedAt
+
+  cid       String @unique
+  code      String @unique
+  course_number String
+
+  subject_code String
+  subject  Subject @relation(fields: [code], references: [code])
+
+  description String
+  name        String
+  long_name   String
+  notes       String
+  version     Int
+  units       Int
+  aka       String?
+
+  prereq    String?
+  prereq_json Json?
+  coreq     String?
+  coreq_json Json?  
+  antireq   String?
+  antiereq_json Json?
+
+  active    Boolean
+  multi_term Boolean
+  nogpa     Boolean
+  repeatable Boolean
+
+  components CourseComponent[]
+  course_group_id String
+  coursedog_id String
+
+  course_created_at DateTime
+  course_effective_start_date DateTime
+  course_last_updated_at DateTime
+
+  departments Department[]
+  faculty Faculty[]
+
+  career    Career
+  topics CourseTopic[]
+
+  grade_mode_code String
+  grade_mode GradeMode
+
+  @@unique([subject_code, course_number], map: "course_subject_course_number_unique")
+  @@map("courses")
+  @@schema("catalog")
+}
+
+model CourseTopic {
+  id          String   @id @default(uuid())
+  created_at  DateTime @default(now())
+  updated_at  DateTime @default(now()) @updatedAt
+
+  code      String @unique
+  name      String @unique
+  long_name String @unique
+  description String
+  repeatable Boolean
+  units      Int
+  link       String
+
+  course_id String
+  course Course @relation(fields: [course_id], references: [id])
+
+  @@map("course_topics")
+  @@schema("catalog")
+}
+
+model Faculty {
+  id          String   @id @default(uuid())
+  created_at  DateTime @default(now())
+  updated_at  DateTime @default(now()) @updatedAt
+
+  name      String @unique
+  code      String @unique
+
+  departments Department[]
+  courses Course[]
+
+  @@index([code], map: "faculty_code_unique")
+
+  @@map("faculties")
+  @@schema("catalog")
+}
+
+model Department {
+  id          String   @id @default(uuid())
+  created_at  DateTime @default(now())
+  updated_at  DateTime @default(now()) @updatedAt
+
+  name      String @unique
+  display_name String
+  code      String @unique
+  active    Boolean
+
+  faculties Faculty[]
+  courses Course[]
+  subjects Subject[]
+
+  @@map("departments")
+  @@schema("catalog")
+}
+
+enum GradeMode {
+  CDF // Credit/D grade/Fail
+  CNC // Credit/No Credit
+  CRF // Credit/Fail
+  ELG // English Language Graded
+  GRD // Graded
+  MTG // Multi-Term
+
+  @@schema("catalog")
+}
+
+enum TermName {
+  WINTER
+  SPRING
+  SUMMER
+  FALL
+
+  @@schema("catalog")
+}
+
+model Term {
+  id          String   @id @default(uuid())
+  created_at  DateTime @default(now())
+  updated_at  DateTime @default(now()) @updatedAt
+
+  term_id   String @unique
+  year      Int
+  name      TermName
+
+  @@map("terms")
+  @@schema("catalog")
+}
+
+model Subject {
+  id          String   @id @default(uuid())
+  created_at  DateTime @default(now())
+  updated_at  DateTime @default(now()) @updatedAt
+
+  code      String @unique
+  title      String @unique
+
+  departments Department[]
+  courses Course[]
+
+  @@map("subjects")
+  @@schema("catalog")
 }
