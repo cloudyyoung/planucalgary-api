@@ -9,6 +9,10 @@ generator client {
   previewFeatures = ["multiSchema", "prismaSchemaFolder"]
 }
 
+generator express {
+  provider = "prisma-generator-express"
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
