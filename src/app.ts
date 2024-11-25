@@ -4,7 +4,7 @@ import cors from "cors"
 import compression from "compression"
 import morgan from "morgan"
 import helmet from "helmet"
-import bodyParser, { json } from "body-parser"
+import { json, urlencoded } from "body-parser"
 import { expressjwt as jwt } from "express-jwt"
 import "express-async-errors"
 import { errors } from "celebrate"
@@ -13,6 +13,7 @@ import { router as accountRouter } from "./api/accounts/routes"
 
 import { PORT, JWT_SECRET_KEY } from "./config"
 import { auth } from "./api/accounts/middlewares"
+import { prisma } from "./prisma"
 
 const load = async (app: Express) => {
   process.on("uncaughtException", async (error) => {
@@ -25,12 +26,12 @@ const load = async (app: Express) => {
 
   app.enable("trust proxy")
   app.use(json())
+  app.use(urlencoded({ extended: false }))
   app.use(cors())
-  app.use(bodyParser.urlencoded({ extended: false }))
-  app.use(bodyParser.json())
   app.use(morgan("dev"))
   app.use(helmet())
   app.use(compression())
+  app.use(prisma())
   app.use(
     jwt({ secret: JWT_SECRET_KEY!, algorithms: ["HS256"], issuer: "plan-ucalgary-api" }).unless({
       path: ["/accounts/signin", "/accounts/signup"],

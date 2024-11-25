@@ -1,21 +1,20 @@
-import { Request, Response } from "express"
+import { Response } from "express"
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 
 import { JWT_SECRET_KEY } from "../../config"
-import { JwtContent } from "../../interfaces"
+import { JwtContent, PrismaRequest } from "../../interfaces"
 
 import { EmailExistsError, InvalidCredentialsError } from "./errors"
-import { prisma } from "../../prisma"
 
 function generateAccessToken(payload: JwtContent, key: string): string {
   return jwt.sign(payload, key, { expiresIn: "36000s", algorithm: "HS256", issuer: "plan-ucalgary-api" })
 }
 
-export const signup = async (req: Request, res: Response) => {
+export const signup = async (req: PrismaRequest, res: Response) => {
   const { email, password } = req.body
 
-  const emailCheck = await prisma.account.findFirst({
+  const emailCheck = await req.prisma.account.findFirst({
     where: {
       email,
     },
@@ -26,7 +25,7 @@ export const signup = async (req: Request, res: Response) => {
 
   const passwordHash = await bcrypt.hash(password, 10)
 
-  const account = await prisma.account.create({
+  const account = await req.prisma.account.create({
     data: {
       email,
       password: passwordHash,
@@ -42,10 +41,10 @@ export const signup = async (req: Request, res: Response) => {
   return res.status(200).json({ token })
 }
 
-export const signin = async (req: Request, res: Response) => {
+export const signin = async (req: PrismaRequest, res: Response) => {
   const { email, password } = req.body
 
-  const account = await prisma.account.findFirst({
+  const account = await req.prisma.account.findFirst({
     where: {
       email,
     },

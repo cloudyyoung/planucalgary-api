@@ -1,7 +1,11 @@
 import { Request } from "express"
 
-import { AccountDocument } from "../models/interfaces.gen"
+import { Account, PrismaClient } from "@prisma/client"
 
-export interface AuthenticatedRequest extends Request {
-  account?: AccountDocument
+export interface AuthenticatedRequest extends PrismaRequest {
+  account?: Account
+}
+
+export interface PrismaRequest extends Request {
+  prisma: PrismaClient
 }
