@@ -17,18 +17,6 @@ CREATE TYPE "catalog"."GradeMode" AS ENUM ('CDF', 'CNC', 'CRF', 'ELG', 'GRD', 'M
 CREATE TYPE "catalog"."TermName" AS ENUM ('WINTER', 'SPRING', 'SUMMER', 'FALL');
 
 -- CreateTable
-CREATE TABLE "planucalgary"."accounts" (
-    "id" TEXT NOT NULL,
-    "email" TEXT NOT NULL,
-    "name" TEXT,
-    "password" TEXT NOT NULL,
-    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT "accounts_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
 CREATE TABLE "catalog"."courses" (
     "id" TEXT NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -132,6 +120,18 @@ CREATE TABLE "catalog"."subjects" (
 );
 
 -- CreateTable
+CREATE TABLE "planucalgary"."accounts" (
+    "id" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
+    "name" TEXT,
+    "password" TEXT NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "accounts_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "catalog"."_CourseToDepartment" (
     "A" TEXT NOT NULL,
     "B" TEXT NOT NULL
@@ -154,9 +154,6 @@ CREATE TABLE "catalog"."_DepartmentToSubject" (
     "A" TEXT NOT NULL,
     "B" TEXT NOT NULL
 );
-
--- CreateIndex
-CREATE UNIQUE INDEX "accounts_email_key" ON "planucalgary"."accounts"("email");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "courses_cid_key" ON "catalog"."courses"("cid");
@@ -199,6 +196,9 @@ CREATE UNIQUE INDEX "subjects_code_key" ON "catalog"."subjects"("code");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "subjects_title_key" ON "catalog"."subjects"("title");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "accounts_email_key" ON "planucalgary"."accounts"("email");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "_CourseToDepartment_AB_unique" ON "catalog"."_CourseToDepartment"("A", "B");
