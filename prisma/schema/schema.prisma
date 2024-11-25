@@ -9,8 +9,9 @@ generator client {
   previewFeatures = ["multiSchema", "prismaSchemaFolder"]
 }
 
-generator express {
-  provider = "prisma-generator-express"
+generator zod {
+  provider       = "zod-prisma-types"
+  output        = "../generated/zod"
 }
 
 datasource db {

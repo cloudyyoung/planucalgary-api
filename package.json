@@ -31,7 +31,8 @@
     "rate-limiter-flexible": "^2.2.1",
     "reflect-metadata": "^0.2.2",
     "swagger-jsdoc": "^6.0.8",
-    "swagger-ui-express": "^4.1.6"
+    "swagger-ui-express": "^4.1.6",
+    "zod-prisma-types": "^3.1.8"
   },
   "scripts": {
     "dev": "nodemon src/app.ts --ignore dist/ --ignore **.gen.ts",
