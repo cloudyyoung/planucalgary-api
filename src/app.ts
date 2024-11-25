@@ -1,5 +1,5 @@
 import "reflect-metadata"
-import express, { Express, Request, Response, NextFunction } from "express"
+import express, { Express } from "express"
 import cors from "cors"
 import compression from "compression"
 import morgan from "morgan"
@@ -7,12 +7,12 @@ import helmet from "helmet"
 import { json, urlencoded } from "body-parser"
 import { expressjwt as jwt } from "express-jwt"
 import "express-async-errors"
-import { errors } from "celebrate"
 
 import { router as accountRouter } from "./api/accounts/routes"
+import { router as courseRouter } from "./api/courses/routes"
 
 import { PORT, JWT_SECRET_KEY } from "./config"
-import { auth, prisma } from "./middlewares"
+import { auth, errors, prisma } from "./middlewares"
 
 const load = async (app: Express) => {
   process.on("uncaughtException", async (error) => {
@@ -41,21 +41,13 @@ const load = async (app: Express) => {
   app.disable("etag")
 
   app.use("/accounts", accountRouter)
+  app.use("/courses", courseRouter)
 
   app.get("/", (_req, res) => {
     return res.status(200).json({ message: "ok" }).end()
   })
 
   app.use(errors())
-  app.use((err: Error, _req: Request, res: Response, next: NextFunction) => {
-    console.log(err.stack)
-    if (err.name === "UnauthorizedError") {
-      res.status(401).json({ statusCode: 401, error: "UnauthorizedError", message: err.message }).end()
-    } else {
-      res.status(400).json({ statusCode: 400, error: err.name, message: err.message }).end()
-    }
-    next(err)
-  })
 
   app.listen(PORT, () => {
     console.log(`Server is running on ${PORT}`)
