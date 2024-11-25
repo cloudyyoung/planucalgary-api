@@ -1,15 +1,13 @@
-import { Joi, Segments } from "celebrate"
+import { z } from "zod"
 
-export const signInValidator = {
-  [Segments.BODY]: Joi.object().keys({
-    email: Joi.string().required(),
-    password: Joi.string().required(),
-  }),
-}
+export const SignInInputSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8),
+})
 
-export const signUpValidator = {
-  [Segments.BODY]: Joi.object().keys({
-    email: Joi.string().email().required(),
-    password: Joi.string().min(8).required(),
-  }),
-}
+export const SignUpInputSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8),
+  firstName: z.string(),
+  lastName: z.string(),
+})
