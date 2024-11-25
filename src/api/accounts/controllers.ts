@@ -3,9 +3,13 @@ import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 
 import { JWT_SECRET_KEY } from "../../config"
-import { JwtContent } from "../../interfaces"
 
 import { EmailExistsError, InvalidCredentialsError } from "./errors"
+
+export interface JwtContent {
+  id: string
+  email: string
+}
 
 function generateAccessToken(payload: JwtContent, key: string): string {
   return jwt.sign(payload, key, { expiresIn: "36000s", algorithm: "HS256", issuer: "plan-ucalgary-api" })
