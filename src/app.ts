@@ -12,8 +12,7 @@ import { errors } from "celebrate"
 import { router as accountRouter } from "./api/accounts/routes"
 
 import { PORT, JWT_SECRET_KEY } from "./config"
-import { auth } from "./api/accounts/middlewares"
-import { prisma } from "./prisma"
+import { auth, prisma } from "./middlewares"
 
 const load = async (app: Express) => {
   process.on("uncaughtException", async (error) => {
