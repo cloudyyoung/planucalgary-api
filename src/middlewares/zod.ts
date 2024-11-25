@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express"
-import { SafeParseSuccess, ZodSchema } from "zod"
+import { ZodSchema } from "zod"
 
 export interface ZodmiddlewareOptions {
   body?: ZodSchema
@@ -13,14 +13,7 @@ export const zod = (options: ZodmiddlewareOptions) => {
         return res.status(400).json({ error: parsed.error.errors }).end()
       }
       req.body = parsed.data
-      req.zod = parsed
     }
     next()
-  }
-}
-
-declare module "express-serve-static-core" {
-  interface Request {
-    zod?: SafeParseSuccess<unknown>
   }
 }
