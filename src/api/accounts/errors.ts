@@ -6,14 +6,6 @@ export class InvalidCredentialsError extends Error {
   }
 }
 
-export class UsernameExistsError extends Error {
-  constructor() {
-    super()
-    this.name = "UsernameExistsError"
-    this.message = "Username already exists."
-  }
-}
-
 export class EmailExistsError extends Error {
   constructor() {
     super()

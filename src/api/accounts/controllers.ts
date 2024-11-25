@@ -2,45 +2,40 @@ import { Request, Response } from "express"
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 
-import { Account } from "../../models"
 import { JWT_SECRET_KEY } from "../../config"
 import { JwtContent } from "../../interfaces"
 
-import { EmailExistsError, InvalidCredentialsError, UsernameExistsError } from "./errors"
+import { EmailExistsError, InvalidCredentialsError } from "./errors"
+import { prisma } from "../../prisma"
 
 function generateAccessToken(payload: JwtContent, key: string): string {
   return jwt.sign(payload, key, { expiresIn: "36000s", algorithm: "HS256", issuer: "plan-ucalgary-api" })
 }
 
 export const signup = async (req: Request, res: Response) => {
-  const { username, email, password } = req.body
+  const { email, password } = req.body
 
-  //Check for the same username
-  const usernameCheck = await Account.findOne({ username })
-  if (usernameCheck) {
-    throw new UsernameExistsError()
-  }
-
-  //check for the same email
-  const emailCheck = await Account.findOne({ email })
+  const emailCheck = await prisma.account.findFirst({
+    where: {
+      email,
+    },
+  })
   if (emailCheck) {
     throw new EmailExistsError()
   }
 
   const passwordHash = await bcrypt.hash(password, 10)
 
-  const user = await Account.create({
-    email,
-    username,
-    password: passwordHash,
-    programs: [],
-    courses: [],
+  const account = await prisma.account.create({
+    data: {
+      email,
+      password: passwordHash,
+    },
   })
 
   const payload: JwtContent = {
-    id: user._id.toString(),
-    email: user.email,
-    username: user.username,
+    id: account.id,
+    email: account.email,
   }
 
   const token = generateAccessToken(payload, JWT_SECRET_KEY!)
@@ -48,24 +43,26 @@ export const signup = async (req: Request, res: Response) => {
 }
 
 export const signin = async (req: Request, res: Response) => {
-  const { username, password } = req.body
+  const { email, password } = req.body
 
-  //Check for similar username
-  const authAccount = await Account.findOne({ username })
-  if (!authAccount) {
+  const account = await prisma.account.findFirst({
+    where: {
+      email,
+    },
+  })
+
+  if (!account) {
     throw new InvalidCredentialsError()
   }
 
-  //Compare the password
-  const match = await bcrypt.compare(password, authAccount.password)
+  const match = await bcrypt.compare(password, account.password)
   if (!match) {
     throw new InvalidCredentialsError()
   }
 
   const payload: JwtContent = {
-    id: authAccount._id.toString(),
-    email: authAccount.email,
-    username: authAccount.username,
+    id: account.id,
+    email: account.email,
   }
 
   const token = generateAccessToken(payload, JWT_SECRET_KEY!)

@@ -1,7 +1,7 @@
 import { Router } from "express"
 import { celebrate } from "celebrate"
 
-import { signin, signup } from "./controller"
+import { signin, signup } from "./controllers"
 import { signInValidator, signUpValidator } from "./validators"
 
 const router = Router()

@@ -9,11 +9,7 @@ import { expressjwt as jwt } from "express-jwt"
 import "express-async-errors"
 import { errors } from "celebrate"
 
-import { router as programsRouter } from "./api/catalog_programs/routes"
 import { router as accountRouter } from "./api/accounts/routes"
-import { router as accountProgramRouter } from "./api/account_programs/routes"
-import { router as accountCoursesRouter } from "./api/account_courses/routes"
-import { router as courseRouter } from "./api/catalog_courses/routes"
 
 import { PORT, JWT_SECRET_KEY } from "./config"
 import { auth } from "./api/accounts/middlewares"
@@ -45,10 +41,6 @@ const load = async (app: Express) => {
   app.disable("etag")
 
   app.use("/accounts", accountRouter)
-  app.use("/accounts/programs", accountProgramRouter)
-  app.use("/accounts/courses", accountCoursesRouter)
-  app.use("/programs", programsRouter)
-  app.use("/courses", courseRouter)
 
   app.get("/", (_req, res) => {
     return res.status(200).json({ message: "ok" }).end()
