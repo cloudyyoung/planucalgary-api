@@ -43,7 +43,7 @@ model Course {
   coreq     String?
   coreq_json Json?  
   antireq   String?
-  antiereq_json Json?
+  antireq_json Json?
 
   is_active    Boolean
   is_multi_term Boolean
