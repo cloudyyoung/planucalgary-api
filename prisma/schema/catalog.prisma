@@ -28,7 +28,7 @@ model Course {
   course_number String
 
   subject_code String
-  subject  Subject @relation(fields: [code], references: [code])
+  subject  Subject @relation(fields: [subject_code], references: [code])
 
   description String
   name        String
@@ -63,8 +63,6 @@ model Course {
 
   career    Career
   topics CourseTopic[]
-
-  grade_mode_code String
   grade_mode GradeMode
 
   @@unique([subject_code, course_number], map: "course_subject_course_number_unique")
@@ -171,6 +169,9 @@ model Subject {
   departments Department[]
   courses Course[]
 
+  @@unique([code, title], map: "subject_code_title_unique")
+  @@unique([title], map: "subject_title_unique")
+  @@unique([code], map: "subject_code_unique")
   @@map("subjects")
   @@schema("catalog")
 }
