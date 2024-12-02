@@ -9,6 +9,12 @@ export const listCourses = async (req: Request, res: Response) => {
 export const getCourse = async (req: Request, res: Response) => {
   const course = await req.prisma.course.findUnique({
     where: { id: req.params.id },
+    include: {
+      subject: true,
+      departments: true,
+      faculties: true,
+      topics: true,
+    },
   })
   return res.json(course)
 }
@@ -28,10 +34,7 @@ export const createCourse = async (req: Request, res: Response) => {
         connect: req.body.faculties.map((code: string) => ({ code })),
       },
       topics: {
-        connectOrCreate: req.body.topics.map((topic: CourseTopic) => ({
-          where: { code: topic.code },
-          create: topic,
-        })),
+        create: req.body.topics,
       },
     },
   })
@@ -41,7 +44,25 @@ export const createCourse = async (req: Request, res: Response) => {
 export const updateCourse = async (req: Request, res: Response) => {
   const course = await req.prisma.course.update({
     where: { id: req.params.id },
-    data: req.body,
+    data: {
+      ...req.body,
+      subject_code: undefined,
+      subject: {
+        connect: { code: req.body.subject_code },
+      },
+      departments: {
+        connect: req.body.departments.map((code: string) => ({ code })),
+      },
+      faculties: {
+        connect: req.body.faculties.map((code: string) => ({ code })),
+      },
+      topics: {
+        connectOrCreate: req.body.topics.map((topic: CourseTopic) => ({
+          where: { code: topic.code, course_id: req.params.id },
+          create: topic,
+        })),
+      },
+    },
   })
   return res.json(course)
 }
