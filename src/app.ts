@@ -10,6 +10,7 @@ import "express-async-errors"
 
 import { router as accountRouter } from "./api/accounts/routes"
 import { router as courseRouter } from "./api/courses/routes"
+import { router as facultyRouter } from "./api/faculties/routes"
 
 import { PORT, JWT_SECRET_KEY } from "./config"
 import { auth, errors, prisma } from "./middlewares"
@@ -42,6 +43,7 @@ const load = async (app: Express) => {
 
   app.use("/accounts", accountRouter)
   app.use("/courses", courseRouter)
+  app.use("/faculties", facultyRouter)
 
   app.get("/", (_req, res) => {
     return res.status(200).json({ message: "ok" }).end()

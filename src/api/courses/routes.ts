@@ -6,8 +6,8 @@ import { IdInputSchema, zod } from "../../middlewares"
 import { CourseCreateInputWithRelationsSchema, CourseUpdateInputWithRelationsSchema } from "./validators"
 
 const router = Router()
-router.get("/", admin(), listCourses)
-router.get("/:id", admin(), zod({ params: IdInputSchema }), getCourse)
+router.get("/", listCourses)
+router.get("/:id", zod({ params: IdInputSchema }), getCourse)
 router.post("/", admin(), zod({ body: CourseCreateInputWithRelationsSchema }), createCourse)
 router.put("/:id", admin(), zod({ params: IdInputSchema, body: CourseUpdateInputWithRelationsSchema }), updateCourse)
 
