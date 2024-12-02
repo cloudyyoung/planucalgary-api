@@ -19,7 +19,7 @@ export const getFaculty = async (req: Request, res: Response) => {
 }
 
 export const createFaculty = async (
-  req: Request<ParamsDictionary, unknown, FacultyOptionalDefaults>,
+  req: Request<ParamsDictionary, any, FacultyOptionalDefaults>,
   res: Response,
 ) => {
   const fac = await req.prisma.faculty.create({ data: req.body })
@@ -27,7 +27,7 @@ export const createFaculty = async (
 }
 
 export const updateFaculty = async (
-  req: Request<ParamsDictionary, unknown, FacultyOptionalDefaults>,
+  req: Request<ParamsDictionary, any, FacultyOptionalDefaults>,
   res: Response,
 ) => {
   const fac = await req.prisma.faculty.update({

@@ -22,7 +22,7 @@ export const getCourse = async (req: Request, res: Response) => {
 }
 
 export const createCourse = async (
-  req: Request<ParamsDictionary, unknown, CourseCreateInputWithRelations>,
+  req: Request<ParamsDictionary, any, CourseCreateInputWithRelations>,
   res: Response,
 ) => {
   const course = await req.prisma.course.create({
@@ -50,7 +50,7 @@ export const createCourse = async (
 }
 
 export const updateCourse = async (
-  req: Request<ParamsDictionary, unknown, CourseUpdateInputWithRelations>,
+  req: Request<ParamsDictionary, any, CourseUpdateInputWithRelations>,
   res: Response,
 ) => {
   const course = await req.prisma.course.update({
