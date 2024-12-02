@@ -41,8 +41,6 @@ export const createCourse = async (
       topics: {
         create: req.body.topics,
       },
-      career: "UNDERGRADUATE_PROGRAM",
-      grade_mode: "GRD",
     },
   })
   return res.json(course)
