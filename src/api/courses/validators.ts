@@ -1,25 +1,19 @@
 import { z } from "zod"
-import {
-  CourseOptionalDefaultsSchema,
-  CourseTopicCreateWithoutCourseInputSchema,
-  CourseTopicUncheckedCreateWithoutCourseInputSchema,
-} from "../../zod"
+import { CourseCreateSchema, CourseUpdate } from "../../zod"
 
-export const CourseCreateInputWithRelationsSchema = z
-  .object({
-    departments: z.array(z.string()),
-    faculties: z.array(z.string()),
-    topics: z.array(
-      z.union([
-        z.lazy(() => CourseTopicCreateWithoutCourseInputSchema),
-        z.lazy(() => CourseTopicUncheckedCreateWithoutCourseInputSchema),
-      ]),
-    ),
-  })
-  .merge(CourseOptionalDefaultsSchema)
+export const CourseCreateWithRelationsSchema = CourseCreateSchema.merge({
+  departments: z.array(z.string()),
+  faculties: z.array(z.string()),
+  topics: z.array(
+    z.union([
+      z.lazy(() => CourseTopicCreateWithoutCourseInputSchema),
+      z.lazy(() => CourseTopicUncheckedCreateWithoutCourseInputSchema),
+    ]),
+  ),
+})
 
-export type CourseCreateInputWithRelations = z.infer<typeof CourseCreateInputWithRelationsSchema>
+export type CourseCreateInputWithRelations = z.infer<typeof CourseCreateWithRelationsSchema>
 
-export const CourseUpdateInputWithRelationsSchema = CourseCreateInputWithRelationsSchema.partial()
+export const CourseUpdateInputWithRelationsSchema = CourseCreateWithRelationsSchema.partial()
 
 export type CourseUpdateInputWithRelations = z.infer<typeof CourseUpdateInputWithRelationsSchema>

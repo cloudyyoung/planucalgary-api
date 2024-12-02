@@ -10,11 +10,9 @@ generator client {
 }
 
 generator zod {
-  provider       = "zod-prisma-types"
+  provider       = "zod-prisma-crud-types"
   output        = "../../src/zod"
-  useMultipleFiles = true
-  createOptionalDefaultValuesTypes = true
-  createRelationValuesTypes = true
+  ignoredFieldNames = "id, created_at, updated_at"
 }
 
 datasource db {
