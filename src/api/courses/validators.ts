@@ -18,17 +18,8 @@ export const CourseCreateInputWithRelationsSchema = z
   })
   .merge(CourseOptionalDefaultsSchema)
 
-export const CourseUpdateInputWithRelationsSchema = z
-  .object({
-    departments: z.array(z.string()).optional(),
-    faculties: z.array(z.string()).optional(),
-    topics: z
-      .array(
-        z.union([
-          z.lazy(() => CourseTopicCreateWithoutCourseInputSchema),
-          z.lazy(() => CourseTopicUncheckedCreateWithoutCourseInputSchema),
-        ]),
-      )
-      .optional(),
-  })
-  .merge(CourseOptionalDefaultsSchema)
+export type CourseCreateInputWithRelations = z.infer<typeof CourseCreateInputWithRelationsSchema>
+
+export const CourseUpdateInputWithRelationsSchema = CourseCreateInputWithRelationsSchema.partial()
+
+export type CourseUpdateInputWithRelations = z.infer<typeof CourseUpdateInputWithRelationsSchema>
