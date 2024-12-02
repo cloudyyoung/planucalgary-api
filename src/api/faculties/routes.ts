@@ -9,7 +9,12 @@ const router = Router()
 router.get("/", listFaculties)
 router.get("/:id", zod({ params: IdInputSchema }), getFaculty)
 router.post("/", admin(), zod({ body: FacultyOptionalDefaultsSchema }), createFaculty)
-router.put("/:id", admin(), zod({ params: IdInputSchema, body: FacultyOptionalDefaultsSchema }), updateFaculty)
+router.put(
+  "/:id",
+  admin(),
+  zod({ params: IdInputSchema, body: FacultyOptionalDefaultsSchema.partial() }),
+  updateFaculty,
+)
 
 export default router
 export { router }
