@@ -75,7 +75,7 @@ model CourseTopic {
   created_at  DateTime @default(now())
   updated_at  DateTime @default(now()) @updatedAt
 
-  code      String @unique
+  number      String @unique @map("number")
   name      String @unique
   long_name String @unique
   description String
@@ -86,6 +86,7 @@ model CourseTopic {
   course_id String
   course Course @relation(fields: [course_id], references: [id])
 
+  @@unique([number, course_id], map: "course_topic_number_course_unique")
   @@map("course_topics")
   @@schema("catalog")
 }
