@@ -1,7 +1,7 @@
 import { Request, Response } from "express"
-import { CourseCreateInputWithRelations, CourseUpdateInputWithRelations } from "./validators"
 import { ParamsDictionary } from "express-serve-static-core"
-import { JsonValueType } from "../../zod/inputTypeSchemas/JsonValueSchema"
+import { CourseCreateRelations, CourseUpdateRelations } from "./validators"
+import { CourseCreate, CourseUpdate } from "../../zod/CourseSchema"
 
 export const listCourses = async (req: Request, res: Response) => {
   const courses = await req.prisma.course.findMany()
@@ -22,7 +22,7 @@ export const getCourse = async (req: Request, res: Response) => {
 }
 
 export const createCourse = async (
-  req: Request<ParamsDictionary, any, CourseCreateInputWithRelations>,
+  req: Request<ParamsDictionary, any, CourseCreate & CourseCreateRelations>,
   res: Response,
 ) => {
   const course = await req.prisma.course.create({
@@ -41,16 +41,15 @@ export const createCourse = async (
       topics: {
         create: req.body.topics,
       },
-      prereq_json: parseJson(req.body.prereq_json),
-      antireq_json: parseJson(req.body.antireq_json),
-      coreq_json: parseJson(req.body.coreq_json),
+      career: "UNDERGRADUATE_PROGRAM",
+      grade_mode: "GRD",
     },
   })
   return res.json(course)
 }
 
 export const updateCourse = async (
-  req: Request<ParamsDictionary, any, CourseUpdateInputWithRelations>,
+  req: Request<ParamsDictionary, any, CourseUpdate & CourseUpdateRelations>,
   res: Response,
 ) => {
   const course = await req.prisma.course.update({
@@ -73,15 +72,7 @@ export const updateCourse = async (
           create: topic,
         })),
       },
-      prereq_json: parseJson(req.body.prereq_json),
-      antireq_json: parseJson(req.body.antireq_json),
-      coreq_json: parseJson(req.body.coreq_json),
     },
   })
   return res.json(course)
-}
-
-const parseJson = (json: undefined | JsonValueType) => {
-  if (!json) return undefined
-  return JSON.parse(JSON.stringify(json))
 }
