@@ -33,8 +33,7 @@
     "swagger-jsdoc": "^6.0.8",
     "swagger-ui-express": "^4.1.6",
     "zod": "^3.23.8",
-    "zod-prisma-crud-types": "^1.0.8",
-    "zod-prisma-types": "^3.1.8"
+    "zod-prisma-crud-types": "^1.0.11"
   },
   "scripts": {
     "dev": "nodemon src/app.ts --ignore dist/ --ignore **.gen.ts",
