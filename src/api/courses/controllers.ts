@@ -1,14 +1,23 @@
 import { Request, Response } from "express"
 import { ParamsDictionary } from "express-serve-static-core"
-import { CourseCreateRelations, CourseUpdateRelations } from "./validators"
+import { CourseCreateRelations, CourseUpdateRelations, CourseList } from "./validators"
 import { CourseCreate, CourseUpdate } from "../../zod"
+import { IdInput } from "../../middlewares"
 
-export const listCourses = async (req: Request, res: Response) => {
-  const courses = await req.prisma.course.findMany()
+export const listCourses = async (req: Request<CourseList>, res: Response) => {
+  const keywords = req.query.keywords as string | undefined
+  const courses = await req.prisma.$queryRaw`
+    select 
+      id, code, subject_code, course_number, description,
+      name, long_name, units, aka, career,
+      is_active, is_multi_term, is_nogpa, is_repeatable
+    from "catalog"."courses"
+    where search_vector @@ plainto_tsquery('english', ${keywords})
+  `
   return res.json(courses)
 }
 
-export const getCourse = async (req: Request, res: Response) => {
+export const getCourse = async (req: Request<IdInput>, res: Response) => {
   const course = await req.prisma.course.findUnique({
     where: { id: req.params.id },
     include: {

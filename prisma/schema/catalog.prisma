@@ -65,6 +65,9 @@ model Course {
   topics CourseTopic[]
   grade_mode GradeMode
 
+  search_vector Unsupported("tsvector")? @default(dbgenerated())
+
+  @@index([search_vector], type: Gin, map: "course_search_vector_gin")
   @@unique([subject_code, course_number], map: "course_subject_course_number_unique")
   @@map("courses")
   @@schema("catalog")

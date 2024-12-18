@@ -12,3 +12,9 @@ export type CourseCreateRelations = z.infer<typeof CourseCreateRelationsSchema>
 export const CourseUpdateRelationsSchema = CourseCreateRelationsSchema.partial()
 
 export type CourseUpdateRelations = z.infer<typeof CourseUpdateRelationsSchema>
+
+export const CourseListSchema = z.object({
+  keywords: z.string().optional(),
+})
+
+export type CourseList = z.infer<typeof CourseListSchema>
