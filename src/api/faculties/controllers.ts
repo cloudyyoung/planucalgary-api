@@ -30,3 +30,10 @@ export const updateFaculty = async (req: Request<ParamsDictionary, any, FacultyU
   })
   return res.json(fac)
 }
+
+export const deleteFaculty = async (req: Request, res: Response) => {
+  const fac = await req.prisma.faculty.delete({
+    where: { id: req.params.id },
+  })
+  return res.json(fac)
+}
