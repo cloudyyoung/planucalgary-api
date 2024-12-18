@@ -83,3 +83,10 @@ export const updateCourse = async (
   })
   return res.json(course)
 }
+
+export const deleteCourse = async (req: Request<IdInput>, res: Response) => {
+  const course = await req.prisma.course.delete({
+    where: { id: req.params.id },
+  })
+  return res.json(course)
+}

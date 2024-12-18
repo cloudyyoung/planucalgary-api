@@ -1,6 +1,6 @@
 import { Router } from "express"
 
-import { createCourse, getCourse, listCourses, updateCourse } from "./controllers"
+import { createCourse, deleteCourse, getCourse, listCourses, updateCourse } from "./controllers"
 import { admin } from "../../middlewares/admin"
 import { IdInputSchema, zod } from "../../middlewares"
 import { CourseCreateRelationsSchema, CourseListSchema, CourseUpdateRelationsSchema } from "./validators"
@@ -16,6 +16,7 @@ router.put(
   zod({ params: IdInputSchema, body: CourseUpdateSchema.merge(CourseUpdateRelationsSchema) }),
   updateCourse,
 )
+router.delete("/:id", admin(), deleteCourse)
 
 export default router
 export { router }
