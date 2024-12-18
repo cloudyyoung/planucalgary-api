@@ -19,8 +19,8 @@ export const getSubject = async (req: Request, res: Response) => {
 }
 
 export const createSubject = async (req: Request<ParamsDictionary, any, FacultyCreate>, res: Response) => {
-  const fac = await req.prisma.faculty.create({ data: req.body })
-  return res.json(fac)
+  const subject = await req.prisma.faculty.create({ data: req.body })
+  return res.json(subject)
 }
 
 export const updateSubject = async (req: Request<ParamsDictionary, any, FacultyUpdate>, res: Response) => {
