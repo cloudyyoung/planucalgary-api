@@ -1,7 +1,7 @@
 import { Request, Response } from "express"
 import { ParamsDictionary } from "express-serve-static-core"
 import { CourseCreateRelations, CourseUpdateRelations } from "./validators"
-import { CourseCreate, CourseUpdate } from "../../zod/CourseSchema"
+import { CourseCreate, CourseUpdate } from "../../zod"
 
 export const listCourses = async (req: Request, res: Response) => {
   const courses = await req.prisma.course.findMany()
