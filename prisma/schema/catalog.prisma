@@ -90,7 +90,7 @@ model CourseTopic {
   course Course @relation(fields: [course_id], references: [id])
 
   @@unique([number, course_id], map: "course_topic_number_course_unique")
-  @@map("course_topics")
+  @@map("courses_topics")
   @@schema("catalog")
 }
 
