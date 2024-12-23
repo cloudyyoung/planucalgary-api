@@ -16,6 +16,7 @@ import { router as departmentRouter } from "./api/departments/routes"
 
 import { PORT, JWT_SECRET_KEY } from "./config"
 import { auth, errors, prisma } from "./middlewares"
+import { emptyget } from "./middlewares/empty-get"
 
 const load = async (app: Express) => {
   process.on("uncaughtException", async (error) => {
@@ -40,6 +41,7 @@ const load = async (app: Express) => {
     }),
     auth(),
   )
+  app.use(emptyget())
   app.disable("x-powered-by")
   app.disable("etag")
 

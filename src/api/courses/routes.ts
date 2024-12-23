@@ -5,6 +5,7 @@ import { admin } from "../../middlewares/admin"
 import { IdInputSchema, zod } from "../../middlewares"
 import { CourseCreateRelationsSchema, CourseListSchema, CourseUpdateRelationsSchema } from "./validators"
 import { CourseCreateSchema, CourseUpdateSchema } from "../../zod"
+import { generatePrereq } from "../utils/openai"
 
 const router = Router()
 router.get("/", zod({ params: CourseListSchema }), listCourses)
@@ -16,7 +17,8 @@ router.put(
   zod({ params: IdInputSchema, body: CourseUpdateSchema.merge(CourseUpdateRelationsSchema) }),
   updateCourse,
 )
-router.delete("/:id", admin(), deleteCourse)
+router.delete("/:id", admin(), zod({ params: IdInputSchema }), deleteCourse)
+router.post("/:id/requisites", admin(), zod({ params: IdInputSchema }), generatePrereq)
 
 export default router
 export { router }

@@ -3,6 +3,7 @@ import { ParamsDictionary } from "express-serve-static-core"
 import { CourseCreateRelations, CourseUpdateRelations, CourseList } from "./validators"
 import { CourseCreate, CourseUpdate } from "../../zod"
 import { IdInput } from "../../middlewares"
+import { generatePrereq } from "../utils/openai"
 
 export const listCourses = async (req: Request<CourseList>, res: Response) => {
   const keywords = req.query.keywords as string | undefined
@@ -88,5 +89,40 @@ export const deleteCourse = async (req: Request<IdInput>, res: Response) => {
   const course = await req.prisma.course.delete({
     where: { id: req.params.id },
   })
+  return res.json(course)
+}
+
+export const generateRequisites = async (req: Request<IdInput>, res: Response) => {
+  const course = await req.prisma.course.findUnique({
+    where: { id: req.params.id },
+    include: {
+      subject: true,
+      departments: true,
+      faculties: true,
+      topics: true,
+    },
+  })
+
+  if (!course) {
+    return res.status(404).json(course)
+  }
+
+  const prereq = course.prereq
+
+  if (prereq) {
+    const prereq_json = await generatePrereq(prereq)
+
+    if (prereq_json) {
+      const course = await req.prisma.course.update({
+        where: { id: req.params.id },
+        data: {
+          prereq_json: prereq_json,
+        },
+      })
+
+      return res.json(course)
+    }
+  }
+
   return res.json(course)
 }
