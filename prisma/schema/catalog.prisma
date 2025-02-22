@@ -99,7 +99,9 @@ model Faculty {
   updated_at  DateTime @default(now()) @updatedAt
 
   name      String @unique
+  display_name String
   code      String @unique
+  is_active    Boolean
 
   departments Department[]
   courses Course[]

@@ -35,6 +35,14 @@ export const createCourse = async (
   req: Request<ParamsDictionary, any, CourseCreate & CourseCreateRelations>,
   res: Response,
 ) => {
+  // find if there is a course with the same cid
+  const existingCourse = await req.prisma.course.findFirst({
+    where: { cid: req.body.cid },
+  })
+  if (existingCourse) {
+    return res.status(403).json({ error: "Course with the given cid already exists" })
+  }
+
   const course = await req.prisma.course.create({
     data: {
       ...req.body,
