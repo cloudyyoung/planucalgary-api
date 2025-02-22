@@ -76,7 +76,7 @@ export const updateCourse = async (
       },
       topics: {
         connectOrCreate: req.body.topics?.map((topic) => ({
-          where: { number: topic.number, course_id: req.params.id },
+          where: { number_course_id: { number: topic.number, course_id: req.params.id } },
           create: topic,
         })),
       },

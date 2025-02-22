@@ -30,12 +30,12 @@ model Course {
   subject_code String
   subject  Subject @relation(fields: [subject_code], references: [code])
 
-  description String
+  description String?
   name        String
   long_name   String
   notes       String?
   version     Int
-  units       Int
+  units       Int?
   aka       String?
 
   prereq    String?
@@ -77,12 +77,12 @@ model CourseTopic {
   created_at  DateTime @default(now())
   updated_at  DateTime @default(now()) @updatedAt
 
-  number      String @unique @map("number")
-  name      String @unique
-  long_name String @unique
-  description String
+  number      String @map("number")
+  name      String
+  long_name String
+  description String?
   is_repeatable Boolean
-  units      Int
+  units      Int?
   link       String
 
   course_id String
