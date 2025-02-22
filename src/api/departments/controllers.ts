@@ -1,30 +1,30 @@
 import { Request, Response } from "express"
 import { ParamsDictionary } from "express-serve-static-core"
-import { FacultyCreate, FacultyUpdate } from "../../zod"
+import { DepartmentCreate, DepartmentUpdate } from "../../zod"
 
 export const listDepartments = async (req: Request, res: Response) => {
-  const faculties = await req.prisma.faculty.findMany()
+  const faculties = await req.prisma.department.findMany()
   return res.json(faculties)
 }
 
 export const getDepartment = async (req: Request, res: Response) => {
-  const fac = await req.prisma.faculty.findUnique({
+  const fac = await req.prisma.department.findUnique({
     where: { id: req.params.id },
     include: {
-      departments: true,
+      faculties: true,
       courses: true,
     },
   })
   return res.json(fac)
 }
 
-export const createDepartment = async (req: Request<ParamsDictionary, any, FacultyCreate>, res: Response) => {
-  const fac = await req.prisma.faculty.create({ data: req.body })
+export const createDepartment = async (req: Request<ParamsDictionary, any, DepartmentCreate>, res: Response) => {
+  const fac = await req.prisma.department.create({ data: req.body })
   return res.json(fac)
 }
 
-export const updateDepartment = async (req: Request<ParamsDictionary, any, FacultyUpdate>, res: Response) => {
-  const fac = await req.prisma.faculty.update({
+export const updateDepartment = async (req: Request<ParamsDictionary, any, DepartmentUpdate>, res: Response) => {
+  const fac = await req.prisma.department.update({
     where: { id: req.params.id },
     data: req.body,
   })
@@ -32,7 +32,7 @@ export const updateDepartment = async (req: Request<ParamsDictionary, any, Facul
 }
 
 export const deleteDepartment = async (req: Request, res: Response) => {
-  const fac = await req.prisma.faculty.delete({
+  const fac = await req.prisma.department.delete({
     where: { id: req.params.id },
   })
   return res.json(fac)
