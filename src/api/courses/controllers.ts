@@ -108,21 +108,10 @@ export const generateRequisites = async (req: Request<IdInput>, res: Response) =
   }
 
   const prereq = course.prereq
-
-  if (prereq) {
-    const prereq_json = await generatePrereq(prereq)
-
-    if (prereq_json) {
-      const course = await req.prisma.course.update({
-        where: { id: req.params.id },
-        data: {
-          prereq_json: prereq_json,
-        },
-      })
-
-      return res.json(course)
-    }
+  if (!prereq) {
+    return res.json(null)
   }
 
-  return res.json(course)
+  const prereq_json = await generatePrereq(prereq, 3)
+  return res.json(prereq_json)
 }

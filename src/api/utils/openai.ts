@@ -8,27 +8,50 @@ export const OpenAIClient = new OpenAI({
 
 export default OpenAIClient
 
-export const generatePrereq = async (prereq: string) => {
+export async function generatePrereq(prereq: string, n: 1): Promise<string | null>
+export async function generatePrereq(prereq: string, n: number): Promise<string[]>
+export async function generatePrereq(prereq: string, n: number): Promise<string | null | string[]> {
+  const systemPrompt = getSystemPrompt()
+  const responseFormat = await getResponseFormat()
+
   const response = await OpenAIClient.chat.completions.create({
     model: "gpt-4o",
+    n: n,
     messages: [
       {
         role: "system",
-        content: getSystemPrompt(),
+        content: systemPrompt,
       },
       {
         role: "user",
         content: prereq,
       },
     ],
-    response_format: getResponseFormat(),
+    response_format: responseFormat,
   })
 
-  return response.choices[0].message.content
+  if (n === 1) {
+    if (response.choices[0].message.content === null) {
+      return null
+    }
+
+    return JSON.parse(response.choices[0].message.content)["requisite"]
+  }
+
+  const contents = []
+  for (const completion of response.choices) {
+    if (completion.message.content === null) {
+      continue
+    }
+
+    const content = JSON.parse(completion.message.content)
+    contents.push(content["requisite"])
+  }
+  return contents
 }
 
-const getResponseFormat = () => {
-  const faculties = prismaClient.faculty.findMany().then((faculties) => faculties.map((faculty) => faculty.name))
+const getResponseFormat = async () => {
+  const faculties = (await prismaClient.faculty.findMany()).map((faculty) => faculty.name)
 
   const anyOf = [
     { $ref: "#/$defs/and" },
@@ -44,6 +67,7 @@ const getResponseFormat = () => {
     type: "json_schema" as const,
     json_schema: {
       name: "requisite_schema",
+      description: "Schema for course prerequisites",
       strict: true,
       schema: {
         type: "object",
@@ -53,7 +77,7 @@ const getResponseFormat = () => {
         $defs: {
           and: {
             type: "object",
-            description: "A and B",
+            description: "Logic operator of a relationship A and B",
             required: ["and"],
             additionalProperties: false,
             properties: {
@@ -67,7 +91,7 @@ const getResponseFormat = () => {
           },
           or: {
             type: "object",
-            description: "A or B",
+            description: "Logic operator of a relationship A or B",
             required: ["or"],
             additionalProperties: false,
             properties: {
@@ -256,7 +280,6 @@ const getResponseFormat = () => {
 
 const getSystemPrompt = () => {
   return `
-
 You are an advanced admission bot for a university tasked with processing course prerequisites for use in a structured database. Your job is to:
   1. Input: Take course information and a textual description of its prerequisites.
   2. Output: Convert the prerequisites into a JSON format with the following structure:
