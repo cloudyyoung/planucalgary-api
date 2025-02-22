@@ -1,6 +1,6 @@
 import { Request, Response } from "express"
 import { ParamsDictionary } from "express-serve-static-core"
-import { FacultyCreate, FacultyUpdate } from "../../zod"
+import { SubjectCreate, SubjectUpdate } from "../../zod"
 
 export const listSubjects = async (req: Request, res: Response) => {
   const subjects = await req.prisma.subject.findMany()
@@ -18,13 +18,13 @@ export const getSubject = async (req: Request, res: Response) => {
   return res.json(subject)
 }
 
-export const createSubject = async (req: Request<ParamsDictionary, any, FacultyCreate>, res: Response) => {
-  const subject = await req.prisma.faculty.create({ data: req.body })
+export const createSubject = async (req: Request<ParamsDictionary, any, SubjectCreate>, res: Response) => {
+  const subject = await req.prisma.subject.create({ data: req.body })
   return res.json(subject)
 }
 
-export const updateSubject = async (req: Request<ParamsDictionary, any, FacultyUpdate>, res: Response) => {
-  const subject = await req.prisma.faculty.update({
+export const updateSubject = async (req: Request<ParamsDictionary, any, SubjectUpdate>, res: Response) => {
+  const subject = await req.prisma.subject.update({
     where: { id: req.params.id },
     data: req.body,
   })
@@ -32,7 +32,7 @@ export const updateSubject = async (req: Request<ParamsDictionary, any, FacultyU
 }
 
 export const deleteSubject = async (req: Request, res: Response) => {
-  const subject = await req.prisma.faculty.delete({
+  const subject = await req.prisma.subject.delete({
     where: { id: req.params.id },
   })
   return res.json(subject)
