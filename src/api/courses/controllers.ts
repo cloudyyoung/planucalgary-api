@@ -4,17 +4,39 @@ import { CourseCreateRelations, CourseUpdateRelations, CourseList } from "./vali
 import { CourseCreate, CourseUpdate } from "../../zod"
 import { IdInput } from "../../middlewares"
 import { generatePrereq } from "../utils/openai"
+import { Prisma } from "@prisma/client"
 
-export const listCourses = async (req: Request<CourseList>, res: Response) => {
-  const keywords = req.query.keywords as string | undefined
-  const courses = await req.prisma.$queryRaw`
-    select 
+export const listCourses = async (req: Request<any, any, any, CourseList>, res: Response) => {
+  const keywords = req.query.keywords
+  const offset = req.query.offset || 0
+  const limit = req.query.limit || 20
+
+  const getWhereStatement = () => {
+    const whereSegments = []
+    if (keywords) {
+      whereSegments.push(Prisma.sql`search_vector @@ plainto_tsquery('english', ${keywords})`)
+    }
+
+    if (whereSegments.length === 0) {
+      return Prisma.empty
+    }
+    return Prisma.sql`where ${Prisma.join(whereSegments, " and ")}`
+  }
+
+  const whereStatement = getWhereStatement()
+  const queryString = Prisma.sql`
+    select
       id, code, subject_code, course_number, description,
       name, long_name, units, aka, career,
       is_active, is_multi_term, is_nogpa, is_repeatable
-    from "catalog"."courses"
-    where search_vector @@ plainto_tsquery('english', ${keywords})
-  `
+      from "catalog"."courses"
+      ${whereStatement}
+      offset ${offset}
+      limit ${limit}
+    `
+
+  const courses = await req.prisma.$queryRaw(queryString)
+
   return res.json(courses)
 }
 
