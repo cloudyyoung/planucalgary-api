@@ -19,6 +19,13 @@ export const getFaculty = async (req: Request, res: Response) => {
 }
 
 export const createFaculty = async (req: Request<ParamsDictionary, any, FacultyCreate>, res: Response) => {
+  const existing = await req.prisma.faculty.findFirst({
+    where: { code: req.body.code },
+  })
+  if (existing) {
+    return res.status(403).json({ error: "Faculty already exists", existing })
+  }
+
   const fac = await req.prisma.faculty.create({ data: req.body })
   return res.json(fac)
 }

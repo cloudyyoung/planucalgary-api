@@ -19,6 +19,13 @@ export const getDepartment = async (req: Request, res: Response) => {
 }
 
 export const createDepartment = async (req: Request<ParamsDictionary, any, DepartmentCreate>, res: Response) => {
+  const existing = await req.prisma.department.findFirst({
+    where: { code: req.body.code },
+  })
+  if (existing) {
+    return res.status(403).json({ error: "Department already exists", existing })
+  }
+
   const fac = await req.prisma.department.create({ data: req.body })
   return res.json(fac)
 }

@@ -19,6 +19,13 @@ export const getSubject = async (req: Request, res: Response) => {
 }
 
 export const createSubject = async (req: Request<ParamsDictionary, any, SubjectCreate>, res: Response) => {
+  const existing = await req.prisma.subject.findFirst({
+    where: { code: req.body.code },
+  })
+  if (existing) {
+    return res.status(403).json({ error: "Subject already exists", existing })
+  }
+
   const subject = await req.prisma.subject.create({ data: req.body })
   return res.json(subject)
 }
