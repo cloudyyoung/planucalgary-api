@@ -1,6 +1,7 @@
 import OpenAI from "openai"
 import { OPENAI_API_KEY } from "../../config"
 import { prismaClient } from "../../middlewares"
+import { Department, Faculty, Subject } from "@prisma/client"
 
 export const OpenAIClient = new OpenAI({
   apiKey: OPENAI_API_KEY,
@@ -11,8 +12,12 @@ export default OpenAIClient
 export async function generatePrereq(prereq: string, n: 1): Promise<string | null>
 export async function generatePrereq(prereq: string, n: number): Promise<string[]>
 export async function generatePrereq(prereq: string, n: number): Promise<string | null | string[]> {
-  const systemPrompt = getSystemPrompt()
-  const responseFormat = await getResponseFormat()
+  const subjects = await prismaClient.subject.findMany()
+  const faculties = await prismaClient.faculty.findMany()
+  const departments = await prismaClient.department.findMany()
+
+  const systemPrompt = getSystemPrompt(subjects, faculties, departments)
+  const responseFormat = getResponseFormat(faculties, departments)
 
   const response = await OpenAIClient.chat.completions.create({
     model: "gpt-4o",
@@ -50,8 +55,9 @@ export async function generatePrereq(prereq: string, n: number): Promise<string 
   return contents
 }
 
-const getResponseFormat = async () => {
-  const faculties = (await prismaClient.faculty.findMany()).map((faculty) => faculty.name)
+const getResponseFormat = (faculties: Faculty[], departments: Department[]) => {
+  const facultyCodes = faculties.map((faculty) => faculty.code)
+  const departmentCodes = departments.map((department) => department.code)
 
   const anyOf = [
     { $ref: "#/$defs/and" },
@@ -149,18 +155,7 @@ const getResponseFormat = async () => {
               consent: {
                 anyOf: [
                   { $ref: "#/$defs/faculty" },
-                  {
-                    type: "object",
-                    description: "consent to a department",
-                    required: ["department"],
-                    additionalProperties: false,
-                    properties: {
-                      department: {
-                        type: "string",
-                        description: "name of the department; exclude 'Department of' prefix",
-                      },
-                    },
-                  },
+                  { $ref: "#/$defs/department" },
                   { type: "string", description: "consent" },
                 ],
               },
@@ -173,22 +168,7 @@ const getResponseFormat = async () => {
             additionalProperties: false,
             properties: {
               admission: {
-                anyOf: [
-                  { $ref: "#/$defs/faculty" },
-                  { $ref: "#/$defs/program" },
-                  {
-                    type: "object",
-                    description: "admission to a department",
-                    required: ["department"],
-                    additionalProperties: false,
-                    properties: {
-                      department: {
-                        type: "string",
-                        description: "department",
-                      },
-                    },
-                  },
-                ],
+                anyOf: [{ $ref: "#/$defs/faculty" }, { $ref: "#/$defs/program" }, { $ref: "#/$defs/department" }],
               },
             },
           },
@@ -201,7 +181,20 @@ const getResponseFormat = async () => {
               faculty: {
                 type: "string",
                 description: "faculty",
-                enum: faculties,
+                enum: facultyCodes,
+              },
+            },
+          },
+          department: {
+            type: "object",
+            description: "a department",
+            required: ["department"],
+            additionalProperties: false,
+            properties: {
+              department: {
+                type: "string",
+                description: "department",
+                enum: departmentCodes,
               },
             },
           },
@@ -219,7 +212,7 @@ const getResponseFormat = async () => {
                 anyOf: [
                   {
                     type: "string",
-                    enum: faculties,
+                    enum: facultyCodes,
                   },
                   { type: "null" },
                 ],
@@ -278,12 +271,14 @@ const getResponseFormat = async () => {
   }
 }
 
-const getSystemPrompt = () => {
+const getSystemPrompt = (subjects: Subject[], faculties: Faculty[], departments: Department[]) => {
   return `
 You are an advanced admission bot for a university tasked with processing course prerequisites for use in a structured database. Your job is to:
   1. Input: Take course information and a textual description of its prerequisites.
   2. Output: Convert the prerequisites into a JSON format with the following structure:
-    - Use full subject names for courses (e.g., "Mathematics" instead of "MATH").
+    - Use subject code names for courses (e.g., "MATH" instead of "Mathematics" whenever you can).
+    - Use faculty code names for faculties (e.g., "HA" instead of "Haskayne School of Business").
+    - Use department code names for departments (e.g., "CPSC" instead of "Computer Science").
     - Avoid deeply nested logical structures for readability.
     - Simplify logical expressions wherever possible without losing meaning.
     - Ensure no requirement has "units" equal to 0, because it does not make sense to have a course with 0 units.
@@ -293,16 +288,16 @@ You are an advanced admission bot for a university tasked with processing course
     - Handle exceptions gracefully by assuming ambiguous text needs clarification and simplifying to the most likely structure.
     - Try to use the logical operators you are provided with to represent the prerequisites as accurately as possible.
   4. Examples:
-    Input Text: "Mathematics 101, and Physics 201 or Chemistry 102"
+    Input Text: "Mathematics 101, and Physics 201 or Chemistry 102A"
     Output JSON:
       \`\`\`json
       {
         "and": [
-          "Mathematics 101",
+          "MATH101",
           {
             "or": [
-              ""Physics 201",
-              ""Chemistry 102"
+              ""PHYS201",
+              ""CHEM102A"
             ]
           }
         ]
@@ -318,5 +313,15 @@ You are an advanced admission bot for a university tasked with processing course
     - If there is only one requirement at all, wrap it in an "and" condition.
 
 Given these guidelines, your task is to process the provided course and prerequisite text and return a well-formatted JSON object as described. If additional clarification is needed, infer reasonable assumptions. Always output valid JSON.
+
+
+Here is a full list of subject codes and their corresponding names:
+${subjects.map((subject) => `${subject.code}: ${subject.title}`).join("\n")}
+
+Here is a full list of faculties and their corresponding names:
+${faculties.map((faculty) => `${faculty.code}: ${faculty.display_name}`).join("\n")}
+
+Here is a full list of departments and their corresponding names:
+${departments.map((department) => `${department.code}: ${department.name}`).join("\n")}
   `
 }
