@@ -4,13 +4,15 @@ import { CourseCreateRelations, CourseUpdateRelations, CourseList } from "./vali
 import { CourseCreate, CourseUpdate } from "../../zod"
 import { IdInput } from "../../middlewares"
 import { generatePrereq } from "../utils/openai"
-import { Prisma } from "@prisma/client"
+import { Course, Prisma } from "@prisma/client"
 
 export const listCourses = async (req: Request<any, any, any, CourseList>, res: Response) => {
   const keywords = req.query.keywords
-  const offset = req.query.offset || 0
-  const limit = req.query.limit || 20
-  const is_admin = req.account?.is_admin
+  const offset = req.pagination.offset
+  const limit = req.pagination.limit
+  const is_admin = req.account?.is_admin === true
+
+  console.log(offset, limit)
 
   const getSelectStatement = () => {
     const fields = [
@@ -59,17 +61,22 @@ export const listCourses = async (req: Request<any, any, any, CourseList>, res: 
 
   const selectStatement = getSelectStatement()
   const whereStatement = getWhereStatement()
+
   const queryString = Prisma.sql`
       ${selectStatement}
       ${whereStatement}
       offset ${offset}
       limit ${limit}
     `
-  console.log(queryString.sql)
+  const totalQueryString = Prisma.sql`select count(*)::int from "catalog"."courses" ${whereStatement}`
 
-  const courses = await req.prisma.$queryRaw(queryString)
+  const [courses, totalResult] = await Promise.all([
+    await req.prisma.$queryRaw<Course[]>(queryString),
+    await req.prisma.$queryRaw<[{ count: number }]>(totalQueryString),
+  ])
+  const total = totalResult[0].count
 
-  return res.json(courses)
+  return res.paginate(courses, total)
 }
 
 export const getCourse = async (req: Request<IdInput>, res: Response) => {
