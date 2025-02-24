@@ -12,8 +12,6 @@ export const listCourses = async (req: Request<any, any, any, CourseList>, res: 
   const limit = req.pagination.limit
   const is_admin = req.account?.is_admin === true
 
-  console.log(offset, limit)
-
   const getSelectStatement = () => {
     const fields = [
       "id",
