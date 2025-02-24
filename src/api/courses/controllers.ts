@@ -10,6 +10,40 @@ export const listCourses = async (req: Request<any, any, any, CourseList>, res: 
   const keywords = req.query.keywords
   const offset = req.query.offset || 0
   const limit = req.query.limit || 20
+  const is_admin = req.account?.is_admin
+
+  const getSelectStatement = () => {
+    const fields = [
+      "id",
+      "code",
+      "subject_code",
+      "course_number",
+      "description",
+      "name",
+      "long_name",
+      "units",
+      "aka",
+      "career",
+      "is_active",
+      "is_multi_term",
+      "is_nogpa",
+      "is_repeatable",
+    ]
+
+    if (is_admin) {
+      fields.push("prereq")
+      fields.push("coreq")
+      fields.push("antireq")
+      fields.push("prereq_json")
+      fields.push("coreq_json")
+      fields.push("antireq_json")
+    }
+
+    return Prisma.sql`select ${Prisma.join(
+      fields.map((field) => Prisma.sql`${Prisma.raw(field)}`),
+      ", ",
+    )} from "catalog"."courses"`
+  }
 
   const getWhereStatement = () => {
     const whereSegments = []
@@ -23,17 +57,15 @@ export const listCourses = async (req: Request<any, any, any, CourseList>, res: 
     return Prisma.sql`where ${Prisma.join(whereSegments, " and ")}`
   }
 
+  const selectStatement = getSelectStatement()
   const whereStatement = getWhereStatement()
   const queryString = Prisma.sql`
-    select
-      id, code, subject_code, course_number, description,
-      name, long_name, units, aka, career,
-      is_active, is_multi_term, is_nogpa, is_repeatable
-      from "catalog"."courses"
+      ${selectStatement}
       ${whereStatement}
       offset ${offset}
       limit ${limit}
     `
+  console.log(queryString.sql)
 
   const courses = await req.prisma.$queryRaw(queryString)
 

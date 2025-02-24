@@ -15,8 +15,8 @@ export type CourseUpdateRelations = z.infer<typeof CourseUpdateRelationsSchema>
 
 export const CourseListSchema = z.object({
   keywords: z.string().optional(),
-  offset: z.number().int().optional(),
-  limit: z.number().int().optional(),
+  offset: z.coerce.number().int().min(0).optional(),
+  limit: z.coerce.number().int().min(0).max(100).optional(),
 })
 
 export type CourseList = z.infer<typeof CourseListSchema>

@@ -6,5 +6,5 @@ export interface JwtContent {
 }
 
 export const generateAccessToken = (payload: JwtContent, key: string): string => {
-  return jwt.sign(payload, key, { expiresIn: "36000s", algorithm: "HS256", issuer: "plan-ucalgary-api" })
+  return jwt.sign(payload, key, { expiresIn: "864000s", algorithm: "HS256", issuer: "plan-ucalgary-api" })
 }

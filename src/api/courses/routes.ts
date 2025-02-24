@@ -7,7 +7,7 @@ import { CourseCreateRelationsSchema, CourseListSchema, CourseUpdateRelationsSch
 import { CourseCreateSchema, CourseUpdateSchema } from "../../zod"
 
 const router = Router()
-router.get("/", zod({ params: CourseListSchema }), listCourses)
+router.get("/", zod({ query: CourseListSchema }), listCourses)
 router.get("/:id", zod({ params: IdInputSchema }), getCourse)
 router.post("/", admin(), zod({ body: CourseCreateSchema.merge(CourseCreateRelationsSchema) }), createCourse)
 router.put(
