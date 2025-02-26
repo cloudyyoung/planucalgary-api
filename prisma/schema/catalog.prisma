@@ -93,6 +93,33 @@ model CourseTopic {
   @@schema("catalog")
 }
 
+enum RequisiteType {
+  PREREQ
+  COREQ
+  ANTIREQ
+
+  @@schema("catalog")
+}
+
+model RequisiteJson {
+  id          String   @id @default(uuid())
+  created_at  DateTime @default(now())
+  updated_at  DateTime @default(now()) @updatedAt
+
+  requisite_type RequisiteType
+  text           String
+  departments    String[]
+  faculties      String[]
+  program        String?
+
+  json_choices   Json[]
+  json           Json?
+
+  @@unique ([requisite_type, text, departments, faculties, program], map: "requisite_components_unique")
+  @@map("requisites_jsons")
+  @@schema("catalog")
+}
+
 model Faculty {
   id          String   @id @default(uuid())
   created_at  DateTime @default(now())

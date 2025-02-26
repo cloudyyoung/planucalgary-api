@@ -1,9 +1,14 @@
 import { Router } from "express"
 
-import { createCourse, deleteCourse, generateRequisites, getCourse, listCourses, updateCourse } from "./controllers"
+import { createCourse, deleteCourse, getCourse, listCourses, syncRequisites, updateCourse } from "./controllers"
 import { admin } from "../../middlewares/admin"
 import { IdInputSchema, zod } from "../../middlewares"
-import { CourseCreateRelationsSchema, CourseListSchema, CourseUpdateRelationsSchema } from "./validators"
+import {
+  CourseCreateRelationsSchema,
+  CourseListSchema,
+  CourseUpdateRelationsSchema,
+  SyncRequisitesSchema,
+} from "./validators"
 import { CourseCreateSchema, CourseUpdateSchema } from "../../zod"
 
 const router = Router()
@@ -17,7 +22,7 @@ router.put(
   updateCourse,
 )
 router.delete("/:id", admin(), zod({ params: IdInputSchema }), deleteCourse)
-router.post("/:id/requisites", admin(), zod({ params: IdInputSchema }), generateRequisites)
+router.post("/requisites/sync", admin(), zod({ body: SyncRequisitesSchema }), syncRequisites)
 
 export default router
 export { router }

@@ -2,9 +2,9 @@ import { NextFunction, Request, Response } from "express"
 import { z, ZodSchema } from "zod"
 
 export interface ZodmiddlewareOptions {
-  params?: ZodSchema
-  query?: ZodSchema
-  body?: ZodSchema
+  params?: ZodSchema // URL params, e.g. /:id
+  query?: ZodSchema // URL query, e.g. ?id=1
+  body?: ZodSchema // Request body, e.g. { id: 1 }
 }
 
 export const zod = (options: ZodmiddlewareOptions) => {

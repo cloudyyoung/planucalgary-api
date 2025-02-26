@@ -1,10 +1,10 @@
 import { Request, Response } from "express"
 import { ParamsDictionary } from "express-serve-static-core"
-import { CourseCreateRelations, CourseUpdateRelations, CourseList } from "./validators"
-import { CourseCreate, CourseUpdate } from "../../zod"
+import { CourseCreateRelations, CourseUpdateRelations, CourseList, SyncRequisites } from "./validators"
+import { CourseCreate, CourseUpdate, RequisiteJsonCreate } from "../../zod"
 import { IdInput } from "../../middlewares"
 import { generatePrereq } from "../utils/openai"
-import { Course, Prisma } from "@prisma/client"
+import { Course, Prisma, RequisiteType } from "@prisma/client"
 
 export const listCourses = async (req: Request<any, any, any, CourseList>, res: Response) => {
   const keywords = req.query.keywords
@@ -156,6 +156,174 @@ export const deleteCourse = async (req: Request<IdInput>, res: Response) => {
     where: { id: req.params.id },
   })
   return res.json(course)
+}
+
+export const syncRequisites = async (req: Request<SyncRequisites>, res: Response) => {
+  const destination = req.body.destination
+
+  if (destination === "requisites_jsons") {
+    const courses = await req.prisma.course.findMany({
+      select: {
+        prereq: true,
+        coreq: true,
+        antireq: true,
+        departments: {
+          select: {
+            code: true,
+          },
+        },
+        faculties: {
+          select: {
+            code: true,
+          },
+        },
+      },
+    })
+
+    const requisites_jsons = courses.flatMap((course) => {
+      const { prereq, coreq, antireq, departments, faculties } = course
+      const department_codes = departments.map((d) => d.code)
+      const faculty_codes = faculties.map((f) => f.code)
+
+      const requisites_jsons: RequisiteJsonCreate[] = []
+
+      if (prereq) {
+        requisites_jsons.push({
+          requisite_type: RequisiteType.PREREQ,
+          text: prereq,
+          departments: department_codes,
+          faculties: faculty_codes,
+          program: "",
+          json: Prisma.JsonNull,
+          json_choices: [],
+        })
+      }
+      if (coreq) {
+        requisites_jsons.push({
+          requisite_type: RequisiteType.COREQ,
+          text: coreq,
+          departments: department_codes,
+          faculties: faculty_codes,
+          program: "",
+          json: Prisma.JsonNull,
+          json_choices: [],
+        })
+      }
+      if (antireq) {
+        requisites_jsons.push({
+          requisite_type: RequisiteType.ANTIREQ,
+          text: antireq,
+          departments: department_codes,
+          faculties: faculty_codes,
+          program: "",
+          json: Prisma.JsonNull,
+          json_choices: [],
+        })
+      }
+      return requisites_jsons
+    })
+
+    await req.prisma.requisiteJson.createMany({
+      data: requisites_jsons,
+      skipDuplicates: true,
+    })
+
+    return res.status(200).json({ message: `${requisites_jsons.length} requisites are synced to requisites_jsons.` })
+  } else if (destination === "courses") {
+    const courses = await req.prisma.course.findMany({
+      select: {
+        id: true,
+        prereq: true,
+        coreq: true,
+        antireq: true,
+        departments: {
+          select: {
+            code: true,
+          },
+        },
+        faculties: {
+          select: {
+            code: true,
+          },
+        },
+      },
+    })
+
+    for (const course of courses) {
+      const { id, prereq, coreq, antireq, departments, faculties } = course
+      const department_codes = departments.map((d) => d.code)
+      const faculty_codes = faculties.map((f) => f.code)
+
+      let prereq_json
+      let coreq_json
+      let antireq_json
+
+      if (prereq) {
+        const prereq_json_row = await req.prisma.requisiteJson.findUnique({
+          where: {
+            requisite_type_text_departments_faculties_program: {
+              requisite_type: RequisiteType.PREREQ,
+              text: prereq,
+              departments: department_codes,
+              faculties: faculty_codes,
+              program: "",
+            },
+          },
+        })
+
+        if (prereq_json_row) {
+          prereq_json = prereq_json_row.json ?? Prisma.JsonNull
+        }
+      }
+
+      if (coreq) {
+        const coreq_json_row = await req.prisma.requisiteJson.findUnique({
+          where: {
+            requisite_type_text_departments_faculties_program: {
+              requisite_type: RequisiteType.COREQ,
+              text: coreq,
+              departments: department_codes,
+              faculties: faculty_codes,
+              program: "",
+            },
+          },
+        })
+
+        if (coreq_json_row) {
+          coreq_json = coreq_json_row.json ?? Prisma.JsonNull
+        }
+      }
+
+      if (antireq) {
+        const antireq_json_row = await req.prisma.requisiteJson.findUnique({
+          where: {
+            requisite_type_text_departments_faculties_program: {
+              requisite_type: RequisiteType.ANTIREQ,
+              text: antireq,
+              departments: department_codes,
+              faculties: faculty_codes,
+              program: "",
+            },
+          },
+        })
+
+        if (antireq_json_row) {
+          antireq_json = antireq_json_row.json ?? Prisma.JsonNull
+        }
+      }
+
+      await req.prisma.course.update({
+        where: { id },
+        data: {
+          prereq_json,
+          coreq_json,
+          antireq_json,
+        },
+      })
+    }
+
+    return res.status(200).json({ message: `${courses.length} requisites are synced to courses.` })
+  }
 }
 
 export const generateRequisites = async (req: Request<IdInput>, res: Response) => {
