@@ -1,4 +1,11 @@
+import { RequisiteType } from "@prisma/client"
 import { z } from "zod"
+
+export const RequisiteListSchema = z.object({
+  type: z.enum(Object.values(RequisiteType) as [RequisiteType]).optional(),
+})
+
+export type RequisiteList = z.infer<typeof RequisiteListSchema>
 
 export const RequisitesSyncSchema = z.object({
   destination: z.enum(["requisites_jsons", "courses"]),

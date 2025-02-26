@@ -2,12 +2,13 @@ import { Request, Response } from "express"
 
 import { RequisiteJsonCreate } from "../../zod"
 import { Prisma, RequisiteType } from "@prisma/client"
-import { RequisitesSync, RequisiteUpdate } from "./validators"
+import { RequisiteList, RequisitesSync, RequisiteUpdate } from "./validators"
 import { IdInput } from "../../middlewares"
 import { generatePrereq } from "../utils/openai"
 import { isJsonEqual } from "../utils/json"
 
-export const listRequisites = async (req: Request<any, any, any, any>, res: Response) => {
+export const listRequisites = async (req: Request<any, any, any, RequisiteList>, res: Response) => {
+  const { type } = req.query
   const [requisites, total] = await Promise.all([
     req.prisma.requisiteJson.findMany({
       select: {
@@ -20,10 +21,17 @@ export const listRequisites = async (req: Request<any, any, any, any>, res: Resp
         json: true,
         json_choices: true,
       },
+      where: {
+        ...(type && { requisite_type: type }),
+      },
       skip: req.pagination.offset,
       take: req.pagination.limit,
     }),
-    req.prisma.requisiteJson.count(),
+    req.prisma.requisiteJson.count({
+      where: {
+        ...(type && { requisite_type: type }),
+      },
+    }),
   ])
   return res.paginate(requisites, total)
 }
