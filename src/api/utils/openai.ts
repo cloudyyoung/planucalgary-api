@@ -9,14 +9,20 @@ export const OpenAIClient = new OpenAI({
 
 export default OpenAIClient
 
-export async function generatePrereq(prereq: string, n: 1): Promise<string | null>
-export async function generatePrereq(prereq: string, n: number): Promise<string[]>
-export async function generatePrereq(prereq: string, n: number): Promise<string | null | string[]> {
+export async function generatePrereq(req: string, department: string, faculty: string, n: 1): Promise<string | null>
+export async function generatePrereq(req: string, department: string, faculty: string, n: number): Promise<string[]>
+export async function generatePrereq(
+  req: string,
+  department: string,
+  faculty: string,
+  n: number,
+): Promise<string | null | string[]> {
   const subjects = await prismaClient.subject.findMany()
   const faculties = await prismaClient.faculty.findMany()
   const departments = await prismaClient.department.findMany()
 
   const systemPrompt = getSystemPrompt(subjects, faculties, departments)
+  const userPrompt = getUserPrompt(req, department, faculty)
   const responseFormat = getResponseFormat(faculties, departments)
 
   const response = await OpenAIClient.chat.completions.create({
@@ -29,7 +35,7 @@ export async function generatePrereq(prereq: string, n: number): Promise<string 
       },
       {
         role: "user",
-        content: prereq,
+        content: userPrompt,
       },
     ],
     response_format: responseFormat,
@@ -40,7 +46,9 @@ export async function generatePrereq(prereq: string, n: number): Promise<string 
       return null
     }
 
-    return JSON.parse(response.choices[0].message.content)["requisite"]
+    const obj = JSON.parse(response.choices[0].message.content)["requisite"]
+    const cleaned = removeNullFields(obj)
+    return cleaned
   }
 
   const contents = []
@@ -49,8 +57,10 @@ export async function generatePrereq(prereq: string, n: number): Promise<string 
       continue
     }
 
-    const content = JSON.parse(completion.message.content)
-    contents.push(content["requisite"])
+    const content = JSON.parse(completion.message.content.trim())
+    const obj = content["requisite"]
+    const cleaned = removeNullFields(obj)
+    contents.push(cleaned)
   }
   return contents
 }
@@ -66,6 +76,7 @@ const getResponseFormat = (faculties: Faculty[], departments: Department[]) => {
     { $ref: "#/$defs/consent" },
     { $ref: "#/$defs/admission" },
     { $ref: "#/$defs/program" },
+    { $ref: "#/$defs/year" },
     { type: "string" },
   ]
 
@@ -112,7 +123,7 @@ const getResponseFormat = (faculties: Faculty[], departments: Department[]) => {
           units: {
             type: "object",
             description: "X units",
-            required: ["units", "from", "include", "field", "level", "subject"],
+            required: ["units", "from", "include", "exclude", "field", "level", "subject"],
             additionalProperties: false,
             properties: {
               units: { type: "number", description: "X units" },
@@ -131,6 +142,12 @@ const getResponseFormat = (faculties: Faculty[], departments: Department[]) => {
                   { type: "array", items: { type: "string" } },
                   { type: "null" },
                 ],
+              },
+              exclude: {
+                description:
+                  "exclude a list of courses, usually used when the requisite says some additional units besides the previously named courses",
+                additionalProperties: false,
+                anyOf: [{ type: "array", items: { type: "string" } }, { type: "null" }],
               },
               field: {
                 description: "field of study",
@@ -265,6 +282,18 @@ const getResponseFormat = (faculties: Faculty[], departments: Department[]) => {
               },
             },
           },
+          year: {
+            type: "object",
+            description:
+              "year of study, or year standing. eg, first-year, second-year, third-year, fourth-year, fifth-year standing or higher",
+            additionalProperties: false,
+            anyOf: [
+              {
+                type: "string",
+                enum: ["first", "second", "third", "fourth", "fifth"],
+              },
+            ],
+          },
         },
       },
     },
@@ -276,7 +305,7 @@ const getSystemPrompt = (subjects: Subject[], faculties: Faculty[], departments:
 You are an advanced admission bot for a university tasked with processing course prerequisites for use in a structured database. Your job is to:
   1. Input: Take course information and a textual description of its prerequisites.
   2. Output: Convert the prerequisites into a JSON format with the following structure:
-    - Use subject code names for courses (e.g., "MATH" instead of "Mathematics" whenever you can).
+    - Use subject code names for courses (e.g., "MATH" instead of "Mathematics" whenever you can. But if there is no corresponding subject code, do not make up one, instead, reserve the original course name as it is).
     - Use faculty code names for faculties (e.g., "HA" instead of "Haskayne School of Business").
     - Use department code names for departments (e.g., "CPSC" instead of "Computer Science").
     - Avoid deeply nested logical structures for readability.
@@ -314,6 +343,23 @@ You are an advanced admission bot for a university tasked with processing course
 
 Given these guidelines, your task is to process the provided course and prerequisite text and return a well-formatted JSON object as described. If additional clarification is needed, infer reasonable assumptions. Always output valid JSON.
 
+Some notices:
+When you see a course followed by a unit number requirements from the same course level, for example: "Art History 340 and 6 units of courses labelled Art at the 300 level." The 6 units should be in addition to the Art History 340 course. In order to represent this, you can use the "exclude" field to exclude the course that is being repeated:
+\`\`\`
+{
+  "and": [
+    "ARHI340",
+    {
+      "level": "300",
+      "units": 6,
+      "exclude": [
+        "ARHI340"
+      ],
+      "subject": "ART"
+    }
+  ]
+}
+\`\`\`
 
 Here is a full list of subject codes and their corresponding names:
 ${subjects.map((subject) => `${subject.code}: ${subject.title}`).join("\n")}
@@ -324,4 +370,37 @@ ${faculties.map((faculty) => `${faculty.code}: ${faculty.display_name}`).join("\
 Here is a full list of departments and their corresponding names:
 ${departments.map((department) => `${department.code}: ${department.name}`).join("\n")}
   `
+}
+
+const getUserPrompt = (req: string, department: string, faculty: string) => {
+  return `
+The requisite text is: ${req}
+The department is: ${department}
+The faculty is: ${faculty}
+  `
+}
+
+const removeNullFields = (obj: any): any => {
+  // Recursively remove null fields from an object
+  if (obj === null) {
+    return null
+  }
+
+  if (typeof obj !== "object") {
+    return obj
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map((item) => removeNullFields(item))
+  }
+
+  const sortedKeys = Object.keys(obj).sort()
+  const sortedObj: { [key: string]: any } = {}
+  for (const key of sortedKeys) {
+    if (obj[key] !== null) {
+      sortedObj[key] = removeNullFields(obj[key])
+    }
+  }
+
+  return sortedObj
 }

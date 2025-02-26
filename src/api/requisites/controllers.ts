@@ -24,6 +24,9 @@ export const listRequisites = async (req: Request<any, any, any, RequisiteList>,
       where: {
         ...(type && { requisite_type: type }),
       },
+      orderBy: {
+        text: 'asc',
+      },
       skip: req.pagination.offset,
       take: req.pagination.limit,
     }),
@@ -74,7 +77,9 @@ export const generateRequisiteChoices = async (req: Request<IdInput>, res: Respo
   }
 
   const text = requisite.text
-  const choices = await generatePrereq(text, 3)
+  const department = requisite.departments[0] ?? "None"
+  const faculty = requisite.faculties[0] ?? "None"
+  const choices = await generatePrereq(text, department, faculty, 3)
   const json_choices = JSON.parse(JSON.stringify(choices))
 
   // Deeply compare all choices if they are the same, if so, automatically select the first choice
