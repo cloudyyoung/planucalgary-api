@@ -17,6 +17,8 @@ export const listRequisites = async (req: Request<any, any, any, any>, res: Resp
         departments: true,
         faculties: true,
         program: true,
+        json: true,
+        json_choices: true,
       },
       skip: req.pagination.offset,
       take: req.pagination.limit,
