@@ -2,7 +2,10 @@ import { Request, Response } from "express"
 
 import { RequisiteJsonCreate } from "../../zod"
 import { Prisma, RequisiteType } from "@prisma/client"
-import { SyncRequisites } from "./validators"
+import { RequisitesSync, RequisiteUpdate } from "./validators"
+import { IdInput } from "../../middlewares"
+import { generatePrereq } from "../utils/openai"
+import { isJsonEqual } from "../utils/json"
 
 export const listRequisites = async (req: Request<any, any, any, any>, res: Response) => {
   const [requisites, total] = await Promise.all([
@@ -23,7 +26,58 @@ export const listRequisites = async (req: Request<any, any, any, any>, res: Resp
   return res.paginate(requisites, total)
 }
 
-export const syncRequisites = async (req: Request<SyncRequisites>, res: Response) => {
+export const getRequisite = async (req: Request<IdInput>, res: Response) => {
+  const requisite = await req.prisma.requisiteJson.findUnique({
+    where: { id: req.params.id },
+  })
+
+  if (!requisite) {
+    return res.status(404).json({ message: "Requisite not found" })
+  }
+
+  return res.json(requisite)
+}
+
+export const updateRequisite = async (req: Request<IdInput, any, RequisiteUpdate>, res: Response) => {
+  const existing = await req.prisma.requisiteJson.findUnique({
+    where: { id: req.params.id },
+  })
+
+  if (!existing) {
+    return res.status(404).json({ message: "Requisite not found" })
+  }
+
+  const requisite = await req.prisma.requisiteJson.update({
+    where: { id: req.params.id },
+    data: req.body,
+  })
+  return res.json(requisite)
+}
+
+export const generateRequisiteChoices = async (req: Request<IdInput>, res: Response) => {
+  const requisite = await req.prisma.requisiteJson.findUnique({
+    where: { id: req.params.id },
+  })
+
+  if (!requisite) {
+    return res.status(404).json({ message: "Requisite not found" })
+  }
+
+  const text = requisite.text
+  const choices = await generatePrereq(text, 3)
+  const json_choices = JSON.parse(JSON.stringify(choices))
+
+  // Deeply compare all choices if they are the same, if so, automatically select the first choice
+  const allEqual = json_choices.every((choice: JSON) => isJsonEqual(choice, json_choices[0]))
+
+  const updated = await req.prisma.requisiteJson.update({
+    where: { id: req.params.id },
+    data: { json_choices, json: allEqual ? json_choices[0] : Prisma.JsonNull },
+  })
+  return res.json(updated)
+}
+
+export const syncRequisites = async (req: Request<RequisitesSync>, res: Response) => {
   const destination = req.body.destination
 
   if (destination === "requisites_jsons") {
