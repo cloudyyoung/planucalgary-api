@@ -10,6 +10,7 @@ import "express-async-errors"
 
 import { router as accountRouter } from "./api/accounts/routes"
 import { router as courseRouter } from "./api/courses/routes"
+import { router as requisitesRouter } from "./api/requisites/routes"
 import { router as facultyRouter } from "./api/faculties/routes"
 import { router as subjectRouter } from "./api/subjects/routes"
 import { router as departmentRouter } from "./api/departments/routes"
@@ -48,6 +49,7 @@ const load = async (app: Express) => {
 
   app.use("/accounts", accountRouter)
   app.use("/courses", courseRouter)
+  app.use("/requisites", requisitesRouter)
   app.use("/faculties", facultyRouter)
   app.use("/subjects", subjectRouter)
   app.use("/departments", departmentRouter)
