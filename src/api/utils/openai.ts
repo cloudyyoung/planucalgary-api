@@ -2,6 +2,7 @@ import OpenAI from "openai"
 import { OPENAI_API_KEY } from "../../config"
 import { prismaClient } from "../../middlewares"
 import { Department, Faculty, Subject } from "@prisma/client"
+import { cleanup } from "../../jsonlogic/utils"
 
 export const OpenAIClient = new OpenAI({
   apiKey: OPENAI_API_KEY,
@@ -9,14 +10,7 @@ export const OpenAIClient = new OpenAI({
 
 export default OpenAIClient
 
-export async function generatePrereq(req: string, department: string, faculty: string, n: 1): Promise<string | null>
-export async function generatePrereq(req: string, department: string, faculty: string, n: number): Promise<string[]>
-export async function generatePrereq(
-  req: string,
-  department: string,
-  faculty: string,
-  n: number,
-): Promise<string | null | string[]> {
+export async function generatePrereq(req: string, department: string, faculty: string, n: number): Promise<string[]> {
   const subjects = await prismaClient.subject.findMany()
   const faculties = await prismaClient.faculty.findMany()
   const departments = await prismaClient.department.findMany()
@@ -41,17 +35,8 @@ export async function generatePrereq(
     response_format: responseFormat,
   })
 
-  if (n === 1) {
-    if (response.choices[0].message.content === null) {
-      return null
-    }
-
-    const obj = JSON.parse(response.choices[0].message.content)["requisite"]
-    const cleaned = removeNullFields(obj)
-    return cleaned
-  }
-
   const contents = []
+
   for (const completion of response.choices) {
     if (completion.message.content === null) {
       continue
@@ -59,9 +44,10 @@ export async function generatePrereq(
 
     const content = JSON.parse(completion.message.content.trim())
     const obj = content["requisite"]
-    const cleaned = removeNullFields(obj)
+    const cleaned = cleanup(obj)
     contents.push(cleaned)
   }
+
   return contents
 }
 
@@ -73,11 +59,12 @@ const getResponseFormat = (faculties: Faculty[], departments: Department[]) => {
     { $ref: "#/$defs/and" },
     { $ref: "#/$defs/or" },
     { $ref: "#/$defs/not" },
+    { $ref: "#/$defs/course" },
     { $ref: "#/$defs/units" },
     { $ref: "#/$defs/consent" },
     { $ref: "#/$defs/admission" },
     { $ref: "#/$defs/year" },
-    { type: "string" },
+    // { type: "string" },
   ]
 
   return {
@@ -129,10 +116,15 @@ const getResponseFormat = (faculties: Faculty[], departments: Department[]) => {
               not: {
                 type: "object",
                 description: "not",
-                items: { anyOf: anyOf },
+                anyOf: anyOf,
                 additionalProperties: false,
               },
             },
+          },
+          course: {
+            type: "string",
+            description:
+              "The course code that satified the following regex pattern: ^[A-Z]{4}[0-9]{2,3}(-[0-9])?(.[0-9]{1,2})?[A-B]?$",
           },
           units: {
             type: "object",
@@ -142,33 +134,28 @@ const getResponseFormat = (faculties: Faculty[], departments: Department[]) => {
             properties: {
               units: { type: "number", description: "X units" },
               from: {
-                description: "from a list of courses",
+                description:
+                  "Specify the courses that the units are from, this is a strict list that the units must be from",
                 additionalProperties: false,
-                anyOf: [{ type: "array", items: { type: "string" } }, { type: "null" }],
+                anyOf: [{ type: "array", items: { $ref: "#/$defs/course" } }, { type: "null" }],
               },
               include: {
-                description: "include a list of courses",
+                description: "To specifically include a list of courses in the units count",
                 additionalProperties: false,
-                anyOf: [
-                  { $ref: "#/$defs/and" },
-                  { $ref: "#/$defs/or" },
-                  { $ref: "#/$defs/units" },
-                  { type: "array", items: { type: "string" } },
-                  { type: "null" },
-                ],
+                anyOf: [{ type: "array", items: { $ref: "#/$defs/course" } }, { type: "null" }],
               },
               exclude: {
                 description:
-                  "exclude a list of courses, usually used when the requisite says some additional units besides the previously named courses",
+                  "Exclude a list of courses when counting units. This field is usually used when the requisite says some additional units besides the previously named courses",
                 additionalProperties: false,
-                anyOf: [{ type: "array", items: { type: "string" } }, { type: "null" }],
+                anyOf: [{ type: "array", items: { $ref: "#/$defs/course" } }, { type: "null" }],
               },
               field: {
-                description: "field of study",
+                description: "Field of study",
                 anyOf: [{ type: "string" }, { type: "null" }],
               },
               level: {
-                description: "course level of study; when suffixed with +, it means at or above the level",
+                description: "Course level of study; when suffixed with +, it means at or above the level",
                 anyOf: [{ type: "string" }, { type: "null" }],
               },
               subject: {
@@ -236,6 +223,7 @@ const getResponseFormat = (faculties: Faculty[], departments: Department[]) => {
                 anyOf: [{ type: "string" }, { type: "null" }],
               },
               faculty: {
+                description: "The faculty that offers the program",
                 anyOf: [
                   {
                     type: "string",
@@ -245,11 +233,11 @@ const getResponseFormat = (faculties: Faculty[], departments: Department[]) => {
                 ],
               },
               department: {
-                description: "department",
+                description: "The department that offers the program",
                 anyOf: [{ type: "string" }, { type: "null" }],
               },
               honours: {
-                description: "honours program",
+                description: "Whether the program has to be an honours program",
                 anyOf: [{ type: "boolean" }, { type: "null" }],
               },
               type: {
@@ -388,29 +376,4 @@ The requisite text is: ${req}
 The department is: ${department}
 The faculty is: ${faculty}
   `
-}
-
-const removeNullFields = (obj: any): any => {
-  // Recursively remove null fields from an object
-  if (obj === null) {
-    return null
-  }
-
-  if (typeof obj !== "object") {
-    return obj
-  }
-
-  if (Array.isArray(obj)) {
-    return obj.map((item) => removeNullFields(item))
-  }
-
-  const sortedKeys = Object.keys(obj).sort()
-  const sortedObj: { [key: string]: any } = {}
-  for (const key of sortedKeys) {
-    if (obj[key] !== null) {
-      sortedObj[key] = removeNullFields(obj[key])
-    }
-  }
-
-  return sortedObj
 }
