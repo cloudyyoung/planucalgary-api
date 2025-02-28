@@ -356,7 +356,6 @@ You are an advanced admission bot for a university tasked with processing course
       \`\`\`
 
   5. Additional Details:
-    - If no units are explicitly provided, assume 3 units per course unless otherwise stated.
     - Include clear logical operators (and, or) and group courses appropriately.
     - Handle cases like "any one of" or "at least X units in…" correctly.
   6. Formatting:
