@@ -75,7 +75,6 @@ const getResponseFormat = (faculties: Faculty[], departments: Department[]) => {
     { $ref: "#/$defs/units" },
     { $ref: "#/$defs/consent" },
     { $ref: "#/$defs/admission" },
-    { $ref: "#/$defs/program" },
     { $ref: "#/$defs/year" },
     { type: "string" },
   ]
@@ -173,7 +172,7 @@ const getResponseFormat = (faculties: Faculty[], departments: Department[]) => {
                 anyOf: [
                   { $ref: "#/$defs/faculty" },
                   { $ref: "#/$defs/department" },
-                  { type: "string", description: "consent" },
+                  // { type: "string", description: "consent" },
                 ],
               },
             },
