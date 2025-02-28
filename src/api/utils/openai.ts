@@ -64,7 +64,6 @@ const getResponseFormat = (faculties: Faculty[], departments: Department[]) => {
     { $ref: "#/$defs/and" },
     { $ref: "#/$defs/or" },
     { $ref: "#/$defs/not" },
-    { $ref: "#/$defs/course" },
     { $ref: "#/$defs/units" },
     { $ref: "#/$defs/consent" },
     { $ref: "#/$defs/admission" },
@@ -126,15 +125,10 @@ const getResponseFormat = (faculties: Faculty[], departments: Department[]) => {
               },
             },
           },
-          course: {
-            type: "string",
-            description:
-              "The course code that satified the following regex pattern: ^[A-Z]{4}[0-9]{2,3}(-[0-9])?(.[0-9]{1,2})?[A-B]?$",
-          },
           units: {
             type: "object",
             description: "X units",
-            required: ["units", "from", "include", "exclude", "field", "level", "subject"],
+            required: ["units", "from", "exclude", "field", "level", "subject"],
             additionalProperties: false,
             properties: {
               units: { type: "number", description: "X units", additionalProperties: false },
@@ -142,18 +136,13 @@ const getResponseFormat = (faculties: Faculty[], departments: Department[]) => {
                 description:
                   "Specify the courses that the units are from, this is a strict list that the units must be from",
                 additionalProperties: false,
-                anyOf: [{ type: "array", items: { $ref: "#/$defs/course" } }, { type: "null" }],
-              },
-              include: {
-                description: "To specifically include a list of courses in the units count",
-                additionalProperties: false,
-                anyOf: [{ type: "array", items: { $ref: "#/$defs/course" } }, { type: "null" }],
+                anyOf: [{ type: "array", items: { type: "string", description: "Course code" } }, { type: "null" }],
               },
               exclude: {
                 description:
                   "Exclude a list of courses when counting units. This field is usually used when the requisite says some additional units besides the previously named courses",
                 additionalProperties: false,
-                anyOf: [{ type: "array", items: { $ref: "#/$defs/course" } }, { type: "null" }],
+                anyOf: [{ type: "array", items: { type: "string", description: "Course code" } }, { type: "null" }],
               },
               field: {
                 description:

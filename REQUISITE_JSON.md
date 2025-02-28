@@ -43,7 +43,6 @@ Accepts:
 
 - `units`: the number of units to satisfy
 - `from`: an array of courses that represent the units that the units must be taken from
-- `include`: an array of courses that represent the units that the units must include the units from
 - `exclude`: an array of courses that represent the units that the units cannot be taken from
 - `field`: a field of study that the units must satisfy
 - `level`: a level of course number that the units must satisfy
@@ -55,7 +54,6 @@ If the number of units that satisfies all the properties is greater than or equa
 {
     "units": number,
     "from": Course[] | null,
-    "include": Course[] | null,
     "exclude": Course[] | null,
     "field": string | null,
     "level": Level | null,
