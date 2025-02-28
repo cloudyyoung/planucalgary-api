@@ -25,7 +25,7 @@ export const listRequisites = async (req: Request<any, any, any, RequisiteList>,
         ...(type && { requisite_type: type }),
       },
       orderBy: {
-        text: 'asc',
+        text: "asc",
       },
       skip: req.pagination.offset,
       take: req.pagination.limit,
@@ -62,7 +62,10 @@ export const updateRequisite = async (req: Request<IdInput, any, RequisiteUpdate
 
   const requisite = await req.prisma.requisiteJson.update({
     where: { id: req.params.id },
-    data: req.body,
+    data: {
+      ...req.body,
+      ...(req.body.json && { json: req.body.json ?? Prisma.DbNull }),
+    },
   })
   return res.json(requisite)
 }
@@ -87,7 +90,7 @@ export const generateRequisiteChoices = async (req: Request<IdInput>, res: Respo
 
   const updated = await req.prisma.requisiteJson.update({
     where: { id: req.params.id },
-    data: { json_choices, json: allEqual ? json_choices[0] : Prisma.JsonNull },
+    data: { json_choices, json: allEqual ? json_choices[0] : Prisma.DbNull },
   })
   return res.json(updated)
 }
