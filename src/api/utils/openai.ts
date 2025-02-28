@@ -42,10 +42,15 @@ export async function generatePrereq(req: string, department: string, faculty: s
       continue
     }
 
-    const content = JSON.parse(completion.message.content.trim())
-    const obj = content["requisite"]
-    const cleaned = cleanup(obj)
-    contents.push(cleaned)
+    try {
+      const content = JSON.parse(completion.message.content.trim())
+      const obj = content["requisite"]
+      const cleaned = cleanup(obj)
+      contents.push(cleaned)
+    } catch (e) {
+      console.error(e)
+      continue
+    }
   }
 
   return contents
@@ -132,7 +137,7 @@ const getResponseFormat = (faculties: Faculty[], departments: Department[]) => {
             required: ["units", "from", "include", "exclude", "field", "level", "subject"],
             additionalProperties: false,
             properties: {
-              units: { type: "number", description: "X units" },
+              units: { type: "number", description: "X units", additionalProperties: false },
               from: {
                 description:
                   "Specify the courses that the units are from, this is a strict list that the units must be from",
@@ -151,15 +156,21 @@ const getResponseFormat = (faculties: Faculty[], departments: Department[]) => {
                 anyOf: [{ type: "array", items: { $ref: "#/$defs/course" } }, { type: "null" }],
               },
               field: {
-                description: "Field of study",
+                description:
+                  "Field of study. Only include this field is the requisite specifically mentions a field of study. Eg, '6 units of courses in the field of Art.'",
+                additionalProperties: false,
                 anyOf: [{ type: "string" }, { type: "null" }],
               },
               level: {
-                description: "Course level of study; when suffixed with +, it means at or above the level",
+                description:
+                  "Course level of study. When suffixed with +, it means at or above the level. Eg, '6 units of courses at the 300 level or above.'",
+                additionalProperties: false,
                 anyOf: [{ type: "string" }, { type: "null" }],
               },
               subject: {
-                description: "subject of study",
+                description:
+                  "Subject of study. Only include this field is the requisite specifically mentions a subject. Eg, '6 units of courses labelled Art.'",
+                additionalProperties: false,
                 anyOf: [{ type: "string" }, { type: "null" }],
               },
             },
@@ -171,6 +182,7 @@ const getResponseFormat = (faculties: Faculty[], departments: Department[]) => {
             additionalProperties: false,
             properties: {
               consent: {
+                additionalProperties: false,
                 anyOf: [{ $ref: "#/$defs/faculty" }, { $ref: "#/$defs/department" }],
               },
             },
@@ -182,6 +194,7 @@ const getResponseFormat = (faculties: Faculty[], departments: Department[]) => {
             additionalProperties: false,
             properties: {
               admission: {
+                additionalProperties: false,
                 anyOf: [{ $ref: "#/$defs/faculty" }, { $ref: "#/$defs/program" }, { $ref: "#/$defs/department" }],
               },
             },
@@ -195,6 +208,7 @@ const getResponseFormat = (faculties: Faculty[], departments: Department[]) => {
               faculty: {
                 type: "string",
                 description: "faculty",
+                additionalProperties: false,
                 enum: facultyCodes,
               },
             },
@@ -208,6 +222,7 @@ const getResponseFormat = (faculties: Faculty[], departments: Department[]) => {
               department: {
                 type: "string",
                 description: "department",
+                additionalProperties: false,
                 enum: departmentCodes,
               },
             },
@@ -220,10 +235,12 @@ const getResponseFormat = (faculties: Faculty[], departments: Department[]) => {
             properties: {
               program: {
                 description: "the field name of the program; leave null if no specific program name is specified",
+                additionalProperties: false,
                 anyOf: [{ type: "string" }, { type: "null" }],
               },
               faculty: {
                 description: "The faculty that offers the program",
+                additionalProperties: false,
                 anyOf: [
                   {
                     type: "string",
@@ -234,14 +251,17 @@ const getResponseFormat = (faculties: Faculty[], departments: Department[]) => {
               },
               department: {
                 description: "The department that offers the program",
+                additionalProperties: false,
                 anyOf: [{ type: "string" }, { type: "null" }],
               },
               honours: {
                 description: "Whether the program has to be an honours program",
+                additionalProperties: false,
                 anyOf: [{ type: "boolean" }, { type: "null" }],
               },
               type: {
                 description: "type of program; eg, major, minor, concentration",
+                additionalProperties: false,
                 anyOf: [
                   {
                     type: "string",
@@ -252,10 +272,12 @@ const getResponseFormat = (faculties: Faculty[], departments: Department[]) => {
               },
               degree: {
                 description: "degree name; eg, BSc, BA, BEng, etc",
+                additionalProperties: false,
                 anyOf: [{ type: "string" }, { type: "null" }],
               },
               career: {
                 description: "career level; eg, undergraduate, master, doctoral",
+                additionalProperties: false,
                 anyOf: [
                   {
                     type: "string",
@@ -266,6 +288,7 @@ const getResponseFormat = (faculties: Faculty[], departments: Department[]) => {
               },
               year: {
                 description: "academic standing",
+                additionalProperties: false,
                 anyOf: [
                   {
                     type: "string",
@@ -276,6 +299,7 @@ const getResponseFormat = (faculties: Faculty[], departments: Department[]) => {
               },
               gpa: {
                 description: "minimum GPA",
+                additionalProperties: false,
                 anyOf: [{ type: "number" }, { type: "null" }],
               },
             },

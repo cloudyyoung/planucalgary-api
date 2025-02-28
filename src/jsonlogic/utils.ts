@@ -17,7 +17,7 @@ export const cleanup = (obj: any): any => {
     return value
   }
 
-  const keys = Object.keys(obj)
+  const keys = Object.keys(obj).sort()
 
   if (keys.length === 1) {
     const key = keys[0]
