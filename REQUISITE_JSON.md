@@ -26,6 +26,17 @@ If any of the booleans are `true`, return true. Otherwise, return `false`.
 }
 ```
 
+## Not
+
+Accepts `boolean`, return `boolean`.
+If the boolean is `true`, return `false`. Otherwise, return `true`.
+
+```
+{
+    "not": boolean
+}
+```
+
 ## Units
 
 Accepts:

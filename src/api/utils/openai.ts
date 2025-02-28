@@ -72,6 +72,7 @@ const getResponseFormat = (faculties: Faculty[], departments: Department[]) => {
   const anyOf = [
     { $ref: "#/$defs/and" },
     { $ref: "#/$defs/or" },
+    { $ref: "#/$defs/not" },
     { $ref: "#/$defs/units" },
     { $ref: "#/$defs/consent" },
     { $ref: "#/$defs/admission" },
@@ -114,6 +115,20 @@ const getResponseFormat = (faculties: Faculty[], departments: Department[]) => {
               or: {
                 type: "array",
                 description: "or",
+                items: { anyOf: anyOf },
+                additionalProperties: false,
+              },
+            },
+          },
+          not: {
+            type: "object",
+            description: "Logic operator of a relationship not A",
+            required: ["not"],
+            additionalProperties: false,
+            properties: {
+              not: {
+                type: "object",
+                description: "not",
                 items: { anyOf: anyOf },
                 additionalProperties: false,
               },
@@ -169,11 +184,7 @@ const getResponseFormat = (faculties: Faculty[], departments: Department[]) => {
             additionalProperties: false,
             properties: {
               consent: {
-                anyOf: [
-                  { $ref: "#/$defs/faculty" },
-                  { $ref: "#/$defs/department" },
-                  // { type: "string", description: "consent" },
-                ],
+                anyOf: [{ $ref: "#/$defs/faculty" }, { $ref: "#/$defs/department" }],
               },
             },
           },
