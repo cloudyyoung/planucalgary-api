@@ -152,19 +152,19 @@ export const schema = {
           $ref: "#/definitions/level",
         },
         subject: {
-          type: ["object", "null"],
+          type: ["string", "null"],
           description:
             "Subject of study. Only include this field is the requisite specifically mentions a subject. Eg, '6 units of courses labelled Art.' Only include this field if the requisite specifically mentions a subject.",
           $ref: "#/definitions/subject",
         },
         faculty: {
-          type: ["object", "null"],
+          type: ["string", "null"],
           description:
             "Course offered by a faculty. Only include this field if the requisite specifically mentions a faculty.",
           $ref: "#/definitions/faculty",
         },
         department: {
-          type: ["object", "null"],
+          type: ["string", "null"],
           description:
             "Course offered by a department. Only include this field if the requisite specifically mentions a department.",
           $ref: "#/definitions/department",
