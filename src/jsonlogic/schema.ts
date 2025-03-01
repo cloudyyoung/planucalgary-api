@@ -62,6 +62,7 @@ export const schema = {
     and: {
       type: "object",
       description: "Logic operator of a relationship A and B",
+      required: ["and"],
       properties: {
         and: {
           type: "array",
@@ -82,6 +83,7 @@ export const schema = {
     or: {
       type: "object",
       description: "Logic operator of a relationship A or B",
+      required: ["or"],
       properties: {
         or: {
           type: "array",
@@ -102,6 +104,7 @@ export const schema = {
     not: {
       type: "object",
       description: "Logic operator of a relationship not A",
+      required: ["or"],
       properties: {
         not: {
           anyOf: [
@@ -129,48 +132,41 @@ export const schema = {
           type: "array",
           description:
             "Specify the courses that the units are from, this is a strict list that the units must be from.",
-          nullable: true,
           items: { $ref: "#/definitions/course" },
         },
         exclude: {
           type: "array",
           description:
             "Exclude a list of courses when counting units. This field is usually used when the requisite says some additional units besides the previously named courses",
-          nullable: true,
           items: { $ref: "#/definitions/course" },
         },
         field: {
-          type: "string",
+          type: ["array", "null"],
           description:
             "Field of study. Only include this field is the requisite specifically mentions a field of study. Eg, '6 units of courses in the field of Art.' Only include this field if the requisite specifically mentions a field of study.",
-          nullable: true,
         },
         level: {
-          type: "object",
+          type: ["object", "null"],
           description:
             "Course level of study. When suffixed with +, it means at or above the level. Eg, '6 units of courses at the 300 level or above.' Only include this field if the requisite specifically mentions a level.",
-          nullable: true,
           $ref: "#/definitions/level",
         },
         subject: {
-          type: "object",
+          type: ["object", "null"],
           description:
             "Subject of study. Only include this field is the requisite specifically mentions a subject. Eg, '6 units of courses labelled Art.' Only include this field if the requisite specifically mentions a subject.",
-          nullable: true,
           $ref: "#/definitions/subject",
         },
         faculty: {
-          type: "object",
+          type: ["object", "null"],
           description:
             "Course offered by a faculty. Only include this field if the requisite specifically mentions a faculty.",
-          nullable: true,
           $ref: "#/definitions/faculty",
         },
         department: {
-          type: "object",
+          type: ["object", "null"],
           description:
             "Course offered by a department. Only include this field if the requisite specifically mentions a department.",
-          nullable: true,
           $ref: "#/definitions/department",
         },
       },
@@ -246,6 +242,7 @@ export const ajv = new Ajv({
   strict: "log",
   allowUnionTypes: true,
   allErrors: true,
+  // removeAdditional: "all",
 })
 
 interface GetHydratedSchemaOptions {

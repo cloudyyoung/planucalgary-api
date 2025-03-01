@@ -7,6 +7,7 @@ describe("schema", () => {
   beforeEach(async () => {
     const schema = await getHydratedSchema({ include_courses: true })
     expect(schema).toBeDefined()
+    expect(schema.definitions.course.enum).toBeDefined()
     validate = ajv.compile(schema)
     expect(validate).toBeDefined()
     expect(validate.errors).toBeNull()
@@ -26,10 +27,16 @@ describe("schema", () => {
   })
 
   it("valid a simple json", () => {
-    const json = { and: ["ACCT217", "ACCT301"] }
-    expect(validate.errors).toBeNull()
+    const json = { and: ["ACCT445", "ACCT357"] }
     const valid = validate(json)
+    console.error(validate.errors)
     expect(valid).toBeTruthy()
+  })
+
+  it("valid a simple json falsy", () => {
+    const json = { and: ["ABCD123", "CDEF456"] }
+    const valid = validate(json)
+    expect(valid).toBeFalsy()
   })
 
   it("valid a simpler json", () => {
