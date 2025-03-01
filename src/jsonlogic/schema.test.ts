@@ -10,7 +10,7 @@ describe("schema", () => {
   })
 
   it("should be a valid schema", () => {
-    expect(schema).toBeDefined()
+    expect(ajv.validateSchema(schema)).toBeTruthy()
     const validate = ajv.compile(schema)
     expect(validate).toBeDefined()
     expect(validate.errors).toBeNull()
