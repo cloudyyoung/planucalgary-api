@@ -1,6 +1,8 @@
 import Ajv from "ajv"
 import { prismaClient } from "../middlewares"
 
+const COURSE_CODE_REGEX = "^[A-Z]{3,4}[0-9]{2,3}(-[0-9])?(.[0-9]{2})?[AB]?$"
+
 export const schema = {
   anyOf: [
     // Primitives
@@ -22,7 +24,7 @@ export const schema = {
     course: {
       type: "string",
       description: "Course code",
-      pattern: "^[A-Z]{3,4}[0-9]{2,3}(-[0-9])?(.[0-9]{2})?[AB]?$",
+      pattern: COURSE_CODE_REGEX,
     },
     level: {
       type: "string",
@@ -58,6 +60,7 @@ export const schema = {
 
     // Boolean operators
     and: {
+      type: "object",
       description: "Logic operator of a relationship A and B",
       properties: {
         and: {
@@ -77,6 +80,7 @@ export const schema = {
       },
     },
     or: {
+      type: "object",
       description: "Logic operator of a relationship A or B",
       properties: {
         or: {
@@ -96,6 +100,7 @@ export const schema = {
       },
     },
     not: {
+      type: "object",
       description: "Logic operator of a relationship not A",
       properties: {
         not: {
@@ -177,7 +182,7 @@ export const schema = {
       additionalProperties: false,
       properties: {
         consent: {
-          oneOf: [{ $ref: "#/definitions/faculty_object" }, { $ref: "#/definitions/department_object" }],
+          anyOf: [{ $ref: "#/definitions/faculty_object" }, { $ref: "#/definitions/department_object" }],
         },
       },
     },
@@ -188,7 +193,7 @@ export const schema = {
       additionalProperties: false,
       properties: {
         admission: {
-          oneOf: [
+          anyOf: [
             { $ref: "#/definitions/faculty_object" },
             { $ref: "#/definitions/department_object" },
             { $ref: "#/definitions/program_object" },
@@ -237,38 +242,61 @@ export const schema = {
   },
 }
 
-export const getHydratedSchema = async () => {
-  const subjects = await prismaClient.subject.findMany()
-  const faculties = await prismaClient.faculty.findMany()
-  const departments = await prismaClient.department.findMany()
+export const ajv = new Ajv({
+  strict: "log",
+  allowUnionTypes: true,
+  allErrors: true,
+})
 
-  const subjectCodes = subjects.map((subject) => subject.code)
-  const facultyCodes = faculties.map((faculty) => faculty.code)
-  const departmentCodes = departments.map((department) => department.code)
-
-  const enumedSchema = {
-    ...schema,
-    definitions: {
-      ...schema.definitions,
-      subject: {
-        ...schema.definitions.subject,
-        enum: subjectCodes,
-        pattern: `^(${subjectCodes.join("|")})$`,
-      },
-      faculty: {
-        ...schema.definitions.faculty,
-        enum: facultyCodes,
-        pattern: `^(${facultyCodes.join("|")})$`,
-      },
-      department: {
-        ...schema.definitions.department,
-        enum: departmentCodes,
-        package: `^(${departmentCodes.join("|")})$`,
-      },
-    },
-  }
-  return enumedSchema
+interface GetHydratedSchemaOptions {
+  include_subjects?: boolean
+  incliude_faculties?: boolean
+  include_departments?: boolean
+  include_courses?: boolean
 }
 
-export const ajv = new Ajv()
-export const validate = ajv.compile(schema)
+export const getHydratedSchema = async ({
+  include_subjects = true,
+  incliude_faculties = true,
+  include_departments = true,
+  include_courses = false,
+}: GetHydratedSchemaOptions = {}) => {
+  const enumedSchema: any = { ...schema }
+
+  if (include_subjects) {
+    const subjects = await prismaClient.subject.findMany()
+    const subjectCodes = subjects.map((subject) => subject.code)
+    enumedSchema.definitions.subject.enum = subjectCodes
+    enumedSchema.definitions.subject.pattern = `^(${subjectCodes.join("|")})$`
+  }
+
+  if (incliude_faculties) {
+    const faculties = await prismaClient.faculty.findMany()
+    const facultyCodes = faculties.map((faculty) => faculty.code)
+    enumedSchema.definitions.faculty.enum = facultyCodes
+    delete enumedSchema.definitions.faculty.pattern
+  }
+
+  if (include_departments) {
+    const departments = await prismaClient.department.findMany()
+    const departmentCodes = departments.map((department) => department.code)
+    enumedSchema.definitions.department.enum = departmentCodes
+    delete enumedSchema.definitions.department.pattern
+  }
+
+  if (include_courses) {
+    const courses = await prismaClient.course.findMany({
+      select: {
+        code: true,
+      },
+      distinct: ["code"],
+    })
+    const courseCodes = courses.map((course) => course.code)
+    enumedSchema.definitions.course.enum = courseCodes
+    delete enumedSchema.definitions.course.pattern
+  }
+
+  console.log(JSON.stringify(enumedSchema))
+
+  return enumedSchema
+}

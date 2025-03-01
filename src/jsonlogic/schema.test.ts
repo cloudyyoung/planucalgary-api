@@ -1,34 +1,33 @@
-import Ajv, { ValidateFunction } from "ajv"
-import { getHydratedSchema } from "./schema"
+import { ValidateFunction } from "ajv"
+import { getHydratedSchema, ajv } from "./schema"
 
 describe("schema", () => {
-  const ajv = new Ajv()
-  let schema: any
   let validate: ValidateFunction
 
-  beforeAll(async () => {
-    schema = await getHydratedSchema()
+  beforeEach(async () => {
+    const schema = await getHydratedSchema({ include_courses: true })
     expect(schema).toBeDefined()
     validate = ajv.compile(schema)
-    expect(validate).toBeDefined()
-  })
-
-  it("should be a valid schema", () => {
-    expect(schema).toBeDefined()
-    expect(ajv.validateSchema(schema)).toBeTruthy()
-    const validate = ajv.compile(schema)
     expect(validate).toBeDefined()
     expect(validate.errors).toBeNull()
   })
 
-  it("valid a really simple json", () => {
-    const json = "CPSC319"
+  it("valid a really simple json - truthy", () => {
+    const json = "CPSC217"
+    expect(validate.errors).toBeNull()
     const valid = validate(json)
     expect(valid).toBeTruthy()
   })
 
+  it("valid a simple json - falsy", () => {
+    const json = "ABCD123"
+    const valid = validate(json)
+    expect(valid).toBeFalsy()
+  })
+
   it("valid a simple json", () => {
     const json = { and: ["ACCT217", "ACCT301"] }
+    console.error(validate.errors)
     expect(validate.errors).toBeNull()
     const valid = validate(json)
     expect(valid).toBeTruthy()
@@ -39,6 +38,7 @@ describe("schema", () => {
       and: [
         {
           units: 24,
+          subject: "ABCD",
         },
         {
           or: ["ACCT217", "ACCT301"],
