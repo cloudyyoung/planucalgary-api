@@ -7,32 +7,38 @@ export const validate = async (json: any) => {
   const courses = await prismaClient.course.findMany()
   const courseCodes = courses.map((course) => course.code)
 
-  const course = (obj: string) => courseCodes.includes(obj)
+  const course = (obj: object | string) => {
+    if (typeof obj !== "string") return false
+    return courseCodes.includes(obj)
+  }
 
-  const schema: Record<string, (obj: object) => boolean> = {
-    and: (obj) => {
-      if (!Array.isArray(obj)) {
-        return false
-      }
-      return obj.every(_validate)
+  const schema: Record<string, (obj: any) => boolean> = {
+    and: (obj: { and: any }) => {
+      const premises = obj.and
+      if (!Array.isArray(premises) || premises.length < 2) return false
+      return premises.every(_validate)
     },
-    or: (obj) => {
-      if (!Array.isArray(obj)) {
-        return false
-      }
-      return obj.some(_validate)
+    or: (obj: { or: any }) => {
+      const premises = obj.or
+      if (!Array.isArray(premises) || premises.length < 2) return false
+      return premises.some(_validate)
     },
-    not: (obj) => {
-      if (typeof obj !== "object") {
-        return false
-      }
-      return _validate(obj)
+    not: (obj: { not: any }) => {
+      const premise = obj.not
+      if (typeof premise !== "object" || typeof premise !== "string") return false
+      return _validate(premise)
     },
-    units: (obj: any) => {
+    units: (obj: { units: number; from: string[] | undefined; exclude: string[] | undefined }) => {
       const units = obj.units
-      if (typeof units !== "number") {
-        return false
+      if (typeof units !== "number") return false
+      if (!Number.isInteger(units)) return false
+
+      const from = obj.from
+      if (from) {
+        if (!Array.isArray(from)) return false
+        if (!from.every(course)) return false
       }
+
       return true
     },
   }
@@ -59,7 +65,7 @@ export const validate = async (json: any) => {
       return false
     }
 
-    if (!processor(obj[matchedKey])) {
+    if (!processor(obj)) {
       return false
     }
 
