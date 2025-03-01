@@ -5,8 +5,8 @@ describe("schema", () => {
     const json = "CPSC217"
     const schema = await getHydratedSchema({ include_courses: true })
     const validate = ajv.compile(schema)
-    expect(validate.errors).toBeNull()
     const valid = validate(json)
+    expect(validate.errors).toBeNull()
     expect(valid).toBeTruthy()
   })
 
@@ -77,7 +77,7 @@ describe("schema", () => {
     expect(valid).toBeFalsy()
   })
 
-  it("valid a complex json: and with units + consent [HERTD4]", async () => {
+  it("valid a complex json: and with units + consent, truthy", async () => {
     const json = {
       and: [
         {
@@ -110,7 +110,7 @@ describe("schema", () => {
     expect(valid).toBeTruthy()
   })
 
-  it("valid a complex json: and with course + admission + consent", async () => {
+  it("valid a complex json: and with course + admission + consent, truthy", async () => {
     const json = {
       and: [
         "KNES260",
@@ -133,7 +133,7 @@ describe("schema", () => {
     expect(valid).toBeTruthy()
   })
 
-  it("valid a complex json: and with units + consent", async () => {
+  it("valid a complex json: and with units + consent, truthy", async () => {
     const json = {
       and: [
         {
@@ -151,11 +151,15 @@ describe("schema", () => {
     const schema = await getHydratedSchema({ include_courses: true })
     const validate = ajv.compile(schema)
     const valid = validate(json)
+
+    for (const error of validate.errors ?? []) {
+      console.error(error)
+    }
     expect(validate.errors).toBeNull()
     expect(valid).toBeTruthy()
   })
 
-  it("valid a complex json", async () => {
+  it("valid a complex json: and with units + nested or, truthy", async () => {
     const json = {
       and: [
         {
@@ -179,7 +183,7 @@ describe("schema", () => {
     const schema = await getHydratedSchema({ include_courses: true })
     const validate = ajv.compile(schema)
     const valid = validate(json)
-    expect(validate.errors).not.toBeNull()
+    expect(validate.errors).toBeNull()
     expect(valid).toBeTruthy()
   })
 })
