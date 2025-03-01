@@ -261,27 +261,27 @@ export const getHydratedSchema = async ({
   include_departments = true,
   include_courses = false,
 }: GetHydratedSchemaOptions = {}) => {
-  const enumedSchema: any = { ...schema }
+  const hydratedSchema: any = { ...schema }
 
   if (include_subjects) {
     const subjects = await prismaClient.subject.findMany()
     const subjectCodes = subjects.map((subject) => subject.code)
-    enumedSchema.definitions.subject.enum = subjectCodes
-    enumedSchema.definitions.subject.pattern = `^(${subjectCodes.join("|")})$`
+    hydratedSchema.definitions.subject.enum = subjectCodes
+    delete hydratedSchema.definitions.subject.pattern
   }
 
   if (incliude_faculties) {
     const faculties = await prismaClient.faculty.findMany()
     const facultyCodes = faculties.map((faculty) => faculty.code)
-    enumedSchema.definitions.faculty.enum = facultyCodes
-    delete enumedSchema.definitions.faculty.pattern
+    hydratedSchema.definitions.faculty.enum = facultyCodes
+    delete hydratedSchema.definitions.faculty.pattern
   }
 
   if (include_departments) {
     const departments = await prismaClient.department.findMany()
     const departmentCodes = departments.map((department) => department.code)
-    enumedSchema.definitions.department.enum = departmentCodes
-    delete enumedSchema.definitions.department.pattern
+    hydratedSchema.definitions.department.enum = departmentCodes
+    delete hydratedSchema.definitions.department.pattern
   }
 
   if (include_courses) {
@@ -292,11 +292,9 @@ export const getHydratedSchema = async ({
       distinct: ["code"],
     })
     const courseCodes = courses.map((course) => course.code)
-    enumedSchema.definitions.course.enum = courseCodes
-    delete enumedSchema.definitions.course.pattern
+    hydratedSchema.definitions.course.enum = courseCodes
+    delete hydratedSchema.definitions.course.pattern
   }
 
-  console.log(JSON.stringify(enumedSchema))
-
-  return enumedSchema
+  return hydratedSchema
 }

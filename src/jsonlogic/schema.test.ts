@@ -27,7 +27,6 @@ describe("schema", () => {
 
   it("valid a simple json", () => {
     const json = { and: ["ACCT217", "ACCT301"] }
-    console.error(validate.errors)
     expect(validate.errors).toBeNull()
     const valid = validate(json)
     expect(valid).toBeTruthy()
