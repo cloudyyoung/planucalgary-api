@@ -1,3 +1,8 @@
+export interface OperatorsDict {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [key: string]: (...args: any) => any
+}
+
 export const bool = (value: any): boolean => {
   return !!value
 }
