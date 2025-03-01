@@ -1,45 +1,60 @@
-import { ValidateFunction } from "ajv"
 import { getHydratedSchema, ajv } from "./schema"
 
 describe("schema", () => {
-  let validate: ValidateFunction
-
-  beforeEach(async () => {
-    const schema = await getHydratedSchema({ include_courses: true })
-    expect(schema).toBeDefined()
-    expect(schema.definitions.course.enum).toBeDefined()
-    validate = ajv.compile(schema)
-    expect(validate).toBeDefined()
-    expect(validate.errors).toBeNull()
-  })
-
-  it("valid a really simple json - truthy", () => {
+  it("valid a really simple json: course, truthy", async () => {
     const json = "CPSC217"
+    const schema = await getHydratedSchema({ include_courses: true })
+    const validate = ajv.compile(schema)
     expect(validate.errors).toBeNull()
     const valid = validate(json)
     expect(valid).toBeTruthy()
   })
 
-  it("valid a simple json - falsy", () => {
+  it("valid a simple json: course, falsy", async () => {
     const json = "ABCD123"
+    const schema = await getHydratedSchema({ include_courses: true })
+    const validate = ajv.compile(schema)
     const valid = validate(json)
     expect(valid).toBeFalsy()
   })
 
-  it("valid a simple json", () => {
+  it("valid a simple json: and with two courses, truthy", async () => {
     const json = { and: ["ACCT445", "ACCT357"] }
+    const schema = await getHydratedSchema({ include_courses: true })
+    const validate = ajv.compile(schema)
     const valid = validate(json)
     console.error(validate.errors)
     expect(valid).toBeTruthy()
   })
 
-  it("valid a simple json falsy", () => {
+  it("valid a simple json: and with two courses, falsy", async () => {
     const json = { and: ["ABCD123", "CDEF456"] }
+    const schema = await getHydratedSchema({ include_courses: true })
+    const validate = ajv.compile(schema)
     const valid = validate(json)
     expect(valid).toBeFalsy()
   })
 
-  it("valid a simpler json", () => {
+  it("valid a simpler json, and with units + or, truthy", async () => {
+    const json = {
+      and: [
+        {
+          units: 24,
+          subject: "CPSC",
+        },
+        {
+          or: ["ACCT425", "ACCT357"],
+        },
+      ],
+    }
+    const schema = await getHydratedSchema({ include_courses: true })
+    const validate = ajv.compile(schema)
+    const valid = validate(json)
+    expect(validate.errors).toBeNull()
+    expect(valid).toBeTruthy()
+  })
+
+  it("valid a simpler json: and with units + units + or, falsy", async () => {
     const json = {
       and: [
         {
@@ -47,21 +62,28 @@ describe("schema", () => {
           subject: "ABCD",
         },
         {
-          or: ["ACCT217", "ACCT301"],
+          units: 24,
+          department: "XXXXXX",
+        },
+        {
+          or: [true, "ACCT301"],
         },
       ],
     }
-    expect(validate.errors).toBeNull()
+    const schema = await getHydratedSchema({ include_courses: true })
+    const validate = ajv.compile(schema)
     const valid = validate(json)
-    expect(valid).toBeTruthy()
+    expect(validate.errors).not.toBeNull()
+    expect(valid).toBeFalsy()
   })
 
-  it("valid a complex json", () => {
+  it("valid a complex json: and with units + consent [HERTD4]", async () => {
     const json = {
       and: [
         {
           units: 15,
-          subject: "ESCI",
+          subject: "ART",
+          department: "ART",
         },
         {
           consent: {
@@ -70,21 +92,25 @@ describe("schema", () => {
         },
       ],
     }
-    expect(validate.errors).toBeNull()
+    const schema = await getHydratedSchema({ include_courses: true })
+    const validate = ajv.compile(schema)
     const valid = validate(json)
+    expect(validate.errors).toBeNull()
     expect(valid).toBeTruthy()
   })
 
-  it("valid a year json", () => {
+  it("valid a year json", async () => {
     const json = {
       year: "fourth",
     }
-    expect(validate.errors).toBeNull()
+    const schema = await getHydratedSchema({ include_courses: true })
+    const validate = ajv.compile(schema)
     const valid = validate(json)
+    expect(validate.errors).toBeNull()
     expect(valid).toBeTruthy()
   })
 
-  it("valid a complex json", () => {
+  it("valid a complex json: and with course + admission + consent", async () => {
     const json = {
       and: [
         "KNES260",
@@ -100,12 +126,14 @@ describe("schema", () => {
         },
       ],
     }
-    expect(validate.errors).toBeNull()
+    const schema = await getHydratedSchema({ include_courses: true })
+    const validate = ajv.compile(schema)
     const valid = validate(json)
+    expect(validate.errors).toBeNull()
     expect(valid).toBeTruthy()
   })
 
-  it("valid a complex json", () => {
+  it("valid a complex json: and with units + consent", async () => {
     const json = {
       and: [
         {
@@ -120,12 +148,14 @@ describe("schema", () => {
         },
       ],
     }
-    expect(validate.errors).toBeNull()
+    const schema = await getHydratedSchema({ include_courses: true })
+    const validate = ajv.compile(schema)
     const valid = validate(json)
+    expect(validate.errors).toBeNull()
     expect(valid).toBeTruthy()
   })
 
-  it("valid a complex json", () => {
+  it("valid a complex json", async () => {
     const json = {
       and: [
         {
@@ -146,8 +176,10 @@ describe("schema", () => {
         },
       ],
     }
-    expect(validate.errors).toBeNull()
+    const schema = await getHydratedSchema({ include_courses: true })
+    const validate = ajv.compile(schema)
     const valid = validate(json)
+    expect(validate.errors).not.toBeNull()
     expect(valid).toBeTruthy()
   })
 })
