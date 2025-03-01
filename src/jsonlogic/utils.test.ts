@@ -1,4 +1,5 @@
-import { cleanup } from "./utils"
+import { getHydratedSchema } from "./schema"
+import { cleanup, getOpenAiSchema } from "./utils"
 
 describe("Test util functions", () => {
   it("Test remove redundant logical nesting simple", () => {
@@ -112,5 +113,13 @@ describe("Test util functions", () => {
 
     const cleaned_obj = cleanup(redundant_obj)
     expect(cleaned_obj).toEqual(expected_obj)
+  })
+
+  it("Test replace refs", async () => {
+    const schema = await getHydratedSchema()
+    expect(schema).toBeDefined()
+    const replaced = getOpenAiSchema(schema)
+    console.error(JSON.stringify(replaced.anyOf))
+    console.error(JSON.stringify(replaced.definitions))
   })
 })

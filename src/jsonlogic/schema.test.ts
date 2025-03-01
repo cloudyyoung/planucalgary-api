@@ -1,5 +1,5 @@
 import Ajv, { ValidateFunction } from "ajv"
-import { getSchema } from "./schema"
+import { getHydratedSchema } from "./schema"
 
 describe("schema", () => {
   const ajv = new Ajv()
@@ -7,7 +7,7 @@ describe("schema", () => {
   let validate: ValidateFunction
 
   beforeAll(async () => {
-    schema = await getSchema()
+    schema = await getHydratedSchema()
     expect(schema).toBeDefined()
     validate = ajv.compile(schema)
     expect(validate).toBeDefined()

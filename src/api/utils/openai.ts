@@ -1,8 +1,10 @@
 import OpenAI from "openai"
+
 import { OPENAI_API_KEY } from "../../config"
 import { prismaClient } from "../../middlewares"
 import { Department, Faculty, Subject } from "@prisma/client"
-import { cleanup } from "../../jsonlogic/utils"
+import { cleanup, getOpenAiSchema } from "../../jsonlogic/utils"
+import { getHydratedSchema } from "../../jsonlogic/schema"
 
 export const OpenAIClient = new OpenAI({
   apiKey: OPENAI_API_KEY,
@@ -17,7 +19,7 @@ export async function generatePrereq(req: string, department: string, faculty: s
 
   const systemPrompt = getSystemPrompt(subjects, faculties, departments)
   const userPrompt = getUserPrompt(req, department, faculty)
-  const responseFormat = getResponseFormat(faculties, departments)
+  const responseFormat = await getResponseFormat()
 
   const response = await OpenAIClient.chat.completions.create({
     model: "gpt-4o",
@@ -56,21 +58,9 @@ export async function generatePrereq(req: string, department: string, faculty: s
   return contents
 }
 
-const getResponseFormat = (faculties: Faculty[], departments: Department[]) => {
-  const facultyCodes = faculties.map((faculty) => faculty.code)
-  const departmentCodes = departments.map((department) => department.code)
-
-  const anyOf = [
-    { $ref: "#/$defs/course" },
-    { $ref: "#/$defs/and" },
-    { $ref: "#/$defs/or" },
-    { $ref: "#/$defs/not" },
-    { $ref: "#/$defs/units" },
-    { $ref: "#/$defs/consent" },
-    { $ref: "#/$defs/admission" },
-    { $ref: "#/$defs/year" },
-    // { type: "string" },
-  ]
+const getResponseFormat = async () => {
+  const schema = await getHydratedSchema()
+  const openAiSchema = getOpenAiSchema(schema)
 
   return {
     type: "json_schema" as const,
@@ -82,244 +72,8 @@ const getResponseFormat = (faculties: Faculty[], departments: Department[]) => {
         type: "object",
         required: ["requisite"],
         additionalProperties: false,
-        properties: { requisite: { anyOf: anyOf } },
-        $defs: {
-          course: {
-            type: "string",
-          },
-          and: {
-            type: "object",
-            description: "Logic operator of a relationship A and B",
-            required: ["and"],
-            additionalProperties: false,
-            properties: {
-              and: {
-                type: "array",
-                description: "and",
-                items: { anyOf: anyOf },
-                additionalProperties: false,
-              },
-            },
-          },
-          or: {
-            type: "object",
-            description: "Logic operator of a relationship A or B",
-            required: ["or"],
-            additionalProperties: false,
-            properties: {
-              or: {
-                type: "array",
-                description: "or",
-                items: { anyOf: anyOf },
-                additionalProperties: false,
-              },
-            },
-          },
-          not: {
-            type: "object",
-            description: "Logic operator of a relationship not A",
-            required: ["not"],
-            additionalProperties: false,
-            properties: {
-              not: {
-                type: "object",
-                description: "not",
-                anyOf: anyOf,
-                additionalProperties: false,
-              },
-            },
-          },
-          units: {
-            type: "object",
-            description: "X units",
-            required: ["units", "from", "exclude", "field", "level", "subject", "faculty", "department"],
-            additionalProperties: false,
-            properties: {
-              units: { type: "number", description: "X units", additionalProperties: false },
-              from: {
-                description:
-                  "Specify the courses that the units are from, this is a strict list that the units must be from",
-                additionalProperties: false,
-                anyOf: [{ type: "array", items: { type: "string", description: "Course code" } }, { type: "null" }],
-              },
-              exclude: {
-                description:
-                  "Exclude a list of courses when counting units. This field is usually used when the requisite says some additional units besides the previously named courses",
-                additionalProperties: false,
-                anyOf: [{ type: "array", items: { type: "string", description: "Course code" } }, { type: "null" }],
-              },
-              field: {
-                description:
-                  "Field of study. Only include this field is the requisite specifically mentions a field of study. Eg, '6 units of courses in the field of Art.'",
-                additionalProperties: false,
-                anyOf: [{ type: "string" }, { type: "null" }],
-              },
-              level: {
-                description:
-                  "Course level of study. When suffixed with +, it means at or above the level. Eg, '6 units of courses at the 300 level or above.'",
-                additionalProperties: false,
-                anyOf: [{ type: "string" }, { type: "null" }],
-              },
-              subject: {
-                description:
-                  "Subject of study. Only include this field is the requisite specifically mentions a subject. Eg, '6 units of courses labelled Art.'",
-                additionalProperties: false,
-                anyOf: [{ type: "string" }, { type: "null" }],
-              },
-              faculty: {
-                description: "Course offered by a faculty",
-                additionalProperties: false,
-                anyOf: [{ $ref: "#/$defs/faculty" }, { type: "null" }],
-              },
-              department: {
-                description: "Course offered by a department",
-                additionalProperties: false,
-                anyOf: [{ $ref: "#/$defs/department" }, { type: "null" }],
-              },
-            },
-          },
-          consent: {
-            type: "object",
-            description: "consent",
-            required: ["consent"],
-            additionalProperties: false,
-            properties: {
-              consent: {
-                additionalProperties: false,
-                anyOf: [{ $ref: "#/$defs/faculty" }, { $ref: "#/$defs/department" }],
-              },
-            },
-          },
-          admission: {
-            type: "object",
-            description: "admission to a program, a department, or a course",
-            required: ["admission"],
-            additionalProperties: false,
-            properties: {
-              admission: {
-                additionalProperties: false,
-                anyOf: [{ $ref: "#/$defs/faculty" }, { $ref: "#/$defs/program" }, { $ref: "#/$defs/department" }],
-              },
-            },
-          },
-          faculty: {
-            type: "object",
-            description: "a faculty",
-            required: ["faculty"],
-            additionalProperties: false,
-            properties: {
-              faculty: {
-                type: "string",
-                description: "faculty",
-                additionalProperties: false,
-                enum: facultyCodes,
-              },
-            },
-          },
-          department: {
-            type: "object",
-            description: "a department",
-            required: ["department"],
-            additionalProperties: false,
-            properties: {
-              department: {
-                type: "string",
-                description: "department",
-                additionalProperties: false,
-                enum: departmentCodes,
-              },
-            },
-          },
-          program: {
-            type: "object",
-            description: "a program",
-            required: ["program", "faculty", "department", "honours", "type", "degree", "career", "year", "gpa"],
-            additionalProperties: false,
-            properties: {
-              program: {
-                description: "the field name of the program; leave null if no specific program name is specified",
-                additionalProperties: false,
-                anyOf: [{ type: "string" }, { type: "null" }],
-              },
-              faculty: {
-                description: "The faculty that offers the program",
-                additionalProperties: false,
-                anyOf: [
-                  {
-                    type: "string",
-                    enum: facultyCodes,
-                  },
-                  { type: "null" },
-                ],
-              },
-              department: {
-                description: "The department that offers the program",
-                additionalProperties: false,
-                anyOf: [{ type: "string" }, { type: "null" }],
-              },
-              honours: {
-                description: "Whether the program has to be an honours program",
-                additionalProperties: false,
-                anyOf: [{ type: "boolean" }, { type: "null" }],
-              },
-              type: {
-                description: "type of program; eg, major, minor, concentration",
-                additionalProperties: false,
-                anyOf: [
-                  {
-                    type: "string",
-                    enum: ["major", "minor", "concentration"],
-                  },
-                  { type: "null" },
-                ],
-              },
-              degree: {
-                description: "degree name; eg, BSc, BA, BEng, etc",
-                additionalProperties: false,
-                anyOf: [{ type: "string" }, { type: "null" }],
-              },
-              career: {
-                description: "career level; eg, undergraduate, master, doctoral",
-                additionalProperties: false,
-                anyOf: [
-                  {
-                    type: "string",
-                    enum: ["undergraduate", "master", "doctoral"],
-                  },
-                  { type: "null" },
-                ],
-              },
-              year: {
-                description: "academic standing",
-                additionalProperties: false,
-                anyOf: [
-                  {
-                    type: "string",
-                    enum: ["first", "second", "third", "fourth", "fifth"],
-                  },
-                  { type: "null" },
-                ],
-              },
-              gpa: {
-                description: "minimum GPA",
-                additionalProperties: false,
-                anyOf: [{ type: "number" }, { type: "null" }],
-              },
-            },
-          },
-          year: {
-            type: "object",
-            description:
-              "year of study, or year standing. eg, first-year, second-year, third-year, fourth-year, fifth-year standing or higher",
-            additionalProperties: false,
-            anyOf: [
-              {
-                type: "string",
-                enum: ["first", "second", "third", "fourth", "fifth"],
-              },
-            ],
-          },
-        },
+        properties: { requisite: { anyOf: openAiSchema.anyOf } },
+        $defs: openAiSchema.definitions,
       },
     },
   }
@@ -399,7 +153,9 @@ ${departments.map((department) => `${department.code}: ${department.name}`).join
 const getUserPrompt = (req: string, department: string, faculty: string) => {
   return `
 The requisite text is: ${req}
-The department is: ${department}
-The faculty is: ${faculty}
+
+If the requisite text mentions specifically a department or faculty, use the following information; otherwise, ignore it:
+The course-related department is: ${department}
+The course-related faculty is: ${faculty}
   `
 }

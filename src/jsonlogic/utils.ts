@@ -83,3 +83,62 @@ export const cleanup = (obj: any): any => {
 export const isJsonEqual = (a: JSON, b: JSON): boolean => {
   return JSON.stringify(a) === JSON.stringify(b)
 }
+
+export const getOpenAiSchema = (schema: any) => {
+  const replaceRef = (obj: any): any => {
+    if (Array.isArray(obj)) {
+      return obj.map(replaceRef)
+    }
+
+    if (typeof obj === "string") {
+      if (obj.startsWith("#")) {
+        const parts = obj.split("/")
+        const definition = parts[parts.length - 1]
+        return `#/$defs/${definition}`
+      }
+    }
+
+    if (typeof obj !== "object") {
+      return obj
+    }
+
+    const keys = Object.keys(obj)
+    const newObj: { [key: string]: any } = {}
+
+    for (const key of keys) {
+      if (key === "pattern") continue
+      if (key === "nullable") continue
+      if (key === "oneOf") {
+        newObj["anyOf"] = replaceRef(obj[key])
+        continue
+      }
+
+      newObj[key] = replaceRef(obj[key])
+    }
+
+    if (keys.includes("properties")) {
+      newObj["required"] = Object.keys(obj["properties"])
+      newObj["additionalProperties"] = false
+      newObj["type"] = "object"
+    }
+
+    if (keys.includes("type") && keys.includes("nullable") && keys.includes("items")) {
+      if (obj["type"] === "array" && obj["nullable"] === true && obj["items"]["$ref"]) {
+        newObj["anyOf"] = [{ type: "array", items: { $ref: replaceRef(obj["items"]["$ref"]) } }, { type: "null" }]
+        delete newObj["type"]
+        delete newObj["items"]
+      }
+    }
+
+    if (keys.includes("type") && keys.includes("nullable") && keys.includes("$ref")) {
+      if (obj["type"] === "object" && obj["nullable"] === true) {
+        delete newObj["$ref"]
+        newObj["anyOf"] = [{ $ref: replaceRef(obj["$ref"]) }, { type: "null" }]
+      }
+    }
+
+    return newObj
+  }
+
+  return replaceRef(schema)
+}
