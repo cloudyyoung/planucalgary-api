@@ -129,24 +129,24 @@ export const schema = {
           description: "X units",
         },
         from: {
-          type: "array",
+          type: ["array", "null"],
           description:
             "Specify the courses that the units are from, this is a strict list that the units must be from.",
           items: { $ref: "#/definitions/course" },
         },
         exclude: {
-          type: "array",
+          type: ["array", "null"],
           description:
             "Exclude a list of courses when counting units. This field is usually used when the requisite says some additional units besides the previously named courses",
           items: { $ref: "#/definitions/course" },
         },
         field: {
-          type: ["array", "null"],
+          type: ["string", "null"],
           description:
             "Field of study. Only include this field is the requisite specifically mentions a field of study. Eg, '6 units of courses in the field of Art.' Only include this field if the requisite specifically mentions a field of study.",
         },
         level: {
-          type: ["object", "null"],
+          type: ["string", "null"],
           description:
             "Course level of study. When suffixed with +, it means at or above the level. Eg, '6 units of courses at the 300 level or above.' Only include this field if the requisite specifically mentions a level.",
           $ref: "#/definitions/level",

@@ -107,9 +107,12 @@ export const getOpenAiSchema = (schema: any) => {
 
     for (const key of keys) {
       if (key === "pattern") continue
-      if (key === "nullable") continue
       if (key === "oneOf") {
         newObj["anyOf"] = replaceRef(obj[key])
+        continue
+      }
+      if (key === "type" && obj[key] === "integer") {
+        newObj["type"] = "number"
         continue
       }
 
@@ -122,18 +125,35 @@ export const getOpenAiSchema = (schema: any) => {
       newObj["type"] = "object"
     }
 
-    if (keys.includes("type") && keys.includes("nullable") && keys.includes("items")) {
-      if (obj["type"] === "array" && obj["nullable"] === true && obj["items"]["$ref"]) {
+    if (keys.includes("type") && keys.includes("items")) {
+      if (
+        Array.isArray(obj["type"]) &&
+        obj["type"].includes("array") &&
+        obj["type"].includes("null") &&
+        obj["items"]["$ref"]
+      ) {
+        newObj["type"] = "array"
         newObj["anyOf"] = [{ type: "array", items: { $ref: replaceRef(obj["items"]["$ref"]) } }, { type: "null" }]
         delete newObj["type"]
         delete newObj["items"]
       }
     }
 
-    if (keys.includes("type") && keys.includes("nullable") && keys.includes("$ref")) {
-      if (obj["type"] === "object" && obj["nullable"] === true) {
+    if (keys.includes("type") && Array.isArray(obj["type"]) && obj["type"].includes("null")) {
+      if (keys.includes("$ref")) {
         delete newObj["$ref"]
         newObj["anyOf"] = [{ $ref: replaceRef(obj["$ref"]) }, { type: "null" }]
+        delete newObj["type"]
+      } else if (keys.includes("items")) {
+        const items = replaceRef(obj["items"])
+        const type = obj["type"].filter((type: string) => type !== "null")[0]
+        newObj["anyOf"] = [{ type, items }, { type: "null" }]
+        delete newObj["items"]
+        delete newObj["type"]
+      } else {
+        const type = obj["type"].filter((type: string) => type !== "null")[0]
+        newObj["anyOf"] = [{ type: type }, { type: "null" }]
+        delete newObj["type"]
       }
     }
 

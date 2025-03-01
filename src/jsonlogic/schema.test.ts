@@ -159,7 +159,7 @@ describe("schema", () => {
     expect(valid).toBeTruthy()
   })
 
-  it("valid a complex json: and with units + nested or, truthy", async () => {
+  it("valid a complex json: and with units + nested or + year, truthy", async () => {
     const json = {
       and: [
         {
@@ -177,6 +177,9 @@ describe("schema", () => {
               faculty: "EN",
             },
           ],
+        },
+        {
+          year: "third",
         },
       ],
     }

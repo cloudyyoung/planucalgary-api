@@ -59,7 +59,7 @@ export async function generatePrereq(req: string, department: string, faculty: s
 }
 
 const getResponseFormat = async () => {
-  const schema = await getHydratedSchema()
+  const schema = await getHydratedSchema({ include_courses: false })
   const openAiSchema = getOpenAiSchema(schema)
 
   return {
