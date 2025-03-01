@@ -26,12 +26,32 @@ export const cleanup = (obj: any): any => {
     // If the key is "and" or "or" and the value is an array with only one element,
     // we can remove the key and return the value directly.
     if (key === "and" || key === "or") {
-      if (Array.isArray(value)) {
-        const newValue = value.map(cleanup).filter(bool)
-        if (newValue.length === 0) return null
-        if (newValue.length === 1) return cleanup(newValue[0])
-        return { [key]: newValue }
+      const array = value.map(cleanup).filter(bool)
+      if (array.length === 0) return null
+      if (array.length === 1) return cleanup(array[0])
+
+      // Two or more values
+      const newArray = []
+      for (const value of array) {
+        const childKeys = Object.keys(value)
+
+        if (childKeys.length > 1) {
+          newArray.push(value)
+          continue
+        }
+
+        const childKey = childKeys[0]
+        const childValue = value[childKey]
+
+        // If the same logic operator is nested, we can flatten it
+        if (childKey === key) {
+          newArray.push(...childValue)
+        } else {
+          newArray.push(value)
+        }
       }
+
+      return { [key]: newArray }
     }
   }
 

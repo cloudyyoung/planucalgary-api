@@ -80,4 +80,37 @@ describe("Test util functions", () => {
     const cleaned_obj = cleanup(redundant_obj)
     expect(cleaned_obj).toEqual(expected_obj)
   })
+
+  it("Test remove redundant logical nesting complex 2", () => {
+    const redundant_obj = {
+      and: [
+        {
+          units: 60,
+        },
+        {
+          and: [
+            "ANTH350",
+            {
+              consent: {
+                department: "ANAR",
+              },
+            },
+          ],
+        },
+      ],
+    }
+
+    const expected_obj = {
+      and: [
+        {
+          units: 60,
+        },
+        "ANTH350",
+        { consent: { department: "ANAR" } },
+      ],
+    }
+
+    const cleaned_obj = cleanup(redundant_obj)
+    expect(cleaned_obj).toEqual(expected_obj)
+  })
 })
