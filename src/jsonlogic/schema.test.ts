@@ -189,4 +189,28 @@ describe("schema", () => {
     expect(validate.errors).toBeNull()
     expect(valid).toBeTruthy()
   })
+
+  it("valid a complex json: or with untracked course, falsy", async () => {
+    const json = {
+      or: ["PLAN602", "Environmental Design Planning 602"],
+    }
+
+    const schema = await getHydratedSchema({ include_courses: false })
+    console.error(JSON.stringify(schema))
+    const validate = ajv.compile(schema)
+    const valid = validate(json)
+    expect(valid).toBeFalsy()
+  })
+
+  it("valid a complex json: units with level, falsy", async () => {
+    const json = {
+      units: 3,
+      level: "AA",
+    }
+
+    const schema = await getHydratedSchema({ include_courses: true })
+    const validate = ajv.compile(schema)
+    const valid = validate(json)
+    expect(valid).toBeFalsy()
+  })
 })
