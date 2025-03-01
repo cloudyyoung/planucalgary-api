@@ -13,12 +13,14 @@ export const OpenAIClient = new OpenAI({
 export default OpenAIClient
 
 export async function generatePrereq(req: string, department: string, faculty: string, n: number): Promise<string[]> {
+  const reqCleaned = req.replace("Prerequisite or Corequisite: ", "")
+
   const subjects = await prismaClient.subject.findMany()
   const faculties = await prismaClient.faculty.findMany()
   const departments = await prismaClient.department.findMany()
 
   const systemPrompt = getSystemPrompt(subjects, faculties, departments)
-  const userPrompt = getUserPrompt(req, department, faculty)
+  const userPrompt = getUserPrompt(reqCleaned, department, faculty)
   const responseFormat = await getResponseFormat()
 
   const response = await OpenAIClient.chat.completions.create({
