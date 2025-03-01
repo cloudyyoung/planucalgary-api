@@ -258,7 +258,9 @@ export const getHydratedSchema = async ({
   include_departments = true,
   include_courses = false,
 }: GetHydratedSchemaOptions = {}) => {
-  const hydratedSchema: any = { ...schema }
+  const deepcopy = (obj: any) => JSON.parse(JSON.stringify(obj))
+
+  const hydratedSchema: any = deepcopy(schema)
 
   if (include_subjects) {
     const subjects = await prismaClient.subject.findMany()
