@@ -61,6 +61,7 @@ const getResponseFormat = (faculties: Faculty[], departments: Department[]) => {
   const departmentCodes = departments.map((department) => department.code)
 
   const anyOf = [
+    { $ref: "#/$defs/course" },
     { $ref: "#/$defs/and" },
     { $ref: "#/$defs/or" },
     { $ref: "#/$defs/not" },
@@ -83,6 +84,9 @@ const getResponseFormat = (faculties: Faculty[], departments: Department[]) => {
         additionalProperties: false,
         properties: { requisite: { anyOf: anyOf } },
         $defs: {
+          course: {
+            type: "string",
+          },
           and: {
             type: "object",
             description: "Logic operator of a relationship A and B",
@@ -128,7 +132,7 @@ const getResponseFormat = (faculties: Faculty[], departments: Department[]) => {
           units: {
             type: "object",
             description: "X units",
-            required: ["units", "from", "exclude", "field", "level", "subject"],
+            required: ["units", "from", "exclude", "field", "level", "subject", "faculty", "department"],
             additionalProperties: false,
             properties: {
               units: { type: "number", description: "X units", additionalProperties: false },
