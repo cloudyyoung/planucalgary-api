@@ -5,7 +5,7 @@ import { Prisma, RequisiteType } from "@prisma/client"
 import { RequisiteList, RequisitesSync, RequisiteUpdate } from "./validators"
 import { IdInput } from "../../middlewares"
 import { generatePrereq } from "../utils/openai"
-import { isJsonEqual } from "../utils/json"
+import { isJsonEqual } from "../../jsonlogic/utils"
 
 export const listRequisites = async (req: Request<any, any, any, RequisiteList>, res: Response) => {
   const { type } = req.query

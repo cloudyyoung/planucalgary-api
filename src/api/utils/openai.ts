@@ -120,7 +120,7 @@ const getResponseFormat = (faculties: Faculty[], departments: Department[]) => {
               not: {
                 type: "object",
                 description: "not",
-                anyOf: anyOf,
+                oneOf: anyOf,
                 additionalProperties: false,
               },
             },
