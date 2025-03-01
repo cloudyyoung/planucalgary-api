@@ -1,15 +1,20 @@
-import Ajv from "ajv"
-import { schema } from "./schema"
+import Ajv, { ValidateFunction } from "ajv"
+import { getSchema } from "./schema"
 
 describe("schema", () => {
   const ajv = new Ajv()
-  const validate = ajv.compile(schema)
+  let schema: any
+  let validate: ValidateFunction
 
-  beforeAll(() => {
+  beforeAll(async () => {
+    schema = await getSchema()
     expect(schema).toBeDefined()
+    validate = ajv.compile(schema)
+    expect(validate).toBeDefined()
   })
 
   it("should be a valid schema", () => {
+    expect(schema).toBeDefined()
     expect(ajv.validateSchema(schema)).toBeTruthy()
     const validate = ajv.compile(schema)
     expect(validate).toBeDefined()
