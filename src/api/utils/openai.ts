@@ -120,7 +120,7 @@ const getResponseFormat = (faculties: Faculty[], departments: Department[]) => {
               not: {
                 type: "object",
                 description: "not",
-                oneOf: anyOf,
+                anyOf: anyOf,
                 additionalProperties: false,
               },
             },
@@ -161,6 +161,16 @@ const getResponseFormat = (faculties: Faculty[], departments: Department[]) => {
                   "Subject of study. Only include this field is the requisite specifically mentions a subject. Eg, '6 units of courses labelled Art.'",
                 additionalProperties: false,
                 anyOf: [{ type: "string" }, { type: "null" }],
+              },
+              faculty: {
+                description: "Course offered by a faculty",
+                additionalProperties: false,
+                anyOf: [{ $ref: "#/$defs/faculty" }, { type: "null" }],
+              },
+              department: {
+                description: "Course offered by a department",
+                additionalProperties: false,
+                anyOf: [{ $ref: "#/$defs/department" }, { type: "null" }],
               },
             },
           },

@@ -1,4 +1,4 @@
-import { Schema } from "ajv"
+import Ajv, { Schema } from "ajv"
 
 const and: Schema = {
   type: "object",
@@ -75,10 +75,26 @@ const units: Schema = {
       type: "integer",
     },
     from: {
-      anyOf: [{ $ref: "#/definitions/course" }, { type: "null" }],
+      anyOf: [
+        {
+          type: "array",
+          items: {
+            anyOf: [{ $ref: "#/definitions/course" }, { type: "null" }],
+          },
+        },
+        { type: "null" },
+      ],
     },
     exclude: {
-      anyOf: [{ $ref: "#/definitions/course" }, { type: "null" }],
+      anyOf: [
+        {
+          type: "array",
+          items: {
+            anyOf: [{ $ref: "#/definitions/course" }, { type: "null" }],
+          },
+        },
+        { type: "null" },
+      ],
     },
     field: {
       oneOf: [{ type: "string" }, { type: "null" }],
@@ -89,6 +105,12 @@ const units: Schema = {
     subject: {
       oneOf: [{ $ref: "#/definitions/subject" }, { type: "null" }],
     },
+    faculty: {
+      oneOf: [{ $ref: "#/definitions/faculty" }, { type: "null" }],
+    },
+    department: {
+      oneOf: [{ $ref: "#/definitions/department" }, { type: "null" }],
+    },
   },
 }
 
@@ -98,7 +120,7 @@ const consent: Schema = {
   additionalProperties: false,
   properties: {
     consent: {
-      oneOf: [{ $ref: "#/definitions/faculty" }, { $ref: "#/definitions/department" }],
+      oneOf: [{ $ref: "#/definitions/faculty_object" }, { $ref: "#/definitions/department_object" }],
     },
   },
 }
@@ -111,46 +133,38 @@ const admission: Schema = {
     admission: {
       type: "object",
       oneOf: [
-        { $ref: "#/definitions/faculty" },
-        { $ref: "#/definitions/department" },
-        { $ref: "#/definitions/program" },
+        { $ref: "#/definitions/faculty_object" },
+        { $ref: "#/definitions/department_object" },
+        { $ref: "#/definitions/program_object" },
       ],
     },
   },
 }
 
-const faculty: Schema = {
+const faculty_object: Schema = {
   type: "object",
   required: ["faculty"],
   additionalProperties: false,
   properties: {
-    faculty: {
-      type: "string",
-      pattern: "^[A-Z]{2}$",
-    },
+    faculty: { $ref: "#/definitions/faculty" },
   },
 }
 
-const department: Schema = {
+const department_object: Schema = {
   type: "object",
   required: ["department"],
   additionalProperties: false,
   properties: {
-    department: {
-      type: "string",
-      pattern: "^[A-Z]{4}$",
-    },
+    department: { $ref: "#/definitions/department" },
   },
 }
 
-const program: Schema = {
+const program_object: Schema = {
   type: "object",
   required: ["program"],
   additionalProperties: false,
   properties: {
-    program: {
-      type: "string",
-    },
+    program: { $ref: "#/definitions/program" },
   },
 }
 
@@ -160,7 +174,8 @@ const year: Schema = {
   additionalProperties: false,
   properties: {
     year: {
-      type: "number",
+      type: "string",
+      enum: ["first", "second", "third", "fourth", "fifth"],
     },
   },
 }
@@ -179,6 +194,20 @@ const level: Schema = {
 const subject: Schema = {
   type: "string",
   pattern: "^[A-Z]{3,4}$",
+}
+
+const faculty: Schema = {
+  type: "string",
+  pattern: "^[A-Z]{2}$",
+}
+
+const department: Schema = {
+  type: "string",
+  pattern: "^[A-Z]{3,4}$",
+}
+
+const program: Schema = {
+  type: "string",
 }
 
 export const schema: Schema = {
@@ -201,6 +230,9 @@ export const schema: Schema = {
     course,
     level,
     subject,
+    faculty,
+    department,
+    program,
 
     // Boolean operators
     and,
@@ -212,8 +244,11 @@ export const schema: Schema = {
     year,
 
     // Objects
-    faculty,
-    department,
-    program,
+    faculty_object,
+    department_object,
+    program_object,
   },
 }
+
+const ajv = new Ajv()
+export const validate = ajv.compile(schema)

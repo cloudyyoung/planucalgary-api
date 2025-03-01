@@ -6,6 +6,7 @@ import { RequisiteList, RequisitesSync, RequisiteUpdate } from "./validators"
 import { IdInput } from "../../middlewares"
 import { generatePrereq } from "../utils/openai"
 import { isJsonEqual } from "../../jsonlogic/utils"
+import { validate } from "../../jsonlogic/schema"
 
 export const listRequisites = async (req: Request<any, any, any, RequisiteList>, res: Response) => {
   const { type } = req.query
@@ -36,7 +37,13 @@ export const listRequisites = async (req: Request<any, any, any, RequisiteList>,
       },
     }),
   ])
-  return res.paginate(requisites, total)
+
+  const requisitesValidated = requisites.map((requisite) => ({
+    ...requisite,
+    json_valid: validate(requisite.json),
+  }))
+
+  return res.paginate(requisitesValidated, total)
 }
 
 export const getRequisite = async (req: Request<IdInput>, res: Response) => {
@@ -58,6 +65,11 @@ export const updateRequisite = async (req: Request<IdInput, any, RequisiteUpdate
 
   if (!existing) {
     return res.status(404).json({ message: "Requisite not found" })
+  }
+
+  const json = req.body.json
+  if (json && !validate(json)) {
+    return res.status(400).json({ message: "Invalid JSON" })
   }
 
   const requisite = await req.prisma.requisiteJson.update({
@@ -84,13 +96,18 @@ export const generateRequisiteChoices = async (req: Request<IdInput>, res: Respo
   const faculty = requisite.faculties[0] ?? "None"
   const choices = await generatePrereq(text, department, faculty, 3)
   const json_choices = JSON.parse(JSON.stringify(choices))
+  const valid_choices = json_choices.filter((choice: JSON) => validate(choice))
+
+  if (valid_choices.length === 0) {
+    return res.status(400).json({ message: "No valid choices generated" })
+  }
 
   // Deeply compare all choices if they are the same, if so, automatically select the first choice
-  const allEqual = json_choices.every((choice: JSON) => isJsonEqual(choice, json_choices[0]))
+  const allEqual = valid_choices.every((choice: JSON) => isJsonEqual(choice, valid_choices[0]))
 
   const updated = await req.prisma.requisiteJson.update({
     where: { id: req.params.id },
-    data: { json_choices, json: allEqual ? json_choices[0] : Prisma.DbNull },
+    data: { json_choices, json: allEqual ? valid_choices[0] : Prisma.DbNull },
   })
   return res.json(updated)
 }
