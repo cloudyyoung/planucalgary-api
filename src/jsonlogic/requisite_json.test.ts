@@ -74,4 +74,17 @@ describe("validator", () => {
     const result = await validate(json)
     expect(result).toBe(true)
   })
+
+  it("validate and with only one argument, false", async () => {
+    const json = {
+      and: [
+        {
+          or: ["DRAM243"],
+        },
+      ],
+    }
+
+    const result = await validate(json)
+    expect(result).toBe(false)
+  })
 })

@@ -183,10 +183,13 @@ export const getValidator = async () => {
         const and_arguments = obj.and
 
         if (!Array.isArray(and_arguments)) {
-          errors.push({ message: "'and' operator requires an array of arguments", value: obj })
+          errors.push({ message: '"and" operator requires an array of arguments', value: obj })
           return false
         } else if (and_arguments.length < 2) {
-          errors.push({ message: "'and' operator requires at least 2 arguments", value: obj })
+          errors.push({
+            message: `"and" operator requires at least 2 arguments, got ${and_arguments.length}`,
+            value: obj,
+          })
           return false
         }
 
@@ -200,10 +203,13 @@ export const getValidator = async () => {
         const or_arguments = obj.or
 
         if (!Array.isArray(or_arguments)) {
-          errors.push({ message: "'or' operator requires an array of arguments", value: obj })
+          errors.push({ message: '"or" operator requires an array of arguments', value: obj })
           return false
         } else if (or_arguments.length < 2) {
-          errors.push({ message: "'or' operator requires at least 2 arguments", value: obj })
+          errors.push({
+            message: `"or" operator requires at least 2 arguments, got ${or_arguments.length}`,
+            value: obj,
+          })
           return false
         }
 
@@ -217,7 +223,7 @@ export const getValidator = async () => {
         const not_argument = obj.not
 
         if (typeof not_argument !== "object" || typeof not_argument !== "string") {
-          errors.push({ message: "'not' operator requires a single argument", value: obj })
+          errors.push({ message: '"not" operator requires a single argument', value: obj })
           return false
         }
 
