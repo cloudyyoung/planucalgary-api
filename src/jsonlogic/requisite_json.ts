@@ -112,13 +112,13 @@ export const getValidator = async () => {
           return false
         }
 
-        if (options.strict) {
-          const valid = courseCodes.includes(obj)
-          if (!valid) {
+        const valid = courseCodes.includes(obj)
+        if (!valid) {
+          if (options.strict) {
             errors.push({ message: "Course code does not exist", value: obj })
             return false
           }
-        } else {
+
           const regex = /^[A-Z]{3,4}[0-9]{2,3}(-[0-9])?(.[0-9]{2})?[AB]?$/
           const valid = regex.test(obj)
           if (!valid) {
@@ -150,13 +150,13 @@ export const getValidator = async () => {
           return false
         }
 
-        if (options.strict) {
-          const valid = subjectCodes.includes(obj)
-          if (!valid) {
+        const valid = subjectCodes.includes(obj)
+        if (!valid) {
+          if (options.strict) {
             errors.push({ message: "Subject code does not exist", value: obj })
             return false
           }
-        } else {
+
           const regex = /^[A-Z]{3,4}$/
           const valid = regex.test(obj)
           if (!valid) {
@@ -173,14 +173,14 @@ export const getValidator = async () => {
           return false
         }
 
-        if (options.strict) {
-          const valid = facultyCodes.includes(obj)
-          if (!valid) {
+        const valid = facultyCodes.includes(obj)
+        if (!valid) {
+          if (options.strict) {
             errors.push({ message: "Faculty code does not exist", value: obj })
             return false
           }
-        } else {
-          const regex = /^UCALG|[A-Z]{2}$/
+
+          const regex = /^[A-Z]{2}$/
           const valid = regex.test(obj)
           if (!valid) {
             errors.push({ message: "Faculty code is not in a valid format", value: obj })
@@ -196,13 +196,13 @@ export const getValidator = async () => {
           return false
         }
 
-        if (options.strict) {
-          const valid = departmentCodes.includes(obj)
-          if (!valid) {
+        const valid = departmentCodes.includes(obj)
+        if (!valid) {
+          if (options.strict) {
             errors.push({ message: "Department code does not exist", value: obj })
             return false
           }
-        } else {
+
           const regex = /^[A-Z]{3,4}$/
           const valid = regex.test(obj)
           if (!valid) {
