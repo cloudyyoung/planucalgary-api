@@ -1,4 +1,5 @@
 import { prismaClient } from "../middlewares"
+import { bool } from "./utils"
 
 export type CourseCode = string
 export type FacultyCode = string
@@ -198,7 +199,8 @@ export const getValidator = async () => {
           return false
         }
 
-        return and_arguments.every(_validate)
+        const results = and_arguments.map(_validate)
+        return results.every(bool)
       },
       or: (obj: Or) => {
         if (!is_object(obj, "or", true)) {
@@ -218,7 +220,8 @@ export const getValidator = async () => {
           return false
         }
 
-        return or_arguments.every(_validate)
+        const results = or_arguments.map(_validate)
+        return results.some(bool)
       },
       not: (obj: Not) => {
         if (!is_object(obj, "not", true)) {
@@ -434,12 +437,11 @@ export const getValidator = async () => {
       const validatorFns = Object.values(operator_validators)
       const oneOf = validatorFns.some((validator) => validator(obj))
 
-      if (!oneOf) {
+      if (!oneOf && errors.length === 0) {
         errors.push({ message: "Unknown requiste body", value: obj })
-        return false
       }
 
-      return true
+      return oneOf
     }
 
     const errors: RequisiteValidationError[] = []
