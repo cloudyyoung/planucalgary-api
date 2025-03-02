@@ -15,13 +15,11 @@ export default OpenAIClient
 export async function generatePrereq(req: string, department: string, faculty: string, n: number): Promise<string[]> {
   const reqCleaned = req.replace("Prerequisite or Corequisite: ", "")
 
-  const subjects = await prismaClient.subject.findMany()
-  const faculties = await prismaClient.faculty.findMany()
-  const departments = await prismaClient.department.findMany()
+  const { subjects, faculties, departments } = await getRelatedData(reqCleaned, department, faculty)
 
   const systemPrompt = getSystemPrompt(subjects, faculties, departments)
   const userPrompt = getUserPrompt(reqCleaned, department, faculty)
-  const responseFormat = await getResponseFormat()
+  const responseFormat = await getResponseFormat(subjects, faculties, departments)
 
   const response = await OpenAIClient.chat.completions.create({
     model: "gpt-4o",
@@ -60,13 +58,38 @@ export async function generatePrereq(req: string, department: string, faculty: s
   return contents
 }
 
-const getResponseFormat = async () => {
+export const getRelatedData = async (req: string, department?: string, faculty?: string) => {
+  const reqCleaned = req.replace("Prerequisite or Corequisite: ", "")
+
   const [subjects, faculties, departments] = await Promise.all([
     prismaClient.subject.findMany(),
     prismaClient.faculty.findMany(),
     prismaClient.department.findMany(),
   ])
 
+  const relatedSubjects = subjects.filter((subject) => reqCleaned.includes(subject.title))
+  const relatedFaculties = faculties.filter((faculty) => reqCleaned.includes(faculty.display_name))
+  const relatedDepartments = departments.filter((department) => reqCleaned.includes(department.name))
+
+  const extraFaculty = faculties.find((faculty_obj) => faculty_obj.code === faculty)
+  const extraDepartment = departments.find((department_obj) => department_obj.code === department)
+
+  if (extraFaculty) {
+    relatedFaculties.push(extraFaculty)
+  }
+
+  if (extraDepartment) {
+    relatedDepartments.push(extraDepartment)
+  }
+
+  return {
+    subjects: relatedSubjects,
+    faculties: relatedFaculties,
+    departments: relatedDepartments,
+  }
+}
+
+const getResponseFormat = async (subjects: Subject[], faculties: Faculty[], departments: Department[]) => {
   const subjectCodes = subjects.map((subject) => subject.code).slice(0, 0)
   const facultyCodes = faculties.map((faculty) => faculty.code)
   const departmentCodes = departments.map((department) => department.code)
