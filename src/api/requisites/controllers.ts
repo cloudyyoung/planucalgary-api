@@ -18,7 +18,6 @@ export const listRequisites = async (req: Request<any, any, any, RequisiteList>,
         text: true,
         departments: true,
         faculties: true,
-        program: true,
         json: true,
         json_choices: true,
       },
@@ -152,7 +151,6 @@ export const syncRequisites = async (req: Request<RequisitesSync>, res: Response
           text: prereq,
           departments: department_codes,
           faculties: faculty_codes,
-          program: "",
           json: Prisma.JsonNull,
           json_choices: [],
         })
@@ -163,7 +161,6 @@ export const syncRequisites = async (req: Request<RequisitesSync>, res: Response
           text: coreq,
           departments: department_codes,
           faculties: faculty_codes,
-          program: "",
           json: Prisma.JsonNull,
           json_choices: [],
         })
@@ -174,7 +171,6 @@ export const syncRequisites = async (req: Request<RequisitesSync>, res: Response
           text: antireq,
           departments: department_codes,
           faculties: faculty_codes,
-          program: "",
           json: Prisma.JsonNull,
           json_choices: [],
         })
@@ -220,12 +216,11 @@ export const syncRequisites = async (req: Request<RequisitesSync>, res: Response
       if (prereq) {
         const prereq_json_row = await req.prisma.requisiteJson.findUnique({
           where: {
-            requisite_type_text_departments_faculties_program: {
+            requisite_type_text_departments_faculties: {
               requisite_type: RequisiteType.PREREQ,
               text: prereq,
               departments: department_codes,
               faculties: faculty_codes,
-              program: "",
             },
           },
         })
@@ -238,12 +233,11 @@ export const syncRequisites = async (req: Request<RequisitesSync>, res: Response
       if (coreq) {
         const coreq_json_row = await req.prisma.requisiteJson.findUnique({
           where: {
-            requisite_type_text_departments_faculties_program: {
+            requisite_type_text_departments_faculties: {
               requisite_type: RequisiteType.COREQ,
               text: coreq,
               departments: department_codes,
               faculties: faculty_codes,
-              program: "",
             },
           },
         })
@@ -256,12 +250,11 @@ export const syncRequisites = async (req: Request<RequisitesSync>, res: Response
       if (antireq) {
         const antireq_json_row = await req.prisma.requisiteJson.findUnique({
           where: {
-            requisite_type_text_departments_faculties_program: {
+            requisite_type_text_departments_faculties: {
               requisite_type: RequisiteType.ANTIREQ,
               text: antireq,
               departments: department_codes,
               faculties: faculty_codes,
-              program: "",
             },
           },
         })
