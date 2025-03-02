@@ -66,12 +66,12 @@ describe("validator", () => {
           units: 12,
         },
         {
-          or: ["DRAM240", "DRAM243"],
+          or: ["DRAM242", "DRAM243"],
         },
       ],
     }
 
     const result = await validate(json)
-    expect(result).toBe(false)
+    expect(result).toBe(true)
   })
 })
