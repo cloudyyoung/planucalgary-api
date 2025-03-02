@@ -19,7 +19,7 @@ export async function generatePrereq(req: string, department: string, faculty: s
 
   const systemPrompt = getSystemPrompt(subjects, faculties, departments)
   const userPrompt = getUserPrompt(reqCleaned, department, faculty)
-  const responseFormat = getResponseFormat(subjects, faculties, departments)
+  const responseFormat = getResponseFormat()
 
   const response = await OpenAIClient.chat.completions.create({
     model: "gpt-4o",
@@ -89,28 +89,8 @@ export const getRelatedData = async (req: string, department?: string, faculty?:
   }
 }
 
-const getResponseFormat = (subjects: Subject[], faculties: Faculty[], departments: Department[]) => {
-  const subjectCodes = subjects.map((subject) => subject.code)
-  const facultyCodes = faculties.map((faculty) => faculty.code)
-  const departmentCodes = departments.map((department) => department.code)
-
-  const schema = getSchema({ subjectCodes, facultyCodes, departmentCodes })
-
-  return {
-    type: "json_schema" as const,
-    json_schema: {
-      name: "requisite_schema",
-      description: "Schema for course prerequisites",
-      strict: true,
-      schema: {
-        type: "object",
-        required: ["requisite"],
-        additionalProperties: false,
-        properties: { requisite: { anyOf: schema.anyOf } },
-        $defs: schema.definitions,
-      },
-    },
-  }
+const getResponseFormat = () => {
+  return getSchema()
 }
 
 const getSystemPrompt = (subjects: Subject[], faculties: Faculty[], departments: Department[]) => {
