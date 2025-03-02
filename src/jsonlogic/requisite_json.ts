@@ -406,6 +406,10 @@ export const getValidator = async () => {
     }
 
     const _validate = (obj: any): boolean => {
+      if (obj === null || obj === undefined) {
+        return false
+      }
+
       if (typeof obj === "string") {
         return primitive_validators.course_code(obj)
       }

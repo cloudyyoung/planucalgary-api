@@ -6,11 +6,11 @@ import { RequisiteList, RequisitesSync, RequisiteUpdate } from "./validators"
 import { IdInput } from "../../middlewares"
 import { generatePrereq } from "../utils/openai"
 import { cleanup, isJsonEqual } from "../../jsonlogic/utils"
-import { ajv, getHydratedSchema } from "../../jsonlogic/schema"
+import { getValidator } from "../../jsonlogic/requisite_json"
 
 export const listRequisites = async (req: Request<any, any, any, RequisiteList>, res: Response) => {
   const { type } = req.query
-  const [requisites, total, schema] = await Promise.all([
+  const [requisites, total, validate] = await Promise.all([
     req.prisma.requisiteJson.findMany({
       select: {
         id: true,
@@ -36,10 +36,8 @@ export const listRequisites = async (req: Request<any, any, any, RequisiteList>,
         ...(type && { requisite_type: type }),
       },
     }),
-    getHydratedSchema(),
+    getValidator(),
   ])
-
-  const validate = ajv.compile(schema)
 
   const requisitesValidated = requisites.map((requisite) => ({
     ...requisite,
@@ -70,12 +68,13 @@ export const updateRequisite = async (req: Request<IdInput, any, RequisiteUpdate
     return res.status(404).json({ message: "Requisite not found" })
   }
 
-  const schema = await getHydratedSchema({ include_courses: true })
-  const validate = ajv.compile(schema)
+  const validate = await getValidator()
 
-  const json = req.body.json
-  if (json && !validate(json)) {
-    return res.status(400).json({ message: "Invalid JSON", error: ajv.errorsText(validate.errors) })
+  try {
+    const json = req.body.json
+    validate(json, false)
+  } catch (e: any) {
+    return res.status(400).json({ message: "Invalid JSON", errors: e.errors })
   }
 
   const requisite = await req.prisma.requisiteJson.update({
