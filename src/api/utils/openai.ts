@@ -19,7 +19,7 @@ export async function generatePrereq(req: string, department: string, faculty: s
 
   const systemPrompt = getSystemPrompt(subjects, faculties, departments)
   const userPrompt = getUserPrompt(reqCleaned, department, faculty)
-  const responseFormat = await getResponseFormat(subjects, faculties, departments)
+  const responseFormat = getResponseFormat(subjects, faculties, departments)
 
   const response = await OpenAIClient.chat.completions.create({
     model: "gpt-4o",
@@ -89,8 +89,8 @@ export const getRelatedData = async (req: string, department?: string, faculty?:
   }
 }
 
-const getResponseFormat = async (subjects: Subject[], faculties: Faculty[], departments: Department[]) => {
-  const subjectCodes = subjects.map((subject) => subject.code).slice(0, 0)
+const getResponseFormat = (subjects: Subject[], faculties: Faculty[], departments: Department[]) => {
+  const subjectCodes = subjects.map((subject) => subject.code)
   const facultyCodes = faculties.map((faculty) => faculty.code)
   const departmentCodes = departments.map((department) => department.code)
 
@@ -138,8 +138,8 @@ You are an advanced admission bot for a university tasked with processing course
           "MATH101",
           {
             "or": [
-              ""PHYS201",
-              ""CHEM102A"
+              "PHYS201",
+              "CHEM102A"
             ]
           }
         ]

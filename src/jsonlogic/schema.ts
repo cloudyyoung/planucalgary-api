@@ -37,10 +37,43 @@ export const getSchema = ({ subjectCodes, facultyCodes, departmentCodes }: GetSc
     enum: departmentCodes,
   }
 
+  const department_obj = {
+    type: "object",
+    description: "A department",
+    required: ["department"],
+    additionalProperties: false,
+    properties: {
+      department: department,
+    },
+  }
+
   const faculty = {
     type: "string",
     description: "A faculty code. Eg, 'KN' for Kinesiology.",
     enum: facultyCodes,
+  }
+
+  const faculty_obj = {
+    type: "object",
+    description: "A faculty",
+    required: ["faculty"],
+    additionalProperties: false,
+    properties: {
+      faculty: faculty,
+    },
+  }
+
+  const program_onj = {
+    type: "object",
+    description: "A program",
+    required: ["program"],
+    additionalProperties: false,
+    properties: {
+      program: {
+        type: "string",
+        description: "A program code",
+      },
+    },
   }
 
   const schema = {
@@ -55,18 +88,6 @@ export const getSchema = ({ subjectCodes, facultyCodes, departmentCodes }: GetSc
     ],
 
     definitions: {
-      level: {
-        type: "string",
-        description:
-          "Course level of study. When suffixed with +, it means at or above the level. Eg, '6 units of courses at the 300 level or above.'",
-      },
-      subject: {
-        type: "string",
-        description:
-          "Subject of study. Only include this field is the requisite specifically mentions a subject. Eg, '6 units of courses labelled Art.'",
-      },
-      faculty: faculty,
-      department: department,
       and: {
         type: "object",
         description: "Logic operator of a relationship A and B",
@@ -220,7 +241,7 @@ export const getSchema = ({ subjectCodes, facultyCodes, departmentCodes }: GetSc
         additionalProperties: false,
         properties: {
           consent: {
-            anyOf: [{ $ref: "#/$defs/faculty_object" }, { $ref: "#/$defs/department_object" }],
+            anyOf: [faculty_obj, department_obj],
           },
         },
       },
@@ -231,17 +252,7 @@ export const getSchema = ({ subjectCodes, facultyCodes, departmentCodes }: GetSc
         additionalProperties: false,
         properties: {
           admission: {
-            anyOf: [
-              {
-                $ref: "#/$defs/faculty_object",
-              },
-              {
-                $ref: "#/$defs/department_object",
-              },
-              {
-                $ref: "#/$defs/program_object",
-              },
-            ],
+            anyOf: [faculty_obj, department_obj, program_onj],
           },
         },
       },
@@ -256,36 +267,6 @@ export const getSchema = ({ subjectCodes, facultyCodes, departmentCodes }: GetSc
             description:
               "year of study, or year standing. eg, first-year, second-year, third-year, fourth-year, fifth-year standing or higher",
             enum: ["first", "second", "third", "fourth", "fifth"],
-          },
-        },
-      },
-      faculty_object: {
-        type: "object",
-        description: "A faculty",
-        required: ["faculty"],
-        additionalProperties: false,
-        properties: {
-          faculty: faculty,
-        },
-      },
-      department_object: {
-        type: "object",
-        description: "A department",
-        required: ["department"],
-        additionalProperties: false,
-        properties: {
-          department: department,
-        },
-      },
-      program_object: {
-        type: "object",
-        description: "A program",
-        required: ["program"],
-        additionalProperties: false,
-        properties: {
-          program: {
-            type: "string",
-            description: "A program code",
           },
         },
       },
