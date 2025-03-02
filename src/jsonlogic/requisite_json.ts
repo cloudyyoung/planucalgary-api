@@ -119,7 +119,7 @@ export const getValidator = async () => {
             return false
           }
 
-          const regex = /^[A-Z]{3,4}[0-9]{2,3}(-[0-9])?(.[0-9]{2})?[AB]?$/
+          const regex = /^([A-Z]{3,4}|[A-Za-z ,]+ )[0-9]{2,3}(-[0-9])?(.[0-9]{2})?[AB]?$/
           const valid = regex.test(obj)
           if (!valid) {
             errors.push({ message: "Course code is not in a valid format", value: obj })
