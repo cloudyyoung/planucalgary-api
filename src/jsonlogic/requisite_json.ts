@@ -71,8 +71,20 @@ export const getValidator = async () => {
   const facultyCodes = faculties.map((faculty) => faculty.code)
   const departments = await prismaClient.department.findMany()
   const departmentCodes = departments.map((department) => department.code)
-  const courses = await prismaClient.course.findMany()
-  const courseCodes = courses.map((course) => course.code)
+  const courses = await prismaClient.course.findMany({
+    select: {
+      code: true,
+      topics: {
+        select: {
+          number: true,
+        },
+      },
+    },
+  })
+  const courseCodes = courses.flatMap((course) => {
+    const topics = course.topics.map((topic) => `${course.code}.${topic.number.padStart(2, "0")}`)
+    return [course.code, ...topics]
+  })
 
   const validator = (json: any, options?: ValidateOptions): ValidateResult => {
     options = options !== undefined ? options : {}

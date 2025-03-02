@@ -106,31 +106,31 @@ describe("validator", () => {
     expect(result.valid).toBe(true)
   })
 
-  it("valid a really simple json: course, truthy", async () => {
+  it("valid a really simple json: course, truthy", () => {
     const json = "CPSC217"
     const result = validate(json)
     expect(result.valid).toBe(true)
   })
 
-  it("valid a simple json: course, falsy", async () => {
+  it("valid a simple json: course, falsy", () => {
     const json = "ABCD123"
     const result = validate(json)
     expect(result.valid).toBe(false)
   })
 
-  it("valid a simple json: and with two courses, truthy", async () => {
+  it("valid a simple json: and with two courses, truthy", () => {
     const json = { and: ["ACCT445", "ACCT357"] }
     const result = validate(json)
     expect(result.valid).toBe(true)
   })
 
-  it("valid a simple json: and with two courses, falsy", async () => {
+  it("valid a simple json: and with two courses, falsy", () => {
     const json = { and: ["ABCD123", "CDEF456"] }
     const result = validate(json)
     expect(result.valid).toBe(false)
   })
 
-  it("valid a simpler json, and with units + or, truthy", async () => {
+  it("valid a simpler json, and with units + or, truthy", () => {
     const json = {
       and: [
         {
@@ -146,7 +146,7 @@ describe("validator", () => {
     expect(result.valid).toBe(true)
   })
 
-  it("valid a simpler json: and with units + units + or, falsy", async () => {
+  it("valid a simpler json: and with units + units + or, falsy", () => {
     const json = {
       and: [
         {
@@ -166,7 +166,7 @@ describe("validator", () => {
     expect(result.valid).toBe(false)
   })
 
-  it("valid a complex json: and with units + consent, truthy", async () => {
+  it("valid a complex json: and with units + consent, truthy", () => {
     const json = {
       and: [
         {
@@ -185,7 +185,7 @@ describe("validator", () => {
     expect(result.valid).toBe(true)
   })
 
-  it("valid a year json", async () => {
+  it("valid a year json", () => {
     const json = {
       year: "fourth",
     }
@@ -193,7 +193,7 @@ describe("validator", () => {
     expect(result.valid).toBe(true)
   })
 
-  it("valid a complex json: and with course + admission + consent, truthy", async () => {
+  it("valid a complex json: and with course + admission + consent, truthy", () => {
     const json = {
       and: [
         "KNES260",
@@ -213,7 +213,7 @@ describe("validator", () => {
     expect(result.valid).toBe(true)
   })
 
-  it("valid a complex json: and with units + consent, truthy", async () => {
+  it("valid a complex json: and with units + consent, truthy", () => {
     const json = {
       and: [
         {
@@ -232,7 +232,7 @@ describe("validator", () => {
     expect(result.valid).toBe(true)
   })
 
-  it("valid a complex json: and with units + nested or + year, truthy", async () => {
+  it("valid a complex json: and with units + nested or + year, truthy", () => {
     const json = {
       and: [
         {
@@ -260,7 +260,7 @@ describe("validator", () => {
     expect(result.valid).toBe(true)
   })
 
-  it("valid a complex json: or with untracked course, falsy", async () => {
+  it("valid a complex json: or with untracked course, falsy", () => {
     const json = {
       or: ["PLAN602", "Environmental Design Planning 602"],
     }
@@ -268,12 +268,21 @@ describe("validator", () => {
     expect(result.valid).toBe(false)
   })
 
-  it("valid a complex json: units with level, falsy", async () => {
+  it("valid a complex json: units with level, falsy", () => {
     const json = {
       units: 3,
       level: "AA",
     }
     const result = validate(json)
     expect(result.valid).toBe(false)
+  })
+
+  it("validate course with topic number", () => {
+    const json = {
+      from: ["ENCI481", "ENEE377", "ENEE519.09"],
+      units: 3,
+    }
+    const result = validate(json)
+    expect(result.valid).toBe(true)
   })
 })
