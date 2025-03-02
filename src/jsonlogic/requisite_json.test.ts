@@ -1,7 +1,7 @@
-import { RequisiteJsonError, getValidator } from "./requisite_json"
+import { RequisiteJsonError, ValidateResult, getValidator } from "./requisite_json"
 
 describe("validator", () => {
-  let validate: any
+  let validate: (json: any, safe?: boolean) => ValidateResult
 
   beforeAll(async () => {
     validate = await getValidator()
@@ -9,25 +9,25 @@ describe("validator", () => {
 
   it("validate course, truthy", async () => {
     const json = "CPSC217"
-    const result = await validate(json)
+    const result = validate(json)
     expect(result.valid).toBe(true)
   })
 
   it("validate course, falsy", async () => {
     const json = "ABCD1237"
-    const result = await validate(json)
+    const result = validate(json)
     expect(result.valid).toBe(false)
   })
 
   it("validate and with two courses, truthy", async () => {
     const json = { and: ["CPSC217", "CPSC231"] }
-    const result = await validate(json)
+    const result = validate(json)
     expect(result.valid).toBe(true)
   })
 
   it("validate and with two courses, truthy", async () => {
     const json = { and: ["ABCD222", "TTTT222"] }
-    const result = await validate(json)
+    const result = validate(json)
     expect(result.valid).toBe(false)
   })
 
@@ -36,7 +36,7 @@ describe("validator", () => {
       from: ["ENGG213", "COMS363", "SGMA217"],
       units: 3,
     }
-    const result = await validate(json)
+    const result = validate(json)
     expect(result.valid).toBe(true)
   })
 
@@ -54,7 +54,7 @@ describe("validator", () => {
       ],
     }
 
-    const t = async () => await validate(json, false)
+    const t = async () => validate(json, false)
     await expect(t()).rejects.toThrow(RequisiteJsonError)
   })
 
@@ -71,7 +71,7 @@ describe("validator", () => {
       ],
     }
 
-    const result = await validate(json)
+    const result = validate(json)
     expect(result.valid).toBe(true)
   })
 
@@ -84,7 +84,25 @@ describe("validator", () => {
       ],
     }
 
-    const result = await validate(json)
+    const result = validate(json)
     expect(result.valid).toBe(false)
+  })
+
+  it("validate year, truthy", async () => {
+    const json = {
+      and: [
+        {
+          year: "third",
+        },
+        {
+          consent: {
+            faculty: "AR",
+          },
+        },
+      ],
+    }
+
+    const result = validate(json, false)
+    expect(result.valid).toBe(true)
   })
 })

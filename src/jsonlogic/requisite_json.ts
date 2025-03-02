@@ -107,7 +107,7 @@ export const getValidator = async () => {
         const regex = /[0-9]{2,3}[+]?/
         const valid = regex.test(obj)
         if (!valid) {
-          errors.push({ message: "Invalid level", value: obj })
+          errors.push({ message: "Level is not in a valid format", value: obj })
           return false
         }
 
@@ -254,7 +254,7 @@ export const getValidator = async () => {
             errors.push({ message: "Property 'from' must be an array", value: obj })
             return false
           } else if (!from.every(primitive_validators.course_code)) {
-            errors.push({ message: "Property 'from' must be an array of courses", value: obj })
+            errors.push({ message: "Property 'from' must be an array of courses, got alien element(s)", value: obj })
             return false
           }
         }
@@ -265,7 +265,7 @@ export const getValidator = async () => {
             errors.push({ message: "Property 'exclude' must be an array", value: obj })
             return false
           } else if (!exclude.every(primitive_validators.course_code)) {
-            errors.push({ message: "Property 'exclude' must be an array of courses", value: obj })
+            errors.push({ message: "Property 'exclude' must be an array of courses, got alien element(s)", value: obj })
             return false
           }
         }
@@ -281,7 +281,7 @@ export const getValidator = async () => {
           if (typeof level !== "string") {
             errors.push({ message: "Property 'level' must be a string", value: obj })
             return false
-          } else if (primitive_validators.level_string) {
+          } else if (!primitive_validators.level_string(level)) {
             errors.push({ message: "Property 'level' must be a valid level", value: obj })
             return false
           }
@@ -327,7 +327,7 @@ export const getValidator = async () => {
           return false
         }
 
-        return _validate(consent)
+        return true
       },
       admission: (obj: Admission) => {
         if (!is_object(obj, "admission", true)) {
@@ -352,7 +352,7 @@ export const getValidator = async () => {
           return false
         }
 
-        return _validate(admission)
+        return true
       },
       year: (obj: Year) => {
         if (!is_object(obj, "year", true)) {
@@ -418,6 +418,7 @@ export const getValidator = async () => {
 
     const _validate = (obj: any): boolean => {
       if (obj === null || obj === undefined) {
+        errors.push({ message: "Requisite JSON cannot be null or undefined", value: obj })
         return false
       }
 
@@ -426,12 +427,19 @@ export const getValidator = async () => {
       }
 
       if (typeof obj !== "object") {
+        errors.push({ message: "Requisite JSON must be an object or a string", value: obj })
         return false
       }
 
       const validatorFns = Object.values(operator_validators)
       const oneOf = validatorFns.some((validator) => validator(obj))
-      return oneOf
+
+      if (!oneOf) {
+        errors.push({ message: "Unknown requiste body", value: obj })
+        return false
+      }
+
+      return true
     }
 
     const errors: RequisiteValidationError[] = []
