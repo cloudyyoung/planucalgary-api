@@ -256,7 +256,10 @@ export const getValidator = async () => {
           if (!Array.isArray(from)) {
             errors.push({ message: "Property 'from' must be an array", value: obj })
             return false
-          } else if (!from.every(primitive_validators.course_code)) {
+          }
+
+          const results = from.map(primitive_validators.course_code)
+          if (!results.every(bool)) {
             errors.push({ message: "Property 'from' must be an array of courses, got alien element(s)", value: obj })
             return false
           }
@@ -267,7 +270,10 @@ export const getValidator = async () => {
           if (!Array.isArray(exclude)) {
             errors.push({ message: "Property 'exclude' must be an array", value: obj })
             return false
-          } else if (!exclude.every(primitive_validators.course_code)) {
+          }
+
+          const results = exclude.map(primitive_validators.course_code)
+          if (!results.every(bool)) {
             errors.push({ message: "Property 'exclude' must be an array of courses, got alien element(s)", value: obj })
             return false
           }
