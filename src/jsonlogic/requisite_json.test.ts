@@ -7,31 +7,31 @@ describe("validator", () => {
     validate = await getValidator()
   })
 
-  it("validate course, truthy", async () => {
+  it("validate course, truthy", () => {
     const json = "CPSC217"
     const result = validate(json)
     expect(result.valid).toBe(true)
   })
 
-  it("validate course, falsy", async () => {
+  it("validate course, falsy", () => {
     const json = "ABCD1237"
     const result = validate(json)
     expect(result.valid).toBe(false)
   })
 
-  it("validate and with two courses, truthy", async () => {
+  it("validate and with two courses, truthy", () => {
     const json = { and: ["CPSC217", "CPSC231"] }
     const result = validate(json)
     expect(result.valid).toBe(true)
   })
 
-  it("validate and with two courses, truthy", async () => {
+  it("validate and with two courses, truthy", () => {
     const json = { and: ["ABCD222", "TTTT222"] }
     const result = validate(json)
     expect(result.valid).toBe(false)
   })
 
-  it("validate units with from, truthy", async () => {
+  it("validate units with from, truthy", () => {
     const json = {
       from: ["ENGG213", "COMS363", "SGMA217"],
       units: 3,
@@ -40,7 +40,7 @@ describe("validator", () => {
     expect(result.valid).toBe(true)
   })
 
-  it("validate and with two arguments of units, falsy", async () => {
+  it("validate and with two arguments of units, falsy", () => {
     const json = {
       and: [
         {
@@ -54,11 +54,11 @@ describe("validator", () => {
       ],
     }
 
-    const t = async () => validate(json, false)
-    await expect(t()).rejects.toThrow(RequisiteJsonError)
+    const t = () => validate(json, false)
+    expect(t).toThrow(RequisiteJsonError)
   })
 
-  it("validate and with two arguments of units + another or, truthy", async () => {
+  it("validate and with two arguments of units + another or, truthy", () => {
     const json = {
       and: [
         {
@@ -75,7 +75,7 @@ describe("validator", () => {
     expect(result.valid).toBe(true)
   })
 
-  it("validate and with only one argument, false", async () => {
+  it("validate and with only one argument, false", () => {
     const json = {
       and: [
         {
@@ -88,7 +88,7 @@ describe("validator", () => {
     expect(result.valid).toBe(false)
   })
 
-  it("validate year, truthy", async () => {
+  it("validate year, truthy", () => {
     const json = {
       and: [
         {
