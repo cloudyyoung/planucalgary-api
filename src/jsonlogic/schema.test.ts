@@ -1,9 +1,9 @@
-import { getHydratedSchema, ajv } from "./schema"
+import { getSchema, ajv } from "./schema"
 
 describe("schema", () => {
   it("valid a really simple json: course, truthy", async () => {
     const json = "CPSC217"
-    const schema = await getHydratedSchema({ include_courses: true })
+    const schema = await getSchema({ include_courses: true })
     const validate = ajv.compile(schema)
     const valid = validate(json)
     expect(validate.errors).toBeNull()
@@ -12,7 +12,7 @@ describe("schema", () => {
 
   it("valid a simple json: course, falsy", async () => {
     const json = "ABCD123"
-    const schema = await getHydratedSchema({ include_courses: true })
+    const schema = await getSchema({ include_courses: true })
     const validate = ajv.compile(schema)
     const valid = validate(json)
     expect(valid).toBeFalsy()
@@ -20,7 +20,7 @@ describe("schema", () => {
 
   it("valid a simple json: and with two courses, truthy", async () => {
     const json = { and: ["ACCT445", "ACCT357"] }
-    const schema = await getHydratedSchema({ include_courses: true })
+    const schema = await getSchema({ include_courses: true })
     const validate = ajv.compile(schema)
     const valid = validate(json)
     console.error(validate.errors)
@@ -29,7 +29,7 @@ describe("schema", () => {
 
   it("valid a simple json: and with two courses, falsy", async () => {
     const json = { and: ["ABCD123", "CDEF456"] }
-    const schema = await getHydratedSchema({ include_courses: true })
+    const schema = await getSchema({ include_courses: true })
     const validate = ajv.compile(schema)
     const valid = validate(json)
     expect(valid).toBeFalsy()
@@ -47,7 +47,7 @@ describe("schema", () => {
         },
       ],
     }
-    const schema = await getHydratedSchema({ include_courses: true })
+    const schema = await getSchema({ include_courses: true })
     const validate = ajv.compile(schema)
     const valid = validate(json)
     expect(validate.errors).toBeNull()
@@ -70,7 +70,7 @@ describe("schema", () => {
         },
       ],
     }
-    const schema = await getHydratedSchema({ include_courses: true })
+    const schema = await getSchema({ include_courses: true })
     const validate = ajv.compile(schema)
     const valid = validate(json)
     expect(validate.errors).not.toBeNull()
@@ -92,7 +92,7 @@ describe("schema", () => {
         },
       ],
     }
-    const schema = await getHydratedSchema({ include_courses: true })
+    const schema = await getSchema({ include_courses: true })
     const validate = ajv.compile(schema)
     const valid = validate(json)
     expect(validate.errors).toBeNull()
@@ -103,7 +103,7 @@ describe("schema", () => {
     const json = {
       year: "fourth",
     }
-    const schema = await getHydratedSchema({ include_courses: true })
+    const schema = await getSchema({ include_courses: true })
     const validate = ajv.compile(schema)
     const valid = validate(json)
     expect(validate.errors).toBeNull()
@@ -126,7 +126,7 @@ describe("schema", () => {
         },
       ],
     }
-    const schema = await getHydratedSchema({ include_courses: true })
+    const schema = await getSchema({ include_courses: true })
     const validate = ajv.compile(schema)
     const valid = validate(json)
     expect(validate.errors).toBeNull()
@@ -148,7 +148,7 @@ describe("schema", () => {
         },
       ],
     }
-    const schema = await getHydratedSchema({ include_courses: true })
+    const schema = await getSchema({ include_courses: true })
     const validate = ajv.compile(schema)
     const valid = validate(json)
 
@@ -183,7 +183,7 @@ describe("schema", () => {
         },
       ],
     }
-    const schema = await getHydratedSchema({ include_courses: true })
+    const schema = await getSchema({ include_courses: true })
     const validate = ajv.compile(schema)
     const valid = validate(json)
     expect(validate.errors).toBeNull()
@@ -195,7 +195,7 @@ describe("schema", () => {
       or: ["PLAN602", "Environmental Design Planning 602"],
     }
 
-    const schema = await getHydratedSchema({ include_courses: false })
+    const schema = await getSchema({ include_courses: false })
     console.error(JSON.stringify(schema))
     const validate = ajv.compile(schema)
     const valid = validate(json)
@@ -208,7 +208,7 @@ describe("schema", () => {
       level: "AA",
     }
 
-    const schema = await getHydratedSchema({ include_courses: true })
+    const schema = await getSchema({ include_courses: true })
     const validate = ajv.compile(schema)
     const valid = validate(json)
     expect(valid).toBeFalsy()

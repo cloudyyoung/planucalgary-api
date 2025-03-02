@@ -1,299 +1,296 @@
-import Ajv from "ajv"
-import { prismaClient } from "../middlewares"
+export interface GetSchemaOptions {
+  subjectCodes: string[]
+  facultyCodes: string[]
+  departmentCodes: string[]
+}
 
-const COURSE_CODE_REGEX = "^[A-Z]{3,4}[0-9]{2,3}(-[0-9])?(.[0-9]{2})?[AB]?$"
+export const getSchema = ({ subjectCodes, facultyCodes, departmentCodes }: GetSchemaOptions) => {
+  const string_ = {
+    type: "string",
+  }
 
-export const schema = {
-  anyOf: [
-    // Primitives
-    // Course is the only primitive that can be at the root level, returns True if the course exists in data
-    { $ref: "#/definitions/course" },
+  const null_ = {
+    type: "null",
+  }
 
-    // Boolean operators
-    { $ref: "#/definitions/and" },
-    { $ref: "#/definitions/or" },
-    { $ref: "#/definitions/not" },
-    { $ref: "#/definitions/units" },
-    { $ref: "#/definitions/consent" },
-    { $ref: "#/definitions/admission" },
-    { $ref: "#/definitions/year" },
-  ],
+  const course = {
+    type: "string",
+    description: "Course code",
+  }
 
-  definitions: {
-    // Primitives
-    course: {
-      type: "string",
-      description: "Course code",
-      pattern: COURSE_CODE_REGEX,
-    },
-    level: {
-      type: "string",
-      description:
-        "Course level of study. When suffixed with +, it means at or above the level. Eg, '6 units of courses at the 300 level or above.'",
-      pattern: "^[0-9]{2,3}[+]?$",
-    },
-    subject: {
-      type: "string",
-      description:
-        "Subject of study. Only include this field is the requisite specifically mentions a subject. Eg, '6 units of courses labelled Art.'",
-      pattern: "^[A-Z]{3,4}$",
-    },
-    faculty: {
-      type: "string",
-      description: "A faculty code. Eg, 'KN' for Kinesiology.",
-      pattern: "^[A-Z]{2}$",
-    },
-    department: {
-      type: "string",
-      description: "A department code. Eg, 'CPSC' forDepartment of Computer Science.",
-      pattern: "^[A-Z]{3,4}$",
-    },
-    program: {
-      type: "string",
-    },
-    year_str: {
-      type: "string",
-      description:
-        "year of study, or year standing. eg, first-year, second-year, third-year, fourth-year, fifth-year standing or higher",
-      enum: ["first", "second", "third", "fourth", "fifth"],
-    },
+  const subject = {
+    type: "string",
+    description:
+      "Subject of study. Only include this field is the requisite specifically mentions a subject. Eg, '6 units of courses labelled Art.'",
+    enum: subjectCodes,
+  }
 
-    // Boolean operators
-    and: {
-      type: "object",
-      description: "Logic operator of a relationship A and B",
-      required: ["and"],
-      properties: {
-        and: {
-          type: "array",
-          items: {
+  const level = {
+    type: "string",
+    description:
+      "Course level of study. When suffixed with +, it means at or above the level. Eg, '6 units of courses at the 300 level or above.'",
+  }
+
+  const department = {
+    type: "string",
+    description: "A department code. Eg, 'CPSC' for Department of Computer Science.",
+    enum: departmentCodes,
+  }
+
+  const faculty = {
+    type: "string",
+    description: "A faculty code. Eg, 'KN' for Kinesiology.",
+    enum: facultyCodes,
+  }
+
+  const schema = {
+    anyOf: [
+      { $ref: "#/definitions/and" },
+      { $ref: "#/definitions/or" },
+      { $ref: "#/definitions/not" },
+      { $ref: "#/definitions/units" },
+      { $ref: "#/definitions/consent" },
+      { $ref: "#/definitions/admission" },
+      { $ref: "#/definitions/year" },
+    ],
+
+    definitions: {
+      level: {
+        type: "string",
+        description:
+          "Course level of study. When suffixed with +, it means at or above the level. Eg, '6 units of courses at the 300 level or above.'",
+      },
+      subject: {
+        type: "string",
+        description:
+          "Subject of study. Only include this field is the requisite specifically mentions a subject. Eg, '6 units of courses labelled Art.'",
+      },
+      faculty: faculty,
+      department: department,
+      and: {
+        type: "object",
+        description: "Logic operator of a relationship A and B",
+        required: ["and"],
+        additionalProperties: false,
+        properties: {
+          and: {
+            type: "array",
+            items: {
+              anyOf: [
+                course,
+                {
+                  $ref: "#/$defs/or",
+                },
+                {
+                  $ref: "#/$defs/not",
+                },
+                {
+                  $ref: "#/$defs/units",
+                },
+                {
+                  $ref: "#/$defs/consent",
+                },
+                {
+                  $ref: "#/$defs/admission",
+                },
+                {
+                  $ref: "#/$defs/year",
+                },
+              ],
+            },
+          },
+        },
+      },
+      or: {
+        type: "object",
+        description: "Logic operator of a relationship A or B",
+        required: ["or"],
+        additionalProperties: false,
+        properties: {
+          or: {
+            type: "array",
+            items: {
+              anyOf: [
+                course,
+                {
+                  $ref: "#/$defs/and",
+                },
+                {
+                  $ref: "#/$defs/not",
+                },
+                {
+                  $ref: "#/$defs/units",
+                },
+                {
+                  $ref: "#/$defs/consent",
+                },
+                {
+                  $ref: "#/$defs/admission",
+                },
+                {
+                  $ref: "#/$defs/year",
+                },
+              ],
+            },
+          },
+        },
+      },
+      not: {
+        type: "object",
+        description: "Logic operator of a relationship not A",
+        required: ["not"],
+        additionalProperties: false,
+        properties: {
+          not: {
             anyOf: [
-              { $ref: "#/definitions/course" },
-              { $ref: "#/definitions/or" },
-              { $ref: "#/definitions/not" },
-              { $ref: "#/definitions/units" },
-              { $ref: "#/definitions/consent" },
-              { $ref: "#/definitions/admission" },
-              { $ref: "#/definitions/year" },
+              course,
+              {
+                $ref: "#/$defs/and",
+              },
+              {
+                $ref: "#/$defs/or",
+              },
+              {
+                $ref: "#/$defs/units",
+              },
+              {
+                $ref: "#/$defs/consent",
+              },
+              {
+                $ref: "#/$defs/admission",
+              },
+              {
+                $ref: "#/$defs/year",
+              },
             ],
           },
         },
       },
-    },
-    or: {
-      type: "object",
-      description: "Logic operator of a relationship A or B",
-      required: ["or"],
-      properties: {
-        or: {
-          type: "array",
-          items: {
+      units: {
+        type: "object",
+        description: "X units",
+        required: ["units", "from", "exclude", "field", "level", "subject", "faculty", "department"],
+        additionalProperties: false,
+        properties: {
+          units: {
+            type: "number",
+            description: "X units",
+          },
+          from: {
+            description:
+              "Specify the courses that the units are from, this is a strict list that the units must be from.",
+            anyOf: [{ type: "array", items: course }, null_],
+          },
+          exclude: {
+            description:
+              "Exclude a list of courses when counting units. This field is usually used when the requisite says some additional units besides the previously named courses",
+            anyOf: [{ type: "array", items: course }, null_],
+          },
+          field: {
+            description:
+              "Field of study. Only include this field is the requisite specifically mentions a field of study. Eg, '6 units of courses in the field of Art.' Only include this field if the requisite specifically mentions a field of study.",
+            anyOf: [string_, null_],
+          },
+          level: {
+            description:
+              "Course level of study. When suffixed with +, it means at or above the level. Eg, '6 units of courses at the 300 level or above.' Only include this field if the requisite specifically mentions a level.",
+            anyOf: [level, null_],
+          },
+          subject: {
+            description:
+              "Subject of study. Only include this field is the requisite specifically mentions a subject. Eg, '6 units of courses labelled Art.' Only include this field if the requisite specifically mentions a subject.",
+            anyOf: [subject, null_],
+          },
+          faculty: {
+            description:
+              "Course offered by a faculty. Only include this field if the requisite specifically mentions a faculty.",
+            anyOf: [faculty, null_],
+          },
+          department: {
+            description:
+              "Course offered by a department. Only include this field if the requisite specifically mentions a department.",
+            anyOf: [department, null_],
+          },
+        },
+      },
+      consent: {
+        type: "object",
+        description: "Consent from a faculty or department",
+        required: ["consent"],
+        additionalProperties: false,
+        properties: {
+          consent: {
+            anyOf: [{ $ref: "#/$defs/faculty_object" }, { $ref: "#/$defs/department_object" }],
+          },
+        },
+      },
+      admission: {
+        type: "object",
+        description: "Admission to a faculty, department, or program",
+        required: ["admission"],
+        additionalProperties: false,
+        properties: {
+          admission: {
             anyOf: [
-              { $ref: "#/definitions/course" },
-              { $ref: "#/definitions/and" },
-              { $ref: "#/definitions/not" },
-              { $ref: "#/definitions/units" },
-              { $ref: "#/definitions/consent" },
-              { $ref: "#/definitions/admission" },
-              { $ref: "#/definitions/year" },
+              {
+                $ref: "#/$defs/faculty_object",
+              },
+              {
+                $ref: "#/$defs/department_object",
+              },
+              {
+                $ref: "#/$defs/program_object",
+              },
             ],
           },
         },
       },
-    },
-    not: {
-      type: "object",
-      description: "Logic operator of a relationship not A",
-      required: ["or"],
-      properties: {
-        not: {
-          anyOf: [
-            { $ref: "#/definitions/course" },
-            { $ref: "#/definitions/and" },
-            { $ref: "#/definitions/or" },
-            { $ref: "#/definitions/units" },
-            { $ref: "#/definitions/consent" },
-            { $ref: "#/definitions/admission" },
-            { $ref: "#/definitions/year" },
-          ],
+      year: {
+        type: "object",
+        description: "Year of study",
+        required: ["year"],
+        additionalProperties: false,
+        properties: {
+          year: {
+            type: "string",
+            description:
+              "year of study, or year standing. eg, first-year, second-year, third-year, fourth-year, fifth-year standing or higher",
+            enum: ["first", "second", "third", "fourth", "fifth"],
+          },
+        },
+      },
+      faculty_object: {
+        type: "object",
+        description: "A faculty",
+        required: ["faculty"],
+        additionalProperties: false,
+        properties: {
+          faculty: faculty,
+        },
+      },
+      department_object: {
+        type: "object",
+        description: "A department",
+        required: ["department"],
+        additionalProperties: false,
+        properties: {
+          department: department,
+        },
+      },
+      program_object: {
+        type: "object",
+        description: "A program",
+        required: ["program"],
+        additionalProperties: false,
+        properties: {
+          program: {
+            type: "string",
+            description: "A program code",
+          },
         },
       },
     },
-    units: {
-      type: "object",
-      description: "X units",
-      required: ["units"],
-      properties: {
-        units: {
-          type: "integer",
-          description: "X units",
-        },
-        from: {
-          type: ["array", "null"],
-          description:
-            "Specify the courses that the units are from, this is a strict list that the units must be from.",
-          items: { $ref: "#/definitions/course" },
-        },
-        exclude: {
-          type: ["array", "null"],
-          description:
-            "Exclude a list of courses when counting units. This field is usually used when the requisite says some additional units besides the previously named courses",
-          items: { $ref: "#/definitions/course" },
-        },
-        field: {
-          type: ["string", "null"],
-          description:
-            "Field of study. Only include this field is the requisite specifically mentions a field of study. Eg, '6 units of courses in the field of Art.' Only include this field if the requisite specifically mentions a field of study.",
-        },
-        level: {
-          type: ["string", "null"],
-          description:
-            "Course level of study. When suffixed with +, it means at or above the level. Eg, '6 units of courses at the 300 level or above.' Only include this field if the requisite specifically mentions a level.",
-          $ref: "#/definitions/level",
-        },
-        subject: {
-          type: ["string", "null"],
-          description:
-            "Subject of study. Only include this field is the requisite specifically mentions a subject. Eg, '6 units of courses labelled Art.' Only include this field if the requisite specifically mentions a subject.",
-          $ref: "#/definitions/subject",
-        },
-        faculty: {
-          type: ["string", "null"],
-          description:
-            "Course offered by a faculty. Only include this field if the requisite specifically mentions a faculty.",
-          $ref: "#/definitions/faculty",
-        },
-        department: {
-          type: ["string", "null"],
-          description:
-            "Course offered by a department. Only include this field if the requisite specifically mentions a department.",
-          $ref: "#/definitions/department",
-        },
-      },
-    },
-    consent: {
-      type: "object",
-      description: "Consent from a faculty or department",
-      required: ["consent"],
-      additionalProperties: false,
-      properties: {
-        consent: {
-          anyOf: [{ $ref: "#/definitions/faculty_object" }, { $ref: "#/definitions/department_object" }],
-        },
-      },
-    },
-    admission: {
-      type: "object",
-      description: "Admission to a faculty, department, or program",
-      required: ["admission"],
-      additionalProperties: false,
-      properties: {
-        admission: {
-          anyOf: [
-            { $ref: "#/definitions/faculty_object" },
-            { $ref: "#/definitions/department_object" },
-            { $ref: "#/definitions/program_object" },
-          ],
-        },
-      },
-    },
-    year: {
-      type: "object",
-      description: "Year of study",
-      required: ["year"],
-      additionalProperties: false,
-      properties: {
-        year: { $ref: "#/definitions/year_str" },
-      },
-    },
-
-    // Objects
-    faculty_object: {
-      type: "object",
-      description: "A faculty",
-      required: ["faculty"],
-      additionalProperties: false,
-      properties: {
-        faculty: { $ref: "#/definitions/faculty" },
-      },
-    },
-    department_object: {
-      type: "object",
-      description: "A department",
-      required: ["department"],
-      additionalProperties: false,
-      properties: {
-        department: { $ref: "#/definitions/department" },
-      },
-    },
-    program_object: {
-      type: "object",
-      description: "A program",
-      required: ["program"],
-      additionalProperties: false,
-      properties: {
-        program: { $ref: "#/definitions/program" },
-      },
-    },
-  },
-}
-
-export const ajv = new Ajv({
-  strict: "log",
-  allowUnionTypes: true,
-  allErrors: true,
-  // removeAdditional: "all",
-})
-
-interface GetHydratedSchemaOptions {
-  include_subjects?: boolean
-  incliude_faculties?: boolean
-  include_departments?: boolean
-  include_courses?: boolean
-}
-
-export const getHydratedSchema = async ({
-  include_subjects = true,
-  incliude_faculties = true,
-  include_departments = true,
-  include_courses = false,
-}: GetHydratedSchemaOptions = {}) => {
-  const deepcopy = (obj: any) => JSON.parse(JSON.stringify(obj))
-
-  const hydratedSchema: any = deepcopy(schema)
-
-  if (include_subjects) {
-    const subjects = await prismaClient.subject.findMany()
-    const subjectCodes = subjects.map((subject) => subject.code)
-    hydratedSchema.definitions.subject.enum = subjectCodes
-    delete hydratedSchema.definitions.subject.pattern
   }
 
-  if (incliude_faculties) {
-    const faculties = await prismaClient.faculty.findMany()
-    const facultyCodes = faculties.map((faculty) => faculty.code)
-    hydratedSchema.definitions.faculty.enum = facultyCodes
-    delete hydratedSchema.definitions.faculty.pattern
-  }
-
-  if (include_departments) {
-    const departments = await prismaClient.department.findMany()
-    const departmentCodes = departments.map((department) => department.code)
-    hydratedSchema.definitions.department.enum = departmentCodes
-    delete hydratedSchema.definitions.department.pattern
-  }
-
-  if (include_courses) {
-    const courses = await prismaClient.course.findMany({
-      select: {
-        code: true,
-      },
-      distinct: ["code"],
-    })
-    const courseCodes = courses.map((course) => course.code)
-    hydratedSchema.definitions.course.enum = courseCodes
-    delete hydratedSchema.definitions.course.pattern
-  }
-
-  return hydratedSchema
+  return schema
 }

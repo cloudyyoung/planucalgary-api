@@ -3,8 +3,8 @@ import OpenAI from "openai"
 import { OPENAI_API_KEY } from "../../config"
 import { prismaClient } from "../../middlewares"
 import { Department, Faculty, Subject } from "@prisma/client"
-import { cleanup, getOpenAiSchema } from "../../jsonlogic/utils"
-import { getHydratedSchema } from "../../jsonlogic/schema"
+import { cleanup } from "../../jsonlogic/utils"
+import { getSchema } from "../../jsonlogic/schema"
 
 export const OpenAIClient = new OpenAI({
   apiKey: OPENAI_API_KEY,
@@ -61,8 +61,17 @@ export async function generatePrereq(req: string, department: string, faculty: s
 }
 
 const getResponseFormat = async () => {
-  const schema = await getHydratedSchema({ include_courses: false })
-  const openAiSchema = getOpenAiSchema(schema)
+  const [subjects, faculties, departments] = await Promise.all([
+    prismaClient.subject.findMany(),
+    prismaClient.faculty.findMany(),
+    prismaClient.department.findMany(),
+  ])
+
+  const subjectCodes = subjects.map((subject) => subject.code).slice(0, 0)
+  const facultyCodes = faculties.map((faculty) => faculty.code)
+  const departmentCodes = departments.map((department) => department.code)
+
+  const schema = getSchema({ subjectCodes, facultyCodes, departmentCodes })
 
   return {
     type: "json_schema" as const,
@@ -74,8 +83,8 @@ const getResponseFormat = async () => {
         type: "object",
         required: ["requisite"],
         additionalProperties: false,
-        properties: { requisite: { anyOf: openAiSchema.anyOf } },
-        $defs: openAiSchema.definitions,
+        properties: { requisite: { anyOf: schema.anyOf } },
+        $defs: schema.definitions,
       },
     },
   }
