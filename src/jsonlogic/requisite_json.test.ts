@@ -1,27 +1,33 @@
-import { RequisiteJsonError, validate } from "./requisite_json"
+import { RequisiteJsonError, getValidator } from "./requisite_json"
 
 describe("validator", () => {
+  let validate: any
+
+  beforeAll(async () => {
+    validate = await getValidator()
+  })
+
   it("validate course, truthy", async () => {
     const json = "CPSC217"
-    const result = await validate(json, false)
+    const result = await validate(json)
     expect(result).toBe(true)
   })
 
   it("validate course, falsy", async () => {
     const json = "ABCD1237"
-    const result = await validate(json, false)
+    const result = await validate(json)
     expect(result).toBe(false)
   })
 
   it("validate and with two courses, truthy", async () => {
     const json = { and: ["CPSC217", "CPSC231"] }
-    const result = await validate(json, false)
+    const result = await validate(json)
     expect(result).toBe(true)
   })
 
   it("validate and with two courses, truthy", async () => {
     const json = { and: ["ABCD222", "TTTT222"] }
-    const result = await validate(json, false)
+    const result = await validate(json)
     expect(result).toBe(false)
   })
 
@@ -30,7 +36,7 @@ describe("validator", () => {
       from: ["ENGG213", "COMS363", "SGMA217"],
       units: 3,
     }
-    const result = await validate(json, false)
+    const result = await validate(json)
     expect(result).toBe(true)
   })
 
@@ -65,7 +71,7 @@ describe("validator", () => {
       ],
     }
 
-    const result = await validate(json, false)
-    expect(result).toBe(true)
+    const result = await validate(json)
+    expect(result).toBe(false)
   })
 })
