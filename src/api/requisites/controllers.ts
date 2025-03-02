@@ -39,10 +39,14 @@ export const listRequisites = async (req: Request<any, any, any, RequisiteList>,
     getValidator(),
   ])
 
-  const requisitesValidated = requisites.map((requisite) => ({
-    ...requisite,
-    json_valid: validate(requisite.json),
-  }))
+  const requisitesValidated = requisites.map((requisite) => {
+    const { valid, errors } = validate(requisite.json)
+    return {
+      ...requisite,
+      json_valid: valid,
+      json_errors: errors,
+    }
+  })
 
   return res.paginate(requisitesValidated, total)
 }
@@ -69,12 +73,11 @@ export const updateRequisite = async (req: Request<IdInput, any, RequisiteUpdate
   }
 
   const validate = await getValidator()
+  const json = req.body.json
+  const { valid, errors } = validate(json)
 
-  try {
-    const json = req.body.json
-    validate(json, false)
-  } catch (e: any) {
-    return res.status(400).json({ message: "Invalid JSON", errors: e.errors })
+  if (!valid) {
+    return res.status(400).json({ message: "Invalid JSON", errors: errors })
   }
 
   const requisite = await req.prisma.requisiteJson.update({

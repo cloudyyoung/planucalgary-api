@@ -53,6 +53,11 @@ export interface RequisiteValidationError {
   value: any
 }
 
+export interface ValidateResult {
+  valid: boolean
+  errors: RequisiteValidationError[]
+}
+
 export const getValidator = async () => {
   const subjects = await prismaClient.subject.findMany()
   const subjectCodes = subjects.map((subject) => subject.code)
@@ -63,7 +68,7 @@ export const getValidator = async () => {
   const courses = await prismaClient.course.findMany()
   const courseCodes = courses.map((course) => course.code)
 
-  const validator = (json: any, safe: boolean = true) => {
+  const validator = (json: any, safe: boolean = true): ValidateResult => {
     const is_object = (obj: object, key: string, isOnlyKey: boolean): boolean => {
       if (typeof obj !== "object") {
         return false
@@ -430,13 +435,16 @@ export const getValidator = async () => {
     }
 
     const errors: RequisiteValidationError[] = []
-    const result = _validate(json)
+    const valid = _validate(json)
 
     if (safe === false && errors.length > 0) {
       throw new RequisiteJsonError(errors)
     }
 
-    return result
+    return {
+      valid: valid,
+      errors: errors,
+    }
   }
 
   return validator
