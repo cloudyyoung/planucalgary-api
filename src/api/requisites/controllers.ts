@@ -71,12 +71,14 @@ export const updateRequisite = async (req: Request<IdInput, any, RequisiteUpdate
     return res.status(404).json({ message: "Requisite not found" })
   }
 
-  const validate = await getValidator()
-  const json = req.body.json
-  const { valid, errors } = validate(json, { strict: false })
+  if (req.body.json !== null) {
+    const validate = await getValidator()
+    const json = req.body.json
+    const { valid, errors } = validate(json, { strict: false })
 
-  if (!valid) {
-    return res.status(400).json({ message: "Invalid JSON", errors: errors })
+    if (!valid) {
+      return res.status(400).json({ message: "Invalid JSON", errors: errors })
+    }
   }
 
   const requisite = await req.prisma.requisiteJson.update({
