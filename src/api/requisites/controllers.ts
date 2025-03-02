@@ -136,6 +136,9 @@ export const syncRequisites = async (req: Request<RequisitesSync>, res: Response
           },
         },
       },
+      where: {
+        is_active: true,
+      },
     })
 
     const requisites_jsons = courses.flatMap((course) => {
