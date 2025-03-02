@@ -90,17 +90,17 @@ export const updateRequisite = async (req: Request<IdInput, any, RequisiteUpdate
 }
 
 export const generateRequisiteChoices = async (req: Request<IdInput>, res: Response) => {
-  const requisite = await req.prisma.requisiteJson.findUnique({
+  const existing = await req.prisma.requisiteJson.findUnique({
     where: { id: req.params.id },
   })
 
-  if (!requisite) {
+  if (!existing) {
     return res.status(404).json({ message: "Requisite not found" })
   }
 
-  const text = requisite.text
-  const department = requisite.departments[0] ?? "None"
-  const faculty = requisite.faculties[0] ?? "None"
+  const text = existing.text
+  const department = existing.departments[0] ?? "None"
+  const faculty = existing.faculties[0] ?? "None"
   const choices = await generatePrereq(text, department, faculty, 3)
   const json_parsed = JSON.parse(JSON.stringify(choices))
   const json_cleaned = json_parsed.map(cleanup)
@@ -111,7 +111,7 @@ export const generateRequisiteChoices = async (req: Request<IdInput>, res: Respo
 
   const updated = await req.prisma.requisiteJson.update({
     where: { id: req.params.id },
-    data: { json_choices, json: allEqual ? json_choices[0] : Prisma.DbNull },
+    data: { json_choices, json: allEqual ? json_choices[0] : existing.json },
   })
   return res.json(updated)
 }
