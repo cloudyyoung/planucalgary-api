@@ -1,7 +1,7 @@
-import { RequisiteJsonError, ValidateResult, getValidator } from "./requisite_json"
+import { RequisiteJsonError, ValidateOptions, ValidateResult, getValidator } from "./requisite_json"
 
 describe("validator", () => {
-  let validate: (json: any, safe?: boolean) => ValidateResult
+  let validate: (json: any, options?: ValidateOptions) => ValidateResult
 
   beforeAll(async () => {
     validate = await getValidator()
@@ -54,7 +54,7 @@ describe("validator", () => {
       ],
     }
 
-    const t = () => validate(json, false)
+    const t = () => validate(json, { safe: false })
     expect(t).toThrow(RequisiteJsonError)
   })
 
@@ -102,7 +102,7 @@ describe("validator", () => {
       ],
     }
 
-    const result = validate(json, false)
+    const result = validate(json)
     expect(result.valid).toBe(true)
   })
 

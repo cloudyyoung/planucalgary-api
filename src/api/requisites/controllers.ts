@@ -74,7 +74,7 @@ export const updateRequisite = async (req: Request<IdInput, any, RequisiteUpdate
 
   const validate = await getValidator()
   const json = req.body.json
-  const { valid, errors } = validate(json)
+  const { valid, errors } = validate(json, { strict: false })
 
   if (!valid) {
     return res.status(400).json({ message: "Invalid JSON", errors: errors })
