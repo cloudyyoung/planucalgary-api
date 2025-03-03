@@ -59,7 +59,7 @@ export async function generatePrereq(req: string, department: string, faculty: s
 }
 
 export const getRelatedData = async (req: string, department?: string, faculty?: string) => {
-  const reqCleaned = req.replace("Prerequisite or Corequisite: ", "")
+  let reqCleaned = req.replace("Prerequisite or Corequisite: ", "")
 
   const [subjects, faculties, departments] = await Promise.all([
     prismaClient.subject.findMany(),
@@ -67,7 +67,16 @@ export const getRelatedData = async (req: string, department?: string, faculty?:
     prismaClient.department.findMany(),
   ])
 
-  const relatedSubjects = subjects.filter((subject) => reqCleaned.includes(subject.title))
+  const relatedSubjects = []
+  const sortedSubjects = subjects.sort((a, b) => b.title.length - a.title.length)
+
+  for (const subject of sortedSubjects) {
+    if (reqCleaned.includes(subject.title)) {
+      relatedSubjects.push(subject)
+      reqCleaned = reqCleaned.replace(subject.title, subject.code)
+    }
+  }
+
   const relatedFaculties = faculties.filter((faculty) => reqCleaned.includes(faculty.display_name))
   const relatedDepartments = departments.filter((department) => reqCleaned.includes(department.name))
 
@@ -98,7 +107,8 @@ const getSystemPrompt = (subjects: Subject[], faculties: Faculty[], departments:
 You are an advanced admission bot for a university tasked with processing course prerequisites for use in a structured database. Your job is to:
   1. Input: Take course information and a textual description of its prerequisites.
   2. Output: Convert the prerequisites into a JSON format with the following structure:
-    - Use subject code names for courses (e.g., "MATH" instead of "Mathematics" whenever you can. But if there is no corresponding subject code, do not make up one, instead, reserve the original course name as it is).
+    - Use subject code names for courses (e.g., "MATH" instead of "Mathematics").
+    - But if there is no corresponding subject code you may use, reserve the original course name as it is. (e.g., "Newjeans and Bunnies Club 499" has no corresponding subject code, so it should be kept as is).
     - Use faculty code names for faculties (e.g., "HA" instead of "Haskayne School of Business").
     - Use department code names for departments (e.g., "CPSC" instead of "Computer Science").
     - Avoid deeply nested logical structures for readability.
@@ -110,16 +120,17 @@ You are an advanced admission bot for a university tasked with processing course
     - Handle exceptions gracefully by assuming ambiguous text needs clarification and simplifying to the most likely structure.
     - Try to use the logical operators you are provided with to represent the prerequisites as accurately as possible.
   4. Examples:
-    Input Text: "Mathematics 101, and Physics 201 or Chemistry 102A"
+    Input Text: "Mathematics 101, Newjeans and Bunnies Club 499, and Physics 201 or Chemistry 102A"
     Output JSON:
       \`\`\`json
       {
         "and": [
           "MATH101",
+          "Newjeans and Bunnies Club 499",
           {
             "or": [
               "PHYS201",
-              "CHEM102A"
+              "CHEM102A",
             ]
           }
         ]
@@ -153,15 +164,15 @@ When you see a course followed by a unit number requirements from the same cours
 }
 \`\`\`
 
-Here is a full list of subject codes and their corresponding names:
+Here is a full list of subject codes and their corresponding names you may use:
 ${subjects.map((subject) => `${subject.code}: ${subject.title}`).join("\n")}
 
-Here is a full list of faculties and their corresponding names:
+Here is a full list of faculties and their corresponding names you may use:
 ${faculties.map((faculty) => `${faculty.code}: ${faculty.display_name}`).join("\n")}
 
-Here is a full list of departments and their corresponding names:
+Here is a full list of departments and their corresponding names you may use:
 ${departments.map((department) => `${department.code}: ${department.name}`).join("\n")}
-  `
+`
 }
 
 const getUserPrompt = (req: string, department: string, faculty: string) => {
