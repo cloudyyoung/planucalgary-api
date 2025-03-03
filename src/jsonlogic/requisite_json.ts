@@ -287,7 +287,7 @@ export const getValidator = async () => {
 
         const not_argument = obj.not
 
-        if (typeof not_argument !== "object" || typeof not_argument !== "string") {
+        if (typeof not_argument !== "object" && typeof not_argument !== "string") {
           errors.push({ message: '"not" operator requires a single argument', value: obj })
           return false
         }
