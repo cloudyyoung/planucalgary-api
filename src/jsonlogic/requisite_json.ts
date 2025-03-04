@@ -201,7 +201,8 @@ export const getValidator = async () => {
               errors.push({ message: "Subject code should be given but got subject full name", value: obj })
               return false
             }
-
+            
+            warnings.push({ message: "Subject is untracked", value: obj })
             return true
           }
         }
