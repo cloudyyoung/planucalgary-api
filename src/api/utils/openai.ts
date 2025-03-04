@@ -2,7 +2,7 @@ import OpenAI from "openai"
 
 import { OPENAI_API_KEY } from "../../config"
 import { prismaClient } from "../../middlewares"
-import { Course, Department, Faculty, Subject } from "@prisma/client"
+import { Course, CourseTopic, Department, Faculty, RequisiteType, Subject } from "@prisma/client"
 import { cleanup } from "../../jsonlogic/utils"
 import { getSchema } from "../../jsonlogic/schema"
 
@@ -12,13 +12,19 @@ export const OpenAIClient = new OpenAI({
 
 export default OpenAIClient
 
-export async function generatePrereq(req: string, department: string, faculty: string, n: number): Promise<string[]> {
+export async function generatePrereq(
+  req: string,
+  req_type: RequisiteType,
+  department: string,
+  faculty: string,
+  n: number,
+): Promise<string[]> {
   const reqCleaned = req.replace("Prerequisite or Corequisite: ", "")
 
   const { subjects, faculties, departments, courses } = await getRelatedData(reqCleaned, department, faculty)
 
   const systemPrompt = getSystemPrompt(subjects, faculties, departments, courses)
-  const userPrompt = getUserPrompt(reqCleaned, department, faculty)
+  const userPrompt = getUserPrompt(reqCleaned, req_type, department, faculty)
   const responseFormat = getResponseFormat()
 
   console.log(systemPrompt)
@@ -79,20 +85,23 @@ export const getRelatedData = async (req: string, department?: string, faculty?:
     }
   }
 
-  const CourseNumberRegex = /[0-9]{2,3}(-[0-9])?(.[0-9]{2})?[AB]?/g
+  const CourseNumberRegex = /([0-9]{2,3})(-[0-9])?([AB]?)(.[0-9]{2})?/g
   const numbers = reqCleaned.match(CourseNumberRegex) ?? []
+  const subjectCodes = relatedSubjects.map((subject) => subject.code)
+  const courseNumbers = numbers.map((number) => number.split(".")[0])
 
   const relatedCourses = await prismaClient.course.findMany({
     distinct: ["code"],
     include: {
       subject: true,
+      topics: true,
     },
     where: {
       subject_code: {
-        in: relatedSubjects.map((subject) => subject.code),
+        in: subjectCodes,
       },
       course_number: {
-        in: numbers,
+        in: Array.from([...numbers, ...courseNumbers]),
       },
     },
   })
@@ -127,17 +136,22 @@ const getSystemPrompt = (
   subjects: Subject[],
   faculties: Faculty[],
   departments: Department[],
-  courses: (Course & { subject: Subject })[],
+  courses: (Course & { subject: Subject; topics: CourseTopic[] })[],
 ) => {
   return `
 You are an advanced admission bot for a university tasked with processing course prerequisites for use in a structured database. Your job is to:
-  1. Input: Take course information and a textual description of its prerequisites.
+  1. Input:
+    - The type of the requisite text. It can be a prerequisite (PREREQ), corequisite (COREQ), or antirequisite (ANTIREQ).
+    - The requisite text.
+    - The department and faculty related to the requisite. This is useful when the requisite text refers to "the department" or "the faculty".
   2. Rewrite the requisite string to expand course names.
     - When you see a list of courses with the same subject title, expand the subject title to the full course name.
     - For example, "Mathematics 101, 102, and 103" should be expanded to "Mathematics 101, Mathematics 102, and Mathematics 103".
   3. Replace course full names with their corresponding course codes.
     - If a course full name is found in the text, replace the full name string with the corresponding course code. Don't replace substrings.
     - If a course full name is not mentioned in the text, keep it as is. Remember, to keep the course full name as is if it is not in the list of courses.
+    - If course number has more than a number, for example, "Mathematics 101.03", keep the whole number.
+    - If course number has "A" or "B" at the end, for example, "Mathematics 101A", keep the whole number.
     - Don't replace course full names that are not in the given list.
     - Don't replace course full name is its *whole* name is not mentioned in the list of courses. Don't fall into the trap of replacing substrings. For example, if the course full name is "Applied Mathematics 101" and the text contains "Mathematics 101", don't replace it. "Applied Mathematics" is different from "Mathematics".
   4. Replace faculty names with their corresponding faculty codes.
@@ -157,7 +171,7 @@ You are an advanced admission bot for a university tasked with processing course
     - Handle exceptions gracefully by assuming ambiguous text needs clarification and simplifying to the most likely structure.
     - Try to use the logical operators you are provided with to represent the prerequisites as accurately as possible.
   8. Examples:
-    Input Text: "Mathematics 101, Newjeans and Bunnies Club 499, and Physics 201 or Chemistry 102A, and Applied Mathematics 217."
+    Input Text: "Mathematics 101, Newjeans and Bunnies Club 499, and Physics 201.03 or Chemistry 102A, and Applied Mathematics 217."
     Output JSON:
       \`\`\`json
       {
@@ -166,7 +180,7 @@ You are an advanced admission bot for a university tasked with processing course
           "Newjeans and Bunnies Club 499",
           {
             "or": [
-              "PHYS201",
+              "PHYS201.03",
               "CHEM102A",
             ]
           },
@@ -175,11 +189,40 @@ You are an advanced admission bot for a university tasked with processing course
       }
       \`\`\`
 
+      Input Text: "Credit for Anthropology 213 and 346 will not be allowed."
+      Output JSON:
+      \`\`\`json
+      {
+        "and": [
+          "ANTH213",
+          "ANTH346",
+        ]
+      }
+      \`\`\`
+
+      Input Text: "Credit for Chemistry 201 and any of 209, 211, 301 or Engineering 204 will not be allowed."
+      Output JSON:
+      \`\`\`json
+      {
+        "and": [
+          "CHEM201",
+          {
+            "or": [
+              "CHEM209",
+              "CHEM211",
+              "CHEM301",
+              "ENGG204",
+            ]
+          }
+        ]
+      }
+      \`\`\`
+
   9. Additional Details:
     - Include clear logical operators (and, or) and group courses appropriately.
     - Handle cases like "any one of" or "at least X units in…" correctly.
-  10. Formatting:
-    - Ensure every JSON object is syntactically correct.
+    - Ensure your JSON object is syntactically correct.
+    - You would normally do not need to use "not" operator in the JSON object for anti-requisites.
 
 Given these guidelines, your task is to process the provided course and prerequisite text and return a well-formatted JSON object as described. If additional clarification is needed, infer reasonable assumptions. Always output valid JSON.
 
@@ -202,21 +245,34 @@ When you see a course followed by a unit number requirements from the same cours
 \`\`\`
 
 Here is a full list of course full name and their corresponding course codes you can use.
-${courses.map((course) => `- Course full name is: "${course.subject.title} ${course.course_number}", its course code is: "${course.code}"`).join("\n")}
+${courses
+  .flatMap((course) => {
+    if (course.topics.length > 0) {
+      return course.topics.map((topic) => {
+        const topicNumber = topic.number.padStart(2, "0")
+        return `- Course full name is: "${course.subject.title} ${course.course_number}.${topicNumber}", its course code is: "${course.code}.${topicNumber}"`
+      })
+    }
+    return [
+      `- Course full name is: "${course.subject.title} ${course.course_number}", its course code is: "${course.code}"`,
+    ]
+  })
+  .join("\n")}
 
 Here is a full list of subject codes and their corresponding names you can use.
 ${subjects.map((subject) => `- Subject full title is: "${subject.title}", its subject title is: "${subject.code}"`).join("\n")}
 
 Here is a full list of faculties and their corresponding names you can use.
-${faculties.map((faculty) => `- Faculty full name is: "${faculty.name}", its faculty code is: "${faculty.display_name}"`).join("\n")}
+${faculties.map((faculty) => `- Faculty full name is: "${faculty.name}", its faculty code is: "${faculty.code}"`).join("\n")}
 
 Here is a full list of departments and their corresponding names you can use.
 ${departments.map((department) => `- Department full name is: "${department.name}", its department code is: "${department.code}"`).join("\n")}
 `
 }
 
-const getUserPrompt = (req: string, department: string, faculty: string) => {
+const getUserPrompt = (req: string, req_type: RequisiteType, department: string, faculty: string) => {
   return `
+The type of this requisite is: ${req_type}
 The requisite text is: ${req}
 
 If the requisite text mentions specifically a department or faculty, use the following information; otherwise, ignore it:

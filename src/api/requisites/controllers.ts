@@ -102,9 +102,10 @@ export const generateRequisiteChoices = async (req: Request<IdInput>, res: Respo
   }
 
   const text = existing.text
+  const type = existing.requisite_type
   const department = existing.departments[0] ?? "None"
   const faculty = existing.faculties[0] ?? "None"
-  const choices = await generatePrereq(text, department, faculty, 3)
+  const choices = await generatePrereq(text, type, department, faculty, 3)
   const json_parsed = JSON.parse(JSON.stringify(choices))
   const json_cleaned = json_parsed.map(cleanup)
   const json_choices = json_cleaned
