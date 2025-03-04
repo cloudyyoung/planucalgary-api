@@ -61,6 +61,7 @@ export interface ValidateResult {
 
 export interface ValidateOptions {
   safe?: boolean
+  strict?: boolean
 }
 
 export const getValidator = async () => {
@@ -79,6 +80,7 @@ export const getValidator = async () => {
         },
       },
     },
+    distinct: ["code"],
   })
   const courseCodes = courses.flatMap((course) => {
     const topics = course.topics.map((topic) => `${course.code}.${topic.number.padStart(2, "0")}`)
@@ -88,6 +90,7 @@ export const getValidator = async () => {
   const validator = (json: any, options?: ValidateOptions): ValidateResult => {
     options = options !== undefined ? options : {}
     options.safe = options.safe !== undefined ? options.safe : true
+    options.strict = options.strict !== undefined ? options.strict : false
 
     const is_object = (obj: object, key: string, isOnlyKey: boolean): boolean => {
       if (typeof obj !== "object") {
@@ -110,16 +113,49 @@ export const getValidator = async () => {
           return false
         }
 
-        const UntrackedCourseRegex = /^[A-Za-z ,]+ [0-9]{2,3}(-[0-9])?(.[0-9]{2})?[AB]?$/
-        const validUntrackedCourse = UntrackedCourseRegex.test(obj)
-        if (validUntrackedCourse) {
+        // If given an untracked course name, eg., "Applied Mathematics 211",
+        // it is required that database doesn't track such course, ie., "AMAT211" should not exist in the database.
+        const UntrackedCourseRegex = /^([A-Za-z ,]+) ([0-9]{2,3}(-[0-9])?(.[0-9]{2})?[AB]?)$/
+        if (UntrackedCourseRegex.test(obj)) {
+          const matches = obj.match(UntrackedCourseRegex)!
+          const subject = matches[1]
+          const courseNumber = matches[2]
+          const subjectCode = subjects.find((s) => s.title === subject)
+
+          if (subjectCode) {
+            const courseCode = `${subjectCode}${courseNumber}`
+            const valid = courseCodes.includes(courseCode)
+            if (!valid) {
+              errors.push({ message: "Course code should be given but got course full name", value: obj })
+              return false
+            }
+          }
+
           return true
         }
 
-        const valid = courseCodes.includes(obj)
-        if (!valid) {
-          errors.push({ message: "Course code does not exist", value: obj })
-          return false
+        // If given a tracked course code, eg., "AMAT211", it is required that subject code "AMAT" exists in the database.
+        // If subject code "AMAT" doesn't exist in the database, "AMAT" is not at all a valid course code.
+        const TrackedCourseRegex = /^([A-Z]{3,4})[0-9]{2,3}(-[0-9])?(.[0-9]{2})?[AB]?$/
+        if (TrackedCourseRegex.test(obj)) {
+          const matches = obj.match(TrackedCourseRegex)!
+          const subjectCode = matches[1]
+          const valid = subjectCodes.includes(subjectCode)
+          if (!valid) {
+            errors.push({ message: "Course code does not exist", value: obj })
+            return false
+          }
+        }
+
+        // In loose mode, we allow untrack course code like "MATH123" to be valid. Because "MATH" is a valid subject
+        // code in the database, although "MATH123" might not exist in the database.
+        // In strict mode, we require that the course code is a valid course code in the database. "MATH123" is not valid in strict mode.
+        if (options.strict) {
+          const valid = courseCodes.includes(obj)
+          if (!valid) {
+            errors.push({ message: "Course code does not exist", value: obj })
+            return false
+          }
         }
 
         return true
