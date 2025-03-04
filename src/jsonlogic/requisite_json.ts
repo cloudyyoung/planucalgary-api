@@ -61,7 +61,6 @@ export interface ValidateResult {
 
 export interface ValidateOptions {
   safe?: boolean
-  strict?: boolean
 }
 
 export const getValidator = async () => {
@@ -89,7 +88,6 @@ export const getValidator = async () => {
   const validator = (json: any, options?: ValidateOptions): ValidateResult => {
     options = options !== undefined ? options : {}
     options.safe = options.safe !== undefined ? options.safe : true
-    options.strict = options.strict !== undefined ? options.strict : true
 
     const is_object = (obj: object, key: string, isOnlyKey: boolean): boolean => {
       if (typeof obj !== "object") {
@@ -112,19 +110,16 @@ export const getValidator = async () => {
           return false
         }
 
+        const UntrackedCourseRegex = /^[A-Za-z ,]+ [0-9]{2,3}(-[0-9])?(.[0-9]{2})?[AB]?$/
+        const validUntrackedCourse = UntrackedCourseRegex.test(obj)
+        if (validUntrackedCourse) {
+          return true
+        }
+
         const valid = courseCodes.includes(obj)
         if (!valid) {
-          if (options.strict) {
-            errors.push({ message: "Course code does not exist", value: obj })
-            return false
-          }
-
-          const regex = /^([A-Z]{3,4}|[A-Za-z ,]+ )[0-9]{2,3}(-[0-9])?(.[0-9]{2})?[AB]?$/
-          const valid = regex.test(obj)
-          if (!valid) {
-            errors.push({ message: "Course code is not in a valid format", value: obj })
-            return false
-          }
+          errors.push({ message: "Course code does not exist", value: obj })
+          return false
         }
 
         return true
@@ -152,17 +147,8 @@ export const getValidator = async () => {
 
         const valid = subjectCodes.includes(obj)
         if (!valid) {
-          if (options.strict) {
-            errors.push({ message: "Subject code does not exist", value: obj })
-            return false
-          }
-
-          const regex = /^[A-Z]{3,4}$/
-          const valid = regex.test(obj)
-          if (!valid) {
-            errors.push({ message: "Subject code is not in a valid format", value: obj })
-            return false
-          }
+          errors.push({ message: "Subject code does not exist", value: obj })
+          return false
         }
 
         return true
@@ -175,17 +161,8 @@ export const getValidator = async () => {
 
         const valid = facultyCodes.includes(obj)
         if (!valid) {
-          if (options.strict) {
-            errors.push({ message: "Faculty code does not exist", value: obj })
-            return false
-          }
-
-          const regex = /^[A-Z]{2}$/
-          const valid = regex.test(obj)
-          if (!valid) {
-            errors.push({ message: "Faculty code is not in a valid format", value: obj })
-            return false
-          }
+          errors.push({ message: "Faculty code does not exist", value: obj })
+          return false
         }
 
         return true
@@ -198,17 +175,8 @@ export const getValidator = async () => {
 
         const valid = departmentCodes.includes(obj)
         if (!valid) {
-          if (options.strict) {
-            errors.push({ message: "Department code does not exist", value: obj })
-            return false
-          }
-
-          const regex = /^[A-Z]{3,4}$/
-          const valid = regex.test(obj)
-          if (!valid) {
-            errors.push({ message: "Department code is not in a valid format", value: obj })
-            return false
-          }
+          errors.push({ message: "Department code does not exist", value: obj })
+          return false
         }
 
         return true
