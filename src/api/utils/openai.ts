@@ -21,6 +21,8 @@ export async function generatePrereq(req: string, department: string, faculty: s
   const userPrompt = getUserPrompt(reqCleaned, department, faculty)
   const responseFormat = getResponseFormat()
 
+  console.log(systemPrompt)
+
   const response = await OpenAIClient.chat.completions.create({
     model: "gpt-4o",
     n: n,
@@ -127,32 +129,34 @@ const getSystemPrompt = (
   departments: Department[],
   courses: (Course & { subject: Subject })[],
 ) => {
-  console.log(courses.map((course) => `Course full name is: "${course.subject.title} ${course.course_number}", its course code is: "${course.code}"`).join("\n"))
   return `
 You are an advanced admission bot for a university tasked with processing course prerequisites for use in a structured database. Your job is to:
   1. Input: Take course information and a textual description of its prerequisites.
-  2. Replace course full names with their corresponding course codes.
-    - If a course full name is found in the text, replace the full name string with the corresponding course code.
+  2. Rewrite the requisite string to expand course names.
+    - When you see a list of courses with the same subject title, expand the subject title to the full course name.
+    - For example, "Mathematics 101, 102, and 103" should be expanded to "Mathematics 101, Mathematics 102, and Mathematics 103".
+  3. Replace course full names with their corresponding course codes.
+    - If a course full name is found in the text, replace the full name string with the corresponding course code. Don't replace substrings.
     - If a course full name is not mentioned in the text, keep it as is. Remember, to keep the course full name as is if it is not in the list of courses.
     - Don't replace course full names that are not in the given list.
-    - Don't replace course full name is its *whole* name is not mentioned in the list of courses.
-  3. Replace faculty names with their corresponding faculty codes.
+    - Don't replace course full name is its *whole* name is not mentioned in the list of courses. Don't fall into the trap of replacing substrings. For example, if the course full name is "Applied Mathematics 101" and the text contains "Mathematics 101", don't replace it. "Applied Mathematics" is different from "Mathematics".
+  4. Replace faculty names with their corresponding faculty codes.
     - If a faculty name is found in the text, replace the full name string with the corresponding faculty code.
     - If a faculty name is not mentioned in the text, keep it as is.
     - Don't replace faculty names that are not in the given list.
-  4. Replace department names with their corresponding department codes.
+  5. Replace department names with their corresponding department codes.
     - If a department name found in the text, replace the full name string with the corresponding department code.
     - If a department name is not mentioned in the text, keep it as is.
     - Don't replace department names that are not in the given list.
-  5. Output: Return a JSON object with the prerequisites in a structured format.
+  6. Output: Return a JSON object with the prerequisites in a structured format.
     - Avoid deeply nested logical structures for readability.
     - Simplify logical expressions wherever possible without losing meaning.
     - Ensure no requirement has "units" equal to 0, because it does not make sense to have a course with 0 units.
-  3. Rules:
+  7. Rules:
     - Represent logical prerequisites clearly in JSON format using keys like "and" or "or".
     - Handle exceptions gracefully by assuming ambiguous text needs clarification and simplifying to the most likely structure.
     - Try to use the logical operators you are provided with to represent the prerequisites as accurately as possible.
-  4. Examples:
+  8. Examples:
     Input Text: "Mathematics 101, Newjeans and Bunnies Club 499, and Physics 201 or Chemistry 102A, and Applied Mathematics 217."
     Output JSON:
       \`\`\`json
@@ -171,12 +175,11 @@ You are an advanced admission bot for a university tasked with processing course
       }
       \`\`\`
 
-  5. Additional Details:
+  9. Additional Details:
     - Include clear logical operators (and, or) and group courses appropriately.
     - Handle cases like "any one of" or "at least X units in…" correctly.
-  6. Formatting:
+  10. Formatting:
     - Ensure every JSON object is syntactically correct.
-    - If there is only one requirement at all, wrap it in an "and" condition.
 
 Given these guidelines, your task is to process the provided course and prerequisite text and return a well-formatted JSON object as described. If additional clarification is needed, infer reasonable assumptions. Always output valid JSON.
 
@@ -199,16 +202,16 @@ When you see a course followed by a unit number requirements from the same cours
 \`\`\`
 
 Here is a full list of course full name and their corresponding course codes you can use.
-${courses.map((course) => `Course full name is: "${course.subject.title} ${course.course_number}", its course code is: "${course.code}"`).join("\n")}
+${courses.map((course) => `- Course full name is: "${course.subject.title} ${course.course_number}", its course code is: "${course.code}"`).join("\n")}
 
 Here is a full list of subject codes and their corresponding names you can use.
-${subjects.map((subject) => `Subject full title is: "${subject.title}", its subject title is: "${subject.code}"`).join("\n")}
+${subjects.map((subject) => `- Subject full title is: "${subject.title}", its subject title is: "${subject.code}"`).join("\n")}
 
 Here is a full list of faculties and their corresponding names you can use.
-${faculties.map((faculty) => `Faculty full name is: "${faculty.display_name}", its faculty code is: "${faculty.display_name}"`).join("\n")}
+${faculties.map((faculty) => `- Faculty full name is: "${faculty.name}", its faculty code is: "${faculty.display_name}"`).join("\n")}
 
 Here is a full list of departments and their corresponding names you can use.
-${departments.map((department) => `Department full name is: "${department.name}", its department code is: "${department.code}"`).join("\n")}
+${departments.map((department) => `- Department full name is: "${department.name}", its department code is: "${department.code}"`).join("\n")}
 `
 }
 
