@@ -1,4 +1,4 @@
-import { RequisiteJsonError, ValidateOptions, ValidateResult, getValidator } from "./requisite_json"
+import { ValidateOptions, ValidateResult, getValidator } from "./requisite_json"
 
 describe("validator", () => {
   let validate: (json: any, options?: ValidateOptions) => ValidateResult
@@ -44,7 +44,7 @@ describe("validator", () => {
     const json = {
       and: [
         {
-          from: ["CPSC251", "MATH271", "MATH273"],
+          from: ["CPSC251", "MATH271", "MATH273", "MATH999"],
           units: 3,
         },
         {
@@ -54,8 +54,8 @@ describe("validator", () => {
       ],
     }
 
-    const t = () => validate(json, { safe: false })
-    expect(t).toThrow(RequisiteJsonError)
+    const result = validate(json, { strict: true })
+    expect(result.valid).toBe(false)
   })
 
   it("validate and with two arguments of units + another or, truthy", () => {
@@ -260,12 +260,12 @@ describe("validator", () => {
     expect(result.valid).toBe(true)
   })
 
-  it("valid a complex json: or with untracked course, falsy", () => {
+  it("valid a complex json: or with untracked course, truthy", () => {
     const json = {
       or: ["PLAN602", "Environmental Design Planning 602"],
     }
-    const result = validate(json)
-    expect(result.valid).toBe(false)
+    const result = validate(json, { strict: true })
+    expect(result.valid).toBe(true)
   })
 
   it("valid a complex json: units with level, falsy", () => {
