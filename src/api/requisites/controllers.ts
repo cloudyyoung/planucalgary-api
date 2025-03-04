@@ -39,11 +39,12 @@ export const listRequisites = async (req: Request<any, any, any, RequisiteList>,
   ])
 
   const requisitesValidated = requisites.map((requisite) => {
-    const { valid, errors } = validate(requisite.json)
+    const { valid, errors, warnings } = validate(requisite.json)
     return {
       ...requisite,
       json_valid: valid,
       json_errors: errors,
+      json_warnings: warnings,
     }
   })
 
@@ -74,10 +75,10 @@ export const updateRequisite = async (req: Request<IdInput, any, RequisiteUpdate
   if (req.body.json !== null) {
     const validate = await getValidator()
     const json = req.body.json
-    const { valid, errors } = validate(json)
+    const { valid, errors, warnings } = validate(json)
 
     if (!valid) {
-      return res.status(400).json({ message: "Invalid JSON", errors: errors })
+      return res.status(400).json({ message: "Invalid JSON", errors, warnings })
     }
   }
 

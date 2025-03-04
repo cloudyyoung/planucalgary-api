@@ -57,6 +57,7 @@ export interface RequisiteValidationError {
 export interface ValidateResult {
   valid: boolean
   errors: RequisiteValidationError[]
+  warnings: RequisiteValidationError[]
 }
 
 export interface ValidateOptions {
@@ -116,7 +117,8 @@ export const getValidator = async () => {
         // If given an untracked course name, eg., "Applied Mathematics 211",
         // it is required that database doesn't track such course, ie., "AMAT211" should not exist in the database.
         const UntrackedCourseRegex = /^([A-Za-z ,']+) ([0-9]{2,3}(-[0-9])?(.[0-9]{2})?[AB]?)$/
-        if (UntrackedCourseRegex.test(obj)) {
+        const isUntrackedString = UntrackedCourseRegex.test(obj)
+        if (isUntrackedString) {
           const matches = obj.match(UntrackedCourseRegex)!
           const subject = matches[1]
           const courseNumber = matches[2]
@@ -137,7 +139,8 @@ export const getValidator = async () => {
         // If given a tracked course code, eg., "AMAT211", it is required that subject code "AMAT" exists in the database.
         // If subject code "AMAT" doesn't exist in the database, "AMAT" is not at all a valid course code.
         const TrackedCourseRegex = /^([A-Z]{3,4})[0-9]{2,3}(-[0-9])?(.[0-9]{2})?[AB]?$/
-        if (TrackedCourseRegex.test(obj)) {
+        const isTrackedString = TrackedCourseRegex.test(obj)
+        if (isTrackedString) {
           const matches = obj.match(TrackedCourseRegex)!
           const subjectCode = matches[1]
           const valid = subjectCodes.includes(subjectCode)
@@ -147,14 +150,21 @@ export const getValidator = async () => {
           }
         }
 
+        const isTrackedCourseCode = courseCodes.includes(obj)
+        if (!isUntrackedString && !isTrackedString && !isTrackedCourseCode) {
+          errors.push({ message: "Course code does not exist", value: obj })
+          return false
+        }
+
         // In loose mode, we allow untrack course code like "MATH123" to be valid. Because "MATH" is a valid subject
         // code in the database, although "MATH123" might not exist in the database.
         // In strict mode, we require that the course code is a valid course code in the database. "MATH123" is not valid in strict mode.
-        if (options.strict) {
-          const valid = courseCodes.includes(obj)
-          if (!valid) {
+        if (!isTrackedCourseCode) {
+          if (options.strict) {
             errors.push({ message: "Course code does not exist", value: obj })
             return false
+          } else {
+            warnings.push({ message: "Course is untracked", value: obj })
           }
         }
 
@@ -527,6 +537,7 @@ export const getValidator = async () => {
     }
 
     const errors: RequisiteValidationError[] = []
+    const warnings: RequisiteValidationError[] = []
     const valid = _validate(json)
 
     if (options.safe === false && errors.length > 0) {
@@ -534,8 +545,9 @@ export const getValidator = async () => {
     }
 
     return {
-      valid: valid,
-      errors: errors,
+      valid,
+      errors,
+      warnings,
     }
   }
 
