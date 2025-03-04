@@ -115,7 +115,7 @@ export const getValidator = async () => {
 
         // If given an untracked course name, eg., "Applied Mathematics 211",
         // it is required that database doesn't track such course, ie., "AMAT211" should not exist in the database.
-        const UntrackedCourseRegex = /^([A-Za-z ,]+) ([0-9]{2,3}(-[0-9])?(.[0-9]{2})?[AB]?)$/
+        const UntrackedCourseRegex = /^([A-Za-z ,']+) ([0-9]{2,3}(-[0-9])?(.[0-9]{2})?[AB]?)$/
         if (UntrackedCourseRegex.test(obj)) {
           const matches = obj.match(UntrackedCourseRegex)!
           const subject = matches[1]
@@ -179,6 +179,21 @@ export const getValidator = async () => {
         if (typeof obj !== "string") {
           errors.push({ message: "Subject code must be a string", value: obj })
           return false
+        }
+
+        // In loose mode, we allow untrack subject code like "Women's Studies" to be valid.
+        // Because "Women's Studies" is a valid subject code, although "Mathematics" might not exist in the database.
+        if (!options.strict) {
+          const UntrackSubjectRegex = /^[A-Za-z ,']{5,}$/
+          if (UntrackSubjectRegex.test(obj)) {
+            const valid = subjects.some((subject) => subject.title === obj)
+            if (valid) {
+              errors.push({ message: "Subject code should be given but got subject full name", value: obj })
+              return false
+            }
+
+            return true
+          }
         }
 
         const valid = subjectCodes.includes(obj)
