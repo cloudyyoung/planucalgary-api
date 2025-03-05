@@ -236,6 +236,10 @@ model Program {
 
   version Int
 
+  search_vector Unsupported("tsvector")? @default(dbgenerated())
+
+  @@index([search_vector], type: Gin, map: "program_search_vector_gin")
+
   @@map("programs")
   @@schema("catalog")
 }
