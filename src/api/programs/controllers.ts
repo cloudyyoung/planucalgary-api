@@ -1,11 +1,11 @@
 import { Request, Response } from "express"
 import { ParamsDictionary } from "express-serve-static-core"
-import { CourseCreateRelations, CourseUpdateRelations, CourseList } from "./validators"
-import { CourseCreate, CourseUpdate } from "../../zod"
+import { ProgramCreateRelations, ProgramUpdateRelations, ProgramList } from "./validators"
+import { ProgramCreate, ProgramUpdate } from "../../zod"
 import { IdInput } from "../../middlewares"
-import { Course, Prisma } from "@prisma/client"
+import { Program, Prisma } from "@prisma/client"
 
-export const listPrograms = async (req: Request<any, any, any, CourseList>, res: Response) => {
+export const listPrograms = async (req: Request<any, any, any, ProgramList>, res: Response) => {
   const keywords = req.query.keywords
   const offset = req.pagination.offset
   const limit = req.pagination.limit
@@ -58,94 +58,75 @@ export const listPrograms = async (req: Request<any, any, any, CourseList>, res:
       offset ${offset}
       limit ${limit}
     `
-  const totalQueryString = Prisma.sql`select count(*)::int from "catalog"."courses" ${whereStatement}`
+  const totalQueryString = Prisma.sql`select count(*)::int from "catalog"."programs" ${whereStatement}`
 
-  const [courses, totalResult] = await Promise.all([
-    await req.prisma.$queryRaw<Course[]>(queryString),
+  const [programs, totalResult] = await Promise.all([
+    await req.prisma.$queryRaw<Program[]>(queryString),
     await req.prisma.$queryRaw<[{ count: number }]>(totalQueryString),
   ])
   const total = totalResult[0].count
 
-  return res.paginate(courses, total)
+  return res.paginate(programs, total)
 }
 
-export const getCourse = async (req: Request<IdInput>, res: Response) => {
-  const course = await req.prisma.course.findUnique({
+export const getProgram = async (req: Request<IdInput>, res: Response) => {
+  const program = await req.prisma.program.findUnique({
     where: { id: req.params.id },
     include: {
-      subject: true,
       departments: true,
       faculties: true,
-      topics: true,
     },
   })
-  return res.json(course)
+  return res.json(program)
 }
 
-export const createCourse = async (
-  req: Request<ParamsDictionary, any, CourseCreate & CourseCreateRelations>,
+export const createProgram = async (
+  req: Request<ParamsDictionary, any, ProgramCreate & ProgramCreateRelations>,
   res: Response,
 ) => {
-  const existing = await req.prisma.course.findFirst({
-    where: { cid: req.body.cid },
+  const existing = await req.prisma.program.findFirst({
+    where: { pid: req.body.pid },
   })
   if (existing) {
-    return res.status(403).json({ error: "Course with the given cid already exists", existing })
+    return res.status(403).json({ error: "Program with the given cid already exists", existing })
   }
 
-  const course = await req.prisma.course.create({
+  const program = await req.prisma.program.create({
     data: {
       ...req.body,
-      subject_code: undefined,
-      subject: {
-        connect: { code: req.body.subject_code },
-      },
       departments: {
         connect: req.body.departments.map((code: string) => ({ code })),
       },
       faculties: {
         connect: req.body.faculties.map((code: string) => ({ code })),
       },
-      topics: {
-        create: req.body.topics,
-      },
     },
   })
-  return res.json(course)
+  return res.json(program)
 }
 
-export const updateCourse = async (
-  req: Request<ParamsDictionary, any, CourseUpdate & CourseUpdateRelations>,
+export const updateProgram = async (
+  req: Request<ParamsDictionary, any, ProgramUpdate & ProgramUpdateRelations>,
   res: Response,
 ) => {
-  const course = await req.prisma.course.update({
+  const program = await req.prisma.program.update({
     where: { id: req.params.id },
     data: {
       ...req.body,
-      subject_code: undefined,
-      subject: {
-        connect: req.body.subject_code ? { code: req.body.subject_code } : undefined,
-      },
       departments: {
         connect: req.body.departments?.map((code: string) => ({ code })),
       },
       faculties: {
         connect: req.body.faculties?.map((code: string) => ({ code })),
       },
-      topics: {
-        connectOrCreate: req.body.topics?.map((topic) => ({
-          where: { number_course_id: { number: topic.number, course_id: req.params.id } },
-          create: topic,
-        })),
-      },
     },
   })
-  return res.json(course)
+  return res.json(program)
 }
 
-export const deleteCourse = async (req: Request<IdInput>, res: Response) => {
-  const course = await req.prisma.course.delete({
+export const deleteProgram = async (req: Request<IdInput>, res: Response) => {
+  const program = await req.prisma.program.delete({
     where: { id: req.params.id },
   })
-  return res.json(course)
+  return res.json(program)
 }

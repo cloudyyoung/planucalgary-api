@@ -1,16 +1,17 @@
 import { Router } from "express"
 
-import { createCourse, deleteCourse, getCourse, listPrograms, updateCourse } from "./controllers"
+import { createProgram, deleteProgram, getProgram, listPrograms, updateProgram } from "./controllers"
 import { admin } from "../../middlewares/admin"
 import { IdInputSchema, zod } from "../../middlewares"
+import { ProgramListSchema } from "./validators"
 import { ProgramCreateSchema, ProgramUpdateSchema } from "../../zod"
 
 const router = Router()
-router.get("/", zod({ query: ProgramCreateSchema }), listPrograms)
-router.get("/:id", zod({ params: IdInputSchema }), getCourse)
-router.post("/", admin(), zod({ body: ProgramCreateSchema }), createCourse)
-router.put("/:id", admin(), zod({ params: IdInputSchema, body: ProgramUpdateSchema }), updateCourse)
-router.delete("/:id", admin(), zod({ params: IdInputSchema }), deleteCourse)
+router.get("/", zod({ query: ProgramListSchema }), listPrograms)
+router.get("/:id", zod({ params: IdInputSchema }), getProgram)
+router.post("/", admin(), zod({ body: ProgramCreateSchema }), createProgram)
+router.put("/:id", admin(), zod({ params: IdInputSchema, body: ProgramUpdateSchema }), updateProgram)
+router.delete("/:id", admin(), zod({ params: IdInputSchema }), deleteProgram)
 
 export default router
 export { router }
