@@ -122,6 +122,7 @@ export const generateRequisiteChoices = async (req: Request<IdInput>, res: Respo
 
 export const syncRequisites = async (req: Request<RequisitesSync>, res: Response) => {
   const destination = req.body.destination
+  const validate = await getValidator()
 
   if (destination === "requisites_jsons") {
     const courses = await req.prisma.course.findMany({
@@ -209,6 +210,9 @@ export const syncRequisites = async (req: Request<RequisitesSync>, res: Response
           },
         },
       },
+      where: {
+        is_active: true,
+      },
     })
 
     for (const course of courses) {
@@ -233,7 +237,11 @@ export const syncRequisites = async (req: Request<RequisitesSync>, res: Response
         })
 
         if (prereq_json_row) {
-          prereq_json = prereq_json_row.json ?? Prisma.JsonNull
+          if (validate(prereq_json_row.json)) {
+            prereq_json = prereq_json_row.json ?? Prisma.JsonNull
+          } else {
+            prereq_json = Prisma.JsonNull
+          }
         }
       }
 
@@ -250,7 +258,11 @@ export const syncRequisites = async (req: Request<RequisitesSync>, res: Response
         })
 
         if (coreq_json_row) {
-          coreq_json = coreq_json_row.json ?? Prisma.JsonNull
+          if (validate(coreq_json_row.json)) {
+            coreq_json = coreq_json_row.json ?? Prisma.JsonNull
+          } else {
+            coreq_json = Prisma.JsonNull
+          }
         }
       }
 
@@ -267,7 +279,11 @@ export const syncRequisites = async (req: Request<RequisitesSync>, res: Response
         })
 
         if (antireq_json_row) {
-          antireq_json = antireq_json_row.json ?? Prisma.JsonNull
+          if (validate(antireq_json)) {
+            antireq_json = antireq_json_row.json ?? Prisma.JsonNull
+          } else {
+            antireq_json = Prisma.JsonNull
+          }
         }
       }
 
