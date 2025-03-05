@@ -131,6 +131,7 @@ model Faculty {
 
   departments Department[]
   courses Course[]
+  programs Program[]
 
   @@index([code], map: "faculty_code_unique")
 
@@ -151,6 +152,7 @@ model Department {
   faculties Faculty[]
   courses Course[]
   subjects Subject[]
+  programs Program[]
 
   @@map("departments")
   @@schema("catalog")
@@ -164,28 +166,6 @@ enum GradeMode {
   GRD // Graded
   MTG // Multi-Term
 
-  @@schema("catalog")
-}
-
-enum TermName {
-  WINTER
-  SPRING
-  SUMMER
-  FALL
-
-  @@schema("catalog")
-}
-
-model Term {
-  id          String   @id @default(uuid())
-  created_at  DateTime @default(now())
-  updated_at  DateTime @default(now()) @updatedAt
-
-  term_id   String @unique
-  year      Int
-  name      TermName
-
-  @@map("terms")
   @@schema("catalog")
 }
 
@@ -204,5 +184,58 @@ model Subject {
   @@unique([title], map: "subject_title_unique")
   @@unique([code], map: "subject_code_unique")
   @@map("subjects")
+  @@schema("catalog")
+}
+
+
+enum TermName {
+  WINTER
+  SPRING
+  SUMMER
+  FALL
+
+  @@schema("catalog")
+}
+
+model Program {
+  id         String   @id @default(uuid())
+  created_at  DateTime @default(now())
+  updated_at  DateTime @default(now()) @updatedAt
+
+  pid       String @unique
+  coursedog_id String
+  program_group_id String
+
+  code      String @unique
+  name      String
+  long_name String
+  display_name String
+
+  type     String
+  degree_designation_code String
+  degree_designation_name String
+  career   Career
+  
+  departments Department[]
+  faculties Faculty[]
+
+  admission_info String?
+  general_info String?
+
+  transcript_level Int
+  transcript_description String
+
+  requisites Json?
+
+  is_active Boolean
+  start_term Json?
+
+  program_created_at DateTime
+  program_last_updated_at DateTime
+  program_effective_start_date DateTime
+
+  version Int
+
+  @@map("programs")
   @@schema("catalog")
 }
