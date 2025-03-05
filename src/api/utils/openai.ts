@@ -27,8 +27,6 @@ export async function generatePrereq(
   const userPrompt = getUserPrompt(reqCleaned, req_type, department, faculty)
   const responseFormat = getResponseFormat()
 
-  console.log(systemPrompt)
-
   const response = await OpenAIClient.chat.completions.create({
     model: "gpt-4o",
     n: n,
@@ -152,6 +150,7 @@ You are an advanced admission bot for a university tasked with processing course
     - If a course full name is not mentioned in the text, keep it as is. Remember, to keep the course full name as is if it is not in the list of courses.
     - If course number has more than a number, for example, "Mathematics 101.03", keep the whole number.
     - If course number has "A" or "B" at the end, for example, "Mathematics 101A", keep the whole number.
+    - Don't mix use faculty or department codes on course code.
     - Don't replace course full names that are not in the given list.
     - Don't replace course full name is its *whole* name is not mentioned in the list of courses. Don't fall into the trap of replacing substrings. For example, if the course full name is "Applied Mathematics 101" and the text contains "Mathematics 101", don't replace it. "Applied Mathematics" is different from "Mathematics".
   4. Replace faculty names with their corresponding faculty codes.
@@ -266,7 +265,7 @@ Here is a full list of faculties and their corresponding names you can use.
 ${faculties.map((faculty) => `- Faculty full name is: "${faculty.name}", its faculty code is: "${faculty.code}"`).join("\n")}
 
 Here is a full list of departments and their corresponding names you can use.
-${departments.map((department) => `- Department full name is: "${department.name}", its department code is: "${department.code}"`).join("\n")}
+${departments.map((department) => `- Department full name is: "${department.display_name}", its department code is: "${department.code}"`).join("\n")}
 `
 }
 
