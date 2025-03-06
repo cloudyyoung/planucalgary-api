@@ -370,7 +370,7 @@ BEGIN
         setweight(to_tsvector('english', coalesce(NEW.degree_designation_code, '')), 'B') || 
         setweight(to_tsvector('english', coalesce(NEW.degree_designation_name, '')), 'B') || 
         setweight(to_tsvector('english', coalesce(NEW.general_info, '')), 'C') || 
-        setweight(to_tsvector('english', coalesce(NEW.pid, '')), 'D') || 
+        setweight(to_tsvector('english', coalesce(NEW.pid, '')), 'D');
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
