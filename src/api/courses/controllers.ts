@@ -100,6 +100,20 @@ export const createCourse = async (
     return res.status(403).json({ error: "Course with the given cid already exists", existing })
   }
 
+  const departments = await req.prisma.department.findMany({
+    where: { code: { in: req.body.departments } },
+  })
+  if (departments.length !== req.body.departments.length) {
+    return res.status(400).json({ error: "Invalid departments", departments: req.body.departments })
+  }
+
+  const faculties = await req.prisma.faculty.findMany({
+    where: { code: { in: req.body.faculties } },
+  })
+  if (faculties.length !== req.body.faculties.length) {
+    return res.status(400).json({ error: "Invalid faculties", faculties: req.body.faculties })
+  }
+
   const course = await req.prisma.course.create({
     data: {
       ...req.body,
