@@ -1,6 +1,6 @@
 import { Request, Response } from "express"
 import { ParamsDictionary } from "express-serve-static-core"
-import { ProgramCreateRelations, ProgramUpdateRelations, ProgramList } from "./validators"
+import { ProgramCreateRelations, ProgramUpdateRelations, ProgramList, ProgramStartTerm } from "./validators"
 import { ProgramCreate, ProgramUpdate } from "../../zod"
 import { IdInput } from "../../middlewares"
 import { Program, Prisma } from "@prisma/client"
@@ -81,14 +81,14 @@ export const getProgram = async (req: Request<IdInput>, res: Response) => {
 }
 
 export const createProgram = async (
-  req: Request<ParamsDictionary, any, ProgramCreate & ProgramCreateRelations>,
+  req: Request<ParamsDictionary, any, ProgramCreate & ProgramStartTerm & ProgramCreateRelations>,
   res: Response,
 ) => {
   const existing = await req.prisma.program.findFirst({
     where: { pid: req.body.pid },
   })
   if (existing) {
-    return res.status(403).json({ error: "Program with the given cid already exists", existing })
+    return res.status(403).json({ error: "Program with the given pid already exists", existing })
   }
 
   const program = await req.prisma.program.create({
@@ -106,7 +106,7 @@ export const createProgram = async (
 }
 
 export const updateProgram = async (
-  req: Request<ParamsDictionary, any, ProgramUpdate & ProgramUpdateRelations>,
+  req: Request<ParamsDictionary, any, ProgramUpdate & ProgramStartTerm & ProgramUpdateRelations>,
   res: Response,
 ) => {
   const program = await req.prisma.program.update({
