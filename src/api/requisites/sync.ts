@@ -1,5 +1,7 @@
 import { Request, Response } from "express"
 import { RequisiteType, Prisma } from "@prisma/client"
+import _ from "lodash"
+
 import { RequisiteJsonCreate } from "../../zod"
 import { getValidator } from "../../jsonlogic/requisite_json"
 
@@ -100,29 +102,32 @@ export const toRequisitesJson = async (req: Request, res: Response) => {
 export const toCourses = async (req: Request, res: Response) => {
   const validate = await getValidator()
 
-  const courses = await req.prisma.course.findMany({
-    select: {
-      id: true,
-      prereq: true,
-      coreq: true,
-      antireq: true,
-      departments: {
-        select: {
-          code: true,
+  const [courses, requisitesJsons] = await Promise.all([
+    req.prisma.course.findMany({
+      select: {
+        id: true,
+        prereq: true,
+        coreq: true,
+        antireq: true,
+        departments: {
+          select: {
+            code: true,
+          },
+        },
+        faculties: {
+          select: {
+            code: true,
+          },
         },
       },
-      faculties: {
-        select: {
-          code: true,
-        },
+      where: {
+        is_active: true,
       },
-    },
-    where: {
-      is_active: true,
-    },
-  })
+    }),
+    req.prisma.requisiteJson.findMany(),
+  ])
 
-  for (const course of courses) {
+  const course_updates = courses.map((course) => {
     const { id, prereq, coreq, antireq, departments, faculties } = course
     const department_codes = departments.map((d) => d.code)
     const faculty_codes = faculties.map((f) => f.code)
@@ -132,20 +137,17 @@ export const toCourses = async (req: Request, res: Response) => {
     let antireq_json
 
     if (prereq) {
-      const prereq_json_row = await req.prisma.requisiteJson.findUnique({
-        where: {
-          requisite_type_text_departments_faculties: {
-            requisite_type: RequisiteType.PREREQ,
-            text: prereq,
-            departments: department_codes,
-            faculties: faculty_codes,
-          },
-        },
-      })
+      const requisite = requisitesJsons.find(
+        (r) =>
+          r.requisite_type === RequisiteType.PREREQ &&
+          r.text === prereq &&
+          _.isEqual(r.departments, department_codes) &&
+          _.isEqual(r.faculties, faculty_codes),
+      )
 
-      if (prereq_json_row) {
-        if (validate(prereq_json_row.json)) {
-          prereq_json = prereq_json_row.json ?? Prisma.DbNull
+      if (requisite) {
+        if (validate(requisite.json)) {
+          prereq_json = requisite.json ?? Prisma.DbNull
         } else {
           prereq_json = Prisma.DbNull
         }
@@ -153,20 +155,17 @@ export const toCourses = async (req: Request, res: Response) => {
     }
 
     if (coreq) {
-      const coreq_json_row = await req.prisma.requisiteJson.findUnique({
-        where: {
-          requisite_type_text_departments_faculties: {
-            requisite_type: RequisiteType.COREQ,
-            text: coreq,
-            departments: department_codes,
-            faculties: faculty_codes,
-          },
-        },
-      })
+      const requisite = requisitesJsons.find(
+        (r) =>
+          r.requisite_type === RequisiteType.COREQ &&
+          r.text === coreq &&
+          _.isEqual(r.departments, department_codes) &&
+          _.isEqual(r.faculties, faculty_codes),
+      )
 
-      if (coreq_json_row) {
-        if (validate(coreq_json_row.json)) {
-          coreq_json = coreq_json_row.json ?? Prisma.DbNull
+      if (requisite) {
+        if (validate(requisite.json)) {
+          coreq_json = requisite.json ?? Prisma.DbNull
         } else {
           coreq_json = Prisma.DbNull
         }
@@ -174,27 +173,24 @@ export const toCourses = async (req: Request, res: Response) => {
     }
 
     if (antireq) {
-      const antireq_json_row = await req.prisma.requisiteJson.findUnique({
-        where: {
-          requisite_type_text_departments_faculties: {
-            requisite_type: RequisiteType.ANTIREQ,
-            text: antireq,
-            departments: department_codes,
-            faculties: faculty_codes,
-          },
-        },
-      })
+      const requisite = requisitesJsons.find(
+        (r) =>
+          r.requisite_type === RequisiteType.ANTIREQ &&
+          r.text === antireq &&
+          _.isEqual(r.departments, department_codes) &&
+          _.isEqual(r.faculties, faculty_codes),
+      )
 
-      if (antireq_json_row) {
-        if (validate(antireq_json)) {
-          antireq_json = antireq_json_row.json ?? Prisma.DbNull
+      if (requisite) {
+        if (validate(requisite.json)) {
+          antireq_json = requisite.json ?? Prisma.DbNull
         } else {
           antireq_json = Prisma.DbNull
         }
       }
     }
 
-    await req.prisma.course.update({
+    return req.prisma.course.update({
       where: { id },
       data: {
         prereq_json,
@@ -202,7 +198,13 @@ export const toCourses = async (req: Request, res: Response) => {
         antireq_json,
       },
     })
-  }
+  })
 
-  return res.status(200).json({ message: `${courses.length} requisites are synced to courses.` })
+  const result = await req.prisma.$transaction(course_updates)
+  const count = result.length
+
+  return res.status(200).json({
+    message: `${courses.length} requisites are synced to courses.`,
+    courses_synced: count,
+  })
 }
