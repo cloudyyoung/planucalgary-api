@@ -100,19 +100,22 @@ export const createCourse = async (
     return res.status(403).json({ error: "Course with the given cid already exists", existing })
   }
 
-  const departments = await req.prisma.department.findMany({
-    where: { code: { in: req.body.departments } },
-  })
-  if (departments.length !== req.body.departments.length) {
-    return res.status(400).json({ error: "Invalid departments", departments: req.body.departments })
-  }
+  const [departments, faculties] = await Promise.all([
+    req.prisma.department.findMany({
+      where: { code: { in: req.body.departments } },
+    }),
+    req.prisma.faculty.findMany({
+      where: { code: { in: req.body.faculties } },
+    }),
+  ])
 
-  const faculties = await req.prisma.faculty.findMany({
-    where: { code: { in: req.body.faculties } },
-  })
-  if (faculties.length !== req.body.faculties.length) {
-    return res.status(400).json({ error: "Invalid faculties", faculties: req.body.faculties })
-  }
+  const deaprtmentCodes = departments.map((department) => ({
+    code: department.code,
+  }))
+
+  const facultyCodes = faculties.map((faculty) => ({
+    code: faculty.code,
+  }))
 
   const course = await req.prisma.course.create({
     data: {
@@ -122,10 +125,10 @@ export const createCourse = async (
         connect: { code: req.body.subject_code },
       },
       departments: {
-        connect: req.body.departments.map((code: string) => ({ code })),
+        connect: deaprtmentCodes,
       },
       faculties: {
-        connect: req.body.faculties.map((code: string) => ({ code })),
+        connect: facultyCodes,
       },
       topics: {
         create: req.body.topics,
