@@ -27,7 +27,7 @@ ALTER TABLE "catalog"."courses" ADD COLUMN     "search_vector" tsvector;
 
 -- CreateFunction 
 -- IMPORTANT: This generates a new default value for the column. This operation is not maintained in the prisma schema file because it is unsupported.
-CREATE OR REPLACE FUNCTION update_text_search() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION catalog.update_course_text_search() RETURNS trigger AS $$
 BEGIN
     NEW.search_vector :=
         setweight(to_tsvector('english', coalesce(NEW.code, '')), 'A') || 
@@ -46,7 +46,7 @@ $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER update_text_search_trigger
 BEFORE INSERT OR UPDATE ON "catalog"."courses"
-FOR EACH ROW EXECUTE FUNCTION update_text_search();
+FOR EACH ROW EXECUTE FUNCTION update_course_text_search();
 
 
 -- CreateIndex

@@ -212,8 +212,8 @@ model Program {
   display_name String
 
   type     String
-  degree_designation_code String
-  degree_designation_name String
+  degree_designation_code String?
+  degree_designation_name String?
   career   Career
   
   departments Department[]
@@ -222,8 +222,8 @@ model Program {
   admission_info String?
   general_info String?
 
-  transcript_level Int
-  transcript_description String
+  transcript_level Int?
+  transcript_description String?
 
   requisites Json?
 
