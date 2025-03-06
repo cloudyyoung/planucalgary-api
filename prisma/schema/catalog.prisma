@@ -116,6 +116,8 @@ enum RequisiteType {
   PREREQ
   COREQ
   ANTIREQ
+  COURSE_SET
+  REQUISITE_SET
 
   @@schema("catalog")
 }
