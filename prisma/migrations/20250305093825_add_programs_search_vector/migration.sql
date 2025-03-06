@@ -21,7 +21,7 @@ $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER update_text_search_trigger
 BEFORE INSERT OR UPDATE ON "catalog"."programs"
-FOR EACH ROW EXECUTE FUNCTION update_program_text_search();
+FOR EACH ROW EXECUTE FUNCTION catalog.update_program_text_search();
 
 
 -- CreateIndex
