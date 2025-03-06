@@ -98,12 +98,14 @@ model CourseSet {
   created_at  DateTime @default(now())
   updated_at  DateTime @default(now()) @updatedAt
 
-  course_set_group_id String @unique
+  csid       String @unique
+  course_set_group_id String
   type     String
   name      String
   description String?
   json    Json?
 
+  course_set_created_at DateTime
   course_set_last_updated_at DateTime
 
   @@map("course_sets")
