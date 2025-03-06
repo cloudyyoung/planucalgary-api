@@ -109,7 +109,7 @@ export const createCourse = async (
     }),
   ])
 
-  const deaprtmentCodes = departments.map((department) => ({
+  const departmentCodes = departments.map((department) => ({
     code: department.code,
   }))
 
@@ -125,7 +125,7 @@ export const createCourse = async (
         connect: { code: req.body.subject_code },
       },
       departments: {
-        connect: deaprtmentCodes,
+        connect: departmentCodes,
       },
       faculties: {
         connect: facultyCodes,
@@ -142,6 +142,23 @@ export const updateCourse = async (
   req: Request<ParamsDictionary, any, CourseUpdate & CourseUpdateRelations>,
   res: Response,
 ) => {
+  const [departments, faculties] = await Promise.all([
+    req.prisma.department.findMany({
+      where: { code: { in: req.body.departments } },
+    }),
+    req.prisma.faculty.findMany({
+      where: { code: { in: req.body.faculties } },
+    }),
+  ])
+
+  const deaprtmentCodes = departments.map((department) => ({
+    code: department.code,
+  }))
+
+  const facultyCodes = faculties.map((faculty) => ({
+    code: faculty.code,
+  }))
+
   const course = await req.prisma.course.update({
     where: { id: req.params.id },
     data: {
@@ -151,10 +168,10 @@ export const updateCourse = async (
         connect: req.body.subject_code ? { code: req.body.subject_code } : undefined,
       },
       departments: {
-        connect: req.body.departments?.map((code: string) => ({ code })),
+        connect: req.body.departments ? deaprtmentCodes : undefined,
       },
       faculties: {
-        connect: req.body.faculties?.map((code: string) => ({ code })),
+        connect: req.body.faculties ? facultyCodes : undefined,
       },
       topics: {
         connectOrCreate: req.body.topics?.map((topic) => ({
