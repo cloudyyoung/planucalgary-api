@@ -38,6 +38,8 @@
   },
   "scripts": {
     "dev": "nodemon src/app.ts --ignore dist/ --ignore **.gen.ts",
+    "migrate": "prisma migrate dev",
+    "generate": "prisma generate",
     "build": "npx tsc",
     "start": "node dist/app.js",
     "test": "jest"
