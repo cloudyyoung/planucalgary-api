@@ -3,7 +3,7 @@ import { Request, Response } from "express"
 import { Prisma } from "@prisma/client"
 import { RequisiteList, RequisitesSync, RequisiteUpdate } from "./validators"
 import { IdInput } from "../../middlewares"
-import { generatePrereq } from "../utils/openai"
+import { generatePrereq, getFineTuneJson } from "../utils/openai"
 import { cleanup, isJsonEqual } from "../../jsonlogic/utils"
 import { getValidator } from "../../jsonlogic/requisite_json"
 import { toCourses, toCourseSets, toRequisitesJson } from "./sync"
@@ -130,4 +130,33 @@ export const syncRequisites = async (req: Request<RequisitesSync>, res: Response
   } else if (destination === "course_sets") {
     toCourseSets(req, res)
   }
+}
+
+export const getFineTuneJsons = async (req: Request<IdInput>, res: Response) => {
+  const requisites = await req.prisma.requisiteJson.findMany({
+    select: {
+      requisite_type: true,
+      text: true,
+      departments: true,
+      faculties: true,
+      json: true,
+    },
+    where: {
+      json: {
+        not: Prisma.DbNull,
+      },
+    },
+    take: req.pagination.limit,
+    skip: req.pagination.offset,
+  })
+
+  const jsonl = await Promise.all(
+    requisites.map(async ({ requisite_type, text, departments, faculties, json }) => {
+      return await getFineTuneJson(requisite_type, text, departments[0], faculties[0], json)
+    }),
+  )
+
+  const response = jsonl.map((json) => JSON.stringify(json)).join("\n")
+
+  return res.setHeader("Content-Type", "application/jsonl; charset=utf-8").send(response)
 }

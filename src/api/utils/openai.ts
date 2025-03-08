@@ -217,6 +217,21 @@ You are an advanced admission bot for a university tasked with processing course
       }
       \`\`\`
 
+      Input Text: "12 units - Biology 241, 243, 311 and 331"
+      Output JSON:
+      \`\`\`json
+      {
+        "from": [
+          "BIOL241",
+          "BIOL243",
+          "BIOL311",
+          "BIOL331"
+        ],
+        "units": 12
+      }
+      \`\`\`
+
+
   9. Additional Details:
     - Include clear logical operators (and, or) and group courses appropriately.
     - Handle cases like "any one of" or "at least X units in…" correctly.
@@ -278,4 +293,36 @@ If the requisite text mentions specifically a department or faculty, use the fol
 The course-related department is: ${department}
 The course-related faculty is: ${faculty}
   `
+}
+
+export const getFineTuneJson = async (
+  req_type: RequisiteType,
+  req: string,
+  department: string,
+  faculty: string,
+  json: any,
+) => {
+  const { subjects, faculties, departments, courses } = await getRelatedData(req, department, faculty)
+
+  const systemPrompt = getSystemPrompt(subjects, faculties, departments, courses)
+  const userPrompt = getUserPrompt(req, req_type, department, faculty)
+
+  const response = {
+    messages: [
+      {
+        role: "system",
+        content: systemPrompt,
+      },
+      {
+        role: "user",
+        content: userPrompt,
+      },
+      {
+        role: "assistant",
+        content: JSON.stringify(json),
+      },
+    ],
+  }
+
+  return response
 }
