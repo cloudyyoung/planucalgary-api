@@ -208,3 +208,44 @@ export const toCourses = async (req: Request, res: Response) => {
     courses_synced: count,
   })
 }
+
+export const toCourseSets = async (req: Request, res: Response) => {
+  const validate = await getValidator()
+
+  const [courseSets, requisitesJsons] = await Promise.all([
+    req.prisma.courseSet.findMany(),
+    req.prisma.requisiteJson.findMany(),
+  ])
+
+  const course_set_updates = courseSets.flatMap((courseSet) => {
+    const { id, name } = courseSet
+
+    const requisite = requisitesJsons.find(
+      (r) =>
+        r.requisite_type === RequisiteType.COURSE_SET &&
+        r.text === name &&
+        _.isEmpty(r.departments) &&
+        _.isEmpty(r.faculties),
+    )
+
+    if (!requisite) return []
+    if (!validate(requisite.json)) return []
+
+    return [
+      req.prisma.courseSet.update({
+        where: { id },
+        data: {
+          json: requisite.json ?? Prisma.DbNull,
+        },
+      }),
+    ]
+  })
+
+  const result = await req.prisma.$transaction(course_set_updates)
+  const count = result.filter((r) => r !== null).length
+
+  return res.status(200).json({
+    message: `${courseSets.length} requisites are synced to course sets.`,
+    course_sets_synced: count,
+  })
+}

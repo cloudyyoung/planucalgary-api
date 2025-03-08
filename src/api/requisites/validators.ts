@@ -8,7 +8,7 @@ export const RequisiteListSchema = z.object({
 export type RequisiteList = z.infer<typeof RequisiteListSchema>
 
 export const RequisitesSyncSchema = z.object({
-  destination: z.enum(["requisites_jsons", "courses"]),
+  destination: z.enum(["requisites_jsons", "courses", "course_sets"]),
 })
 
 export type RequisitesSync = z.infer<typeof RequisitesSyncSchema>

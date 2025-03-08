@@ -6,7 +6,7 @@ import { IdInput } from "../../middlewares"
 import { generatePrereq } from "../utils/openai"
 import { cleanup, isJsonEqual } from "../../jsonlogic/utils"
 import { getValidator } from "../../jsonlogic/requisite_json"
-import { toCourses, toRequisitesJson } from "./sync"
+import { toCourses, toCourseSets, toRequisitesJson } from "./sync"
 
 export const listRequisites = async (req: Request<any, any, any, RequisiteList>, res: Response) => {
   const { type } = req.query
@@ -127,5 +127,7 @@ export const syncRequisites = async (req: Request<RequisitesSync>, res: Response
     toRequisitesJson(req, res)
   } else if (destination === "courses") {
     toCourses(req, res)
+  } else if (destination === "course_sets") {
+    toCourseSets(req, res)
   }
 }

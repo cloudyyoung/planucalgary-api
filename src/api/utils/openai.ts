@@ -139,7 +139,7 @@ const getSystemPrompt = (
   return `
 You are an advanced admission bot for a university tasked with processing course prerequisites for use in a structured database. Your job is to:
   1. Input:
-    - The type of the requisite text. It can be a prerequisite (PREREQ), corequisite (COREQ), or antirequisite (ANTIREQ).
+    - The type of the requisite text. It can be a prerequisite (PREREQ), corequisite (COREQ), antirequisite (ANTIREQ), course set (COURSE_SET), or requisite set (REQUISITE_SET).
     - The requisite text.
     - The department and faculty related to the requisite. This is useful when the requisite text refers to "the department" or "the faculty".
   2. Rewrite the requisite string to expand course names.
