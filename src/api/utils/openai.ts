@@ -23,12 +23,12 @@ export async function generatePrereq(
 
   const { subjects, faculties, departments, courses } = await getRelatedData(reqCleaned, department, faculty)
 
-  const systemPrompt = getSystemPrompt(subjects, faculties, departments, courses)
-  const userPrompt = getUserPrompt(reqCleaned, req_type, department, faculty)
+  const systemPrompt = getSystemPrompt()
+  const userPrompt = getUserPrompt(reqCleaned, req_type, department, faculty, subjects, faculties, departments, courses)
   const responseFormat = getResponseFormat()
 
   const response = await OpenAIClient.chat.completions.create({
-    model: "ft:gpt-4o-mini-2024-07-18:personal::B8lkE7ZH",
+    model: "gpt-4o",
     n: n,
     messages: [
       {
@@ -130,12 +130,7 @@ const getResponseFormat = () => {
   return getSchema()
 }
 
-const getSystemPrompt = (
-  subjects: Subject[],
-  faculties: Faculty[],
-  departments: Department[],
-  courses: (Course & { subject: Subject; topics: CourseTopic[] })[],
-) => {
+const getSystemPrompt = () => {
   return `
 You are an advanced admission bot for a university tasked with processing course prerequisites for use in a structured database. Your job is to:
   1. Input:
@@ -217,17 +212,16 @@ You are an advanced admission bot for a university tasked with processing course
       }
       \`\`\`
 
-      Input Text: "12 units - Biology 241, 243, 311 and 331"
+      Input Text: "Biology 241, 243, 311 and 331"
       Output JSON:
       \`\`\`json
       {
-        "from": [
+        "and": [
           "BIOL241",
           "BIOL243",
           "BIOL311",
           "BIOL331"
-        ],
-        "units": 12
+        ]
       }
       \`\`\`
 
@@ -237,6 +231,7 @@ You are an advanced admission bot for a university tasked with processing course
     - Handle cases like "any one of" or "at least X units in…" correctly.
     - Ensure your JSON object is syntactically correct.
     - You would normally do not need to use "not" operator in the JSON object for anti-requisites.
+    - When you encountered course-set or requisite-set text, and it says "X units - Course 1, Course 2, and Course 3", you ignore the "X units" part and just represent the courses.
 
 Given these guidelines, your task is to process the provided course and prerequisite text and return a well-formatted JSON object as described. If additional clarification is needed, infer reasonable assumptions. Always output valid JSON.
 
@@ -257,6 +252,31 @@ When you see a course followed by a unit number requirements from the same cours
   ]
 }
 \`\`\`
+`
+}
+
+const getUserPrompt = (
+  req: string,
+  req_type: RequisiteType,
+  req_department: string,
+  req_faculty: string,
+  subjects: Subject[],
+  faculties: Faculty[],
+  departments: Department[],
+  courses: (Course & { subject: Subject; topics: CourseTopic[] })[],
+) => {
+  return `
+# Requisite
+
+The type of this requisite is: ${req_type}
+The requisite text is: ${req}
+
+If the requisite text mentions specifically a department or faculty, use the following information; otherwise, ignore it:
+The course-related department is: ${req_department}
+The course-related faculty is: ${req_faculty}
+
+
+# Related Data
 
 Here is a full list of course full name and their corresponding course codes you can use.
 ${courses
@@ -284,17 +304,6 @@ ${departments.map((department) => `- Department full name is: "${department.disp
 `
 }
 
-const getUserPrompt = (req: string, req_type: RequisiteType, department: string, faculty: string) => {
-  return `
-The type of this requisite is: ${req_type}
-The requisite text is: ${req}
-
-If the requisite text mentions specifically a department or faculty, use the following information; otherwise, ignore it:
-The course-related department is: ${department}
-The course-related faculty is: ${faculty}
-  `
-}
-
 export const getFineTuneJson = async (
   req_type: RequisiteType,
   req: string,
@@ -304,8 +313,8 @@ export const getFineTuneJson = async (
 ) => {
   const { subjects, faculties, departments, courses } = await getRelatedData(req, department, faculty)
 
-  const systemPrompt = getSystemPrompt(subjects, faculties, departments, courses)
-  const userPrompt = getUserPrompt(req, req_type, department, faculty)
+  const systemPrompt = getSystemPrompt()
+  const userPrompt = getUserPrompt(req, req_type, department, faculty, subjects, faculties, departments, courses)
 
   const response = {
     messages: [
