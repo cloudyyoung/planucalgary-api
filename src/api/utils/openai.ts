@@ -41,6 +41,7 @@ export async function generatePrereq(
       },
     ],
     response_format: responseFormat,
+    store: true,
   })
 
   const contents = []
