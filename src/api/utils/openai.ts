@@ -28,7 +28,7 @@ export async function generatePrereq(
   const responseFormat = getResponseFormat()
 
   const response = await OpenAIClient.chat.completions.create({
-    model: "ft:gpt-4o-2024-08-06:personal::B94nQ9L8",
+    model: "gpt-4o",
     n: n,
     messages: [
       {
