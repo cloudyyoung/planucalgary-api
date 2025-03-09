@@ -148,6 +148,9 @@ export const getFineTuneJsons = async (req: Request<IdInput>, res: Response) => 
     },
     take: req.pagination.limit,
     skip: req.pagination.offset,
+    orderBy: {
+      id: "asc",
+    },
   })
 
   const jsonl = await Promise.all(

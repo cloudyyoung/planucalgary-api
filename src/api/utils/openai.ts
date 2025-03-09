@@ -328,7 +328,7 @@ export const getFineTuneJson = async (
       },
       {
         role: "assistant",
-        content: JSON.stringify(json),
+        content: JSON.stringify({ requisite: json }),
       },
     ],
   }
