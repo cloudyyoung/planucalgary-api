@@ -2,6 +2,13 @@ import { prismaClient } from "../middlewares"
 import { bool } from "./utils"
 
 export type CourseCode = string
+export type DynamicCourse = {
+  field?: FieldString
+  level?: LevelString
+  subject?: SubjectCode
+  faculty?: FacultyCode
+  department?: DepartmentCode
+}
 export type FacultyCode = string
 export type DepartmentCode = string
 export type ProgramString = string
@@ -13,13 +20,8 @@ export type LevelString = string
 export type Operators = Units | And | Or | Not | Consent | Admission | Year
 export type Units = {
   units: number
-  from?: CourseCode[]
-  exclude?: CourseCode[]
-  field?: FieldString
-  level?: LevelString
-  subject?: SubjectCode
-  faculty?: FacultyCode
-  department?: DepartmentCode
+  from?: (CourseCode | DynamicCourse)[]
+  exclude?: (CourseCode | DynamicCourse)[]
 }
 export type And = {
   and: Operators[]
@@ -171,6 +173,59 @@ export const getValidator = async () => {
 
         return true
       },
+      dynamic_courses: (obj: object | string) => {
+        if (typeof obj !== "object") {
+          errors.push({ message: "Dynamic course must be an object", value: obj })
+          return false
+        }
+
+        const valid_fields = ["field", "level", "subject", "faculty", "department"]
+        const keys = Object.keys(obj)
+        const valid = keys.every((key) => valid_fields.includes(key))
+        if (!valid) {
+          errors.push({ message: "Dynamic course object has invalid properties", value: obj })
+          return false
+        }
+
+        const dynamic = obj as DynamicCourse
+
+        const field = dynamic.field
+        if (field && typeof field !== "string") {
+          errors.push({ message: "Property 'field' must be a string", value: obj })
+          return false
+        }
+
+        const level = dynamic.level
+        if (level) {
+          if (typeof level !== "string") {
+            errors.push({ message: "Property 'level' must be a string", value: obj })
+            return false
+          } else if (!primitive_validators.level_string(level)) {
+            errors.push({ message: "Property 'level' must be a valid level", value: obj })
+            return false
+          }
+        }
+
+        const subject = dynamic.subject
+        if (subject && !primitive_validators.subject_code(subject)) {
+          errors.push({ message: "Property 'subject' must be a valid course code", value: obj })
+          return false
+        }
+
+        const faculty = dynamic.faculty
+        if (faculty && !primitive_validators.faculty_code(faculty)) {
+          errors.push({ message: "Property 'faculty' must be a valid faculty code", value: obj })
+          return false
+        }
+
+        const department = dynamic.department
+        if (department && !primitive_validators.department_code(department)) {
+          errors.push({ message: "Property 'department' must be a valid department code", value: obj })
+          return false
+        }
+
+        return true
+      },
       level_string: (obj: object | string) => {
         if (typeof obj !== "string") {
           errors.push({ message: "Level must be a string", value: obj })
@@ -269,6 +324,64 @@ export const getValidator = async () => {
     }
 
     const operator_validators: Record<string, (obj: any) => boolean> = {
+      course_code: (obj: CourseCode) => {
+        if (typeof obj !== "string") {
+          return false
+        }
+
+        return primitive_validators.course_code(obj)
+      },
+      dynamic_courses: (obj: DynamicCourse) => {
+        if (typeof obj !== "object") {
+          return false
+        }
+
+        const valid_fields = ["field", "level", "subject", "faculty", "department"]
+        const keys = Object.keys(obj)
+        const valid = keys.every((key) => valid_fields.includes(key))
+        if (!valid) {
+          return false
+        }
+
+        const dynamic = obj as DynamicCourse
+
+        const field = dynamic.field
+        if (field && typeof field !== "string") {
+          errors.push({ message: "Property 'field' must be a string", value: obj })
+          return false
+        }
+
+        const level = dynamic.level
+        if (level) {
+          if (typeof level !== "string") {
+            errors.push({ message: "Property 'level' must be a string", value: obj })
+            return false
+          } else if (!primitive_validators.level_string(level)) {
+            errors.push({ message: "Property 'level' must be a valid level", value: obj })
+            return false
+          }
+        }
+
+        const subject = dynamic.subject
+        if (subject && !primitive_validators.subject_code(subject)) {
+          errors.push({ message: "Property 'subject' must be a valid course code", value: obj })
+          return false
+        }
+
+        const faculty = dynamic.faculty
+        if (faculty && !primitive_validators.faculty_code(faculty)) {
+          errors.push({ message: "Property 'faculty' must be a valid faculty code", value: obj })
+          return false
+        }
+
+        const department = dynamic.department
+        if (department && !primitive_validators.department_code(department)) {
+          errors.push({ message: "Property 'department' must be a valid department code", value: obj })
+          return false
+        }
+
+        return true
+      },
       and: (obj: And) => {
         if (!is_object(obj, "and", true)) {
           return false
@@ -346,7 +459,7 @@ export const getValidator = async () => {
             return false
           }
 
-          const results = from.map(primitive_validators.course_code)
+          const results = from.map((c) => operator_validators.course_code(c) || operator_validators.dynamic_courses(c))
           if (!results.every(bool)) {
             errors.push({ message: "Property 'from' must be an array of courses, got alien element(s)", value: obj })
             return false
@@ -365,41 +478,6 @@ export const getValidator = async () => {
             errors.push({ message: "Property 'exclude' must be an array of courses, got alien element(s)", value: obj })
             return false
           }
-        }
-
-        const field = obj.field
-        if (field && typeof field !== "string") {
-          errors.push({ message: "Property 'field' must be a string", value: obj })
-          return false
-        }
-
-        const level = obj.level
-        if (level) {
-          if (typeof level !== "string") {
-            errors.push({ message: "Property 'level' must be a string", value: obj })
-            return false
-          } else if (!primitive_validators.level_string(level)) {
-            errors.push({ message: "Property 'level' must be a valid level", value: obj })
-            return false
-          }
-        }
-
-        const subject = obj.subject
-        if (subject && !primitive_validators.subject_code(subject)) {
-          errors.push({ message: "Property 'subject' must be a valid course code", value: obj })
-          return false
-        }
-
-        const faculty = obj.faculty
-        if (faculty && !primitive_validators.faculty_code(faculty)) {
-          errors.push({ message: "Property 'faculty' must be a valid faculty code", value: obj })
-          return false
-        }
-
-        const department = obj.department
-        if (department && !primitive_validators.department_code(department)) {
-          errors.push({ message: "Property 'department' must be a valid department code", value: obj })
-          return false
         }
 
         return true
