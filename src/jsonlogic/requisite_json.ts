@@ -322,7 +322,7 @@ export const getValidator = async () => {
     // These validators first checks if an object is indeed the specified operator,
     // then checks if the operator has the correct properties.
     // Course codes and dynamic courses themselves also serve as logic operators (eg., truthy if the course is taken).
-    const operator_validators: Record<string, (obj: any) => boolean> = {
+    const operator_validators: Record<string, (obj: any, ...args: any[]) => boolean> = {
       course: (obj: CourseCode) => {
         if (typeof obj !== "string") {
           return false
@@ -341,7 +341,7 @@ export const getValidator = async () => {
 
         return primitive_validators.dynamic_course(obj)
       },
-      and: (obj: And) => {
+      and: (obj: And, courseOnly: boolean = false) => {
         if (!is_object(obj, "and")) {
           return false
         }
@@ -359,10 +359,17 @@ export const getValidator = async () => {
           return false
         }
 
+        if (courseOnly) {
+          const results = and_arguments.map(
+            (c) => operator_validators.course(c) || operator_validators.dynamic_course(c),
+          )
+          return results.every(bool)
+        }
+
         const results = and_arguments.map(generic_validate)
         return results.every(bool)
       },
-      or: (obj: Or) => {
+      or: (obj: Or, courseOnly: boolean = false) => {
         if (!is_object(obj, "or")) {
           return false
         }
@@ -378,6 +385,13 @@ export const getValidator = async () => {
             value: obj,
           })
           return false
+        }
+
+        if (courseOnly) {
+          const results = or_arguments.map(
+            (c) => operator_validators.course(c) || operator_validators.dynamic_course(c),
+          )
+          return results.every(bool)
         }
 
         const results = or_arguments.map(generic_validate)
@@ -418,7 +432,13 @@ export const getValidator = async () => {
             return false
           }
 
-          const results = from.map((c) => operator_validators.course(c) || operator_validators.dynamic_course(c))
+          const results = from.map(
+            (c) =>
+              operator_validators.course(c) ||
+              operator_validators.dynamic_course(c) ||
+              operator_validators.and(c, true) ||
+              operator_validators.or(c, true),
+          )
           if (!results.every(bool)) {
             errors.push({ message: "Property 'from' must be an array of courses, got alien element(s)", value: obj })
             return false
@@ -432,7 +452,13 @@ export const getValidator = async () => {
             return false
           }
 
-          const results = not.map((c) => operator_validators.course(c) || operator_validators.dynamic_course(c))
+          const results = not.map(
+            (c) =>
+              operator_validators.course(c) ||
+              operator_validators.dynamic_course(c) ||
+              operator_validators.and(c, true) ||
+              operator_validators.or(c, true),
+          )
           if (!results.every(bool)) {
             errors.push({ message: "Property 'not' must be an array of courses, got alien element(s)", value: obj })
             return false
