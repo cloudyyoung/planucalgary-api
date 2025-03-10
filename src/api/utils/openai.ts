@@ -242,12 +242,13 @@ When you see a course followed by a unit number requirements from the same cours
   "and": [
     "ARHI340",
     {
-      "level": "300",
       "units": 6,
-      "exclude": [
+      "from": [
+        {"level": "300", "subject": "ART"}
+      ]
+      "not": [
         "ARHI340"
       ],
-      "subject": "ART"
     }
   ]
 }

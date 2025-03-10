@@ -7,6 +7,7 @@ export const getSchema = () => {
     { $ref: "#/$defs/consent" },
     { $ref: "#/$defs/admission" },
     { $ref: "#/$defs/year" },
+    { $ref: "#/$defs/dynamic_course" },
     { type: "string" },
   ]
 
@@ -67,39 +68,37 @@ export const getSchema = () => {
           units: {
             type: "object",
             description: "X units",
-            required: ["units", "from", "exclude", "field", "level", "subject"],
+            required: ["units", "from", "not"],
             additionalProperties: false,
             properties: {
               units: { type: "number", description: "X units", additionalProperties: false },
               from: {
                 description:
-                  "Specify the courses that the units are from, this is a strict list that the units must be from",
+                  "Specify the courses that the units are from, this is a strict list that the units must be from. The elements can be either a course code, or a dynamic_course object when the courses has to fulfill certain criterias.",
                 additionalProperties: false,
-                anyOf: [{ type: "array", items: { type: "string", description: "Course code" } }, { type: "null" }],
+                anyOf: [
+                  {
+                    type: "array",
+                    items: {
+                      anyOf: [{ type: "string", description: "A course code" }, { $ref: "#/$defs/dynamic_course" }],
+                    },
+                  },
+                  { type: "null" },
+                ],
               },
-              exclude: {
+              not: {
                 description:
                   "Exclude a list of courses when counting units. This field is usually used when the requisite says some additional units besides the previously named courses",
                 additionalProperties: false,
-                anyOf: [{ type: "array", items: { type: "string", description: "Course code" } }, { type: "null" }],
-              },
-              field: {
-                description:
-                  "Field of study. Only include this field is the requisite specifically mentions a field of study. Eg, '6 units of courses in the field of Art.'",
-                additionalProperties: false,
-                anyOf: [{ type: "string" }, { type: "null" }],
-              },
-              level: {
-                description:
-                  "Course level of study. When suffixed with +, it means at or above the level. Eg, '6 units of courses at the 300 level or above.'",
-                additionalProperties: false,
-                anyOf: [{ type: "string" }, { type: "null" }],
-              },
-              subject: {
-                description:
-                  "Subject of study. Only include this field is the requisite specifically mentions a subject. Eg, '6 units of courses labelled Art.'",
-                additionalProperties: false,
-                anyOf: [{ type: "string" }, { type: "null" }],
+                anyOf: [
+                  {
+                    type: "array",
+                    items: {
+                      anyOf: [{ type: "string", description: "A course code" }, { $ref: "#/$defs/dynamic_course" }],
+                    },
+                  },
+                  { type: "null" },
+                ],
               },
             },
           },
@@ -240,6 +239,44 @@ export const getSchema = () => {
                 enum: ["first", "second", "third", "fourth", "fifth"],
               },
             ],
+          },
+          dynamic_course: {
+            type: "object",
+            description: "an object to describe some matching criteria for a group of courses",
+            required: ["field", "level", "subject", "department", "faculty"],
+            additionalProperties: false,
+            properties: {
+              field: {
+                description:
+                  "Field of study. Only include this field is the requisite specifically mentions a field of study. Eg, '6 units of courses in the field of Art.'",
+                additionalProperties: false,
+                anyOf: [{ type: "string" }, { type: "null" }],
+              },
+              level: {
+                description:
+                  "Course level of study. When suffixed with +, it means at or above the level. Eg, '6 units of courses at the 300 level or above.'",
+                additionalProperties: false,
+                anyOf: [{ type: "string" }, { type: "null" }],
+              },
+              subject: {
+                description:
+                  "Subject of study. Only include this field is the requisite specifically mentions a subject. Eg, '6 units of courses labelled Art.'",
+                additionalProperties: false,
+                anyOf: [{ type: "string" }, { type: "null" }],
+              },
+              department: {
+                description:
+                  "Department of study. Only include this field is the requisite specifically mentions a department. Eg, '6 units of courses in the department of Art.'",
+                additionalProperties: false,
+                anyOf: [{ type: "string" }, { type: "null" }],
+              },
+              faculty: {
+                description:
+                  "Faculty of study. Only include this field is the requisite specifically mentions a faculty. Eg, '6 units of courses in the faculty of Science.'",
+                additionalProperties: false,
+                anyOf: [{ type: "string" }, { type: "null" }],
+              },
+            },
           },
         },
       },
