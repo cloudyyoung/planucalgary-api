@@ -100,7 +100,7 @@ export const getValidator = async () => {
         return false
       }
       const keys = Array.isArray(key) ? key : [key]
-      return keys.every((k) => k in obj)
+      return Object.keys(obj).every((k) => keys.includes(k))
     }
 
     // Validators for primitive types, like strings, numbers, etc.

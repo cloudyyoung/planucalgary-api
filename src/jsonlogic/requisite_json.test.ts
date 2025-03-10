@@ -135,7 +135,11 @@ describe("validator", () => {
       and: [
         {
           units: 24,
-          subject: "CPSC",
+          from: [
+            {
+              subject: "CPSC",
+            },
+          ],
         },
         {
           or: ["ACCT425", "ACCT357"],
@@ -151,11 +155,19 @@ describe("validator", () => {
       and: [
         {
           units: 24,
-          subject: "ABCD",
+          from: [
+            {
+              subject: "ABCD",
+            },
+          ],
         },
         {
           units: 24,
-          department: "XXXXXX",
+          from: [
+            {
+              department: "XXXXXX",
+            },
+          ],
         },
         {
           or: [true, "ACCT301"],
@@ -171,8 +183,12 @@ describe("validator", () => {
       and: [
         {
           units: 15,
-          subject: "ART",
-          department: "ART",
+          from: [
+            {
+              subject: "ART",
+              department: "ART",
+            },
+          ],
         },
         {
           consent: {
@@ -217,9 +233,13 @@ describe("validator", () => {
     const json = {
       and: [
         {
-          level: "300+",
           units: 18,
-          subject: "ARHI",
+          from: [
+            {
+              level: "300+",
+              subject: "ARHI",
+            },
+          ],
         },
         {
           consent: {
@@ -243,11 +263,19 @@ describe("validator", () => {
           or: [
             {
               units: 3,
-              faculty: "SC",
+              from: [
+                {
+                  faculty: "SC",
+                },
+              ],
             },
             {
               units: 3,
-              faculty: "EN",
+              from: [
+                {
+                  faculty: "EN",
+                },
+              ],
             },
           ],
         },
@@ -271,7 +299,11 @@ describe("validator", () => {
   it("valid a complex json: units with level, falsy", () => {
     const json = {
       units: 3,
-      level: "AA",
+      from: [
+        {
+          level: "AA",
+        },
+      ],
     }
     const result = validate(json)
     expect(result.valid).toBe(false)
