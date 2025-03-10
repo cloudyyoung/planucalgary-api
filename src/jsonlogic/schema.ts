@@ -80,12 +80,7 @@ export const getSchema = () => {
                   {
                     type: "array",
                     items: {
-                      anyOf: [
-                        { type: "string", description: "A course code" },
-                        { $ref: "#/$defs/dynamic_course" },
-                        { $ref: "#/$defs/and" },
-                        { $ref: "#/$defs/or" },
-                      ],
+                      anyOf: [{ type: "string", description: "A course code" }, { $ref: "#/$defs/dynamic_course" }],
                     },
                   },
                   { type: "null" },
@@ -99,12 +94,7 @@ export const getSchema = () => {
                   {
                     type: "array",
                     items: {
-                      anyOf: [
-                        { type: "string", description: "A course code" },
-                        { $ref: "#/$defs/dynamic_course" },
-                        { $ref: "#/$defs/and" },
-                        { $ref: "#/$defs/or" },
-                      ],
+                      anyOf: [{ type: "string", description: "A course code" }, { $ref: "#/$defs/dynamic_course" }],
                     },
                   },
                   { type: "null" },
