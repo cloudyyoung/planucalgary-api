@@ -359,7 +359,7 @@ export const getValidator = async () => {
           return false
         }
 
-        const results = and_arguments.map(_validate)
+        const results = and_arguments.map(generic_validate)
         return results.every(bool)
       },
       or: (obj: Or) => {
@@ -380,7 +380,7 @@ export const getValidator = async () => {
           return false
         }
 
-        const results = or_arguments.map(_validate)
+        const results = or_arguments.map(generic_validate)
         return results.some(bool)
       },
       not: (obj: Not) => {
@@ -395,7 +395,7 @@ export const getValidator = async () => {
           return false
         }
 
-        return _validate(not_argument)
+        return generic_validate(not_argument)
       },
       units: (obj: Units) => {
         if (!is_object(obj, ["units", "from", "not"])) {
@@ -553,7 +553,7 @@ export const getValidator = async () => {
       },
     }
 
-    const _validate = (obj: any): boolean => {
+    const generic_validate = (obj: any): boolean => {
       if (obj === null || obj === undefined) {
         errors.push({ message: "Requisite JSON cannot be null or undefined", value: obj })
         return false
@@ -576,7 +576,7 @@ export const getValidator = async () => {
 
     const errors: RequisiteValidationError[] = []
     const warnings: RequisiteValidationError[] = []
-    const valid = _validate(json)
+    const valid = generic_validate(json)
 
     if (options.safe === false && errors.length > 0) {
       throw new RequisiteJsonError(errors)
