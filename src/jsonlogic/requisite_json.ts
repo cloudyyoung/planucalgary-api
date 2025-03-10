@@ -168,7 +168,7 @@ export const getValidator = async () => {
 
         return true
       },
-      dynamic_courses: (obj: object | string) => {
+      dynamic_course: (obj: object | string) => {
         if (typeof obj !== "object") {
           errors.push({ message: "Dynamic course must be an object", value: obj })
           return false
@@ -323,14 +323,14 @@ export const getValidator = async () => {
     // then checks if the operator has the correct properties.
     // Course codes and dynamic courses themselves also serve as logic operators (eg., truthy if the course is taken).
     const operator_validators: Record<string, (obj: any) => boolean> = {
-      course_code: (obj: CourseCode) => {
+      course: (obj: CourseCode) => {
         if (typeof obj !== "string") {
           return false
         }
 
         return primitive_validators.course_code(obj)
       },
-      dynamic_courses: (obj: DynamicCourse) => {
+      dynamic_course: (obj: DynamicCourse) => {
         if (typeof obj !== "object") {
           return false
         }
@@ -339,7 +339,7 @@ export const getValidator = async () => {
           return false
         }
 
-        return primitive_validators.dynamic_courses(obj)
+        return primitive_validators.dynamic_course(obj)
       },
       and: (obj: And) => {
         if (!is_object(obj, "and")) {
@@ -418,7 +418,7 @@ export const getValidator = async () => {
             return false
           }
 
-          const results = from.map((c) => operator_validators.course_code(c) || operator_validators.dynamic_courses(c))
+          const results = from.map((c) => operator_validators.course(c) || operator_validators.dynamic_course(c))
           if (!results.every(bool)) {
             errors.push({ message: "Property 'from' must be an array of courses, got alien element(s)", value: obj })
             return false
@@ -432,7 +432,7 @@ export const getValidator = async () => {
             return false
           }
 
-          const results = not.map((c) => operator_validators.course_code(c) || operator_validators.dynamic_courses(c))
+          const results = not.map((c) => operator_validators.course(c) || operator_validators.dynamic_course(c))
           if (!results.every(bool)) {
             errors.push({ message: "Property 'not' must be an array of courses, got alien element(s)", value: obj })
             return false
