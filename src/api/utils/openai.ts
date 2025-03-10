@@ -213,16 +213,17 @@ You are an advanced admission bot for a university tasked with processing course
       }
       \`\`\`
 
-      Input Text: "Biology 241, 243, 311 and 331"
+      Input Text: "18 units - Biology 241, 243, 311 and 331"
       Output JSON:
       \`\`\`json
       {
-        "and": [
+        "from": [
           "BIOL241",
           "BIOL243",
           "BIOL311",
           "BIOL331"
-        ]
+        ],
+        "units": 18
       }
       \`\`\`
 
