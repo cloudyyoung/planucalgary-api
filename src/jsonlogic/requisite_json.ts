@@ -21,7 +21,7 @@ export type Operators = CourseCode | DynamicCourse | Units | And | Or | Not | Co
 export type Units = {
   units: number
   from?: (CourseCode | DynamicCourse)[]
-  exclude?: (CourseCode | DynamicCourse)[]
+  not?: (CourseCode | DynamicCourse)[]
 }
 export type And = {
   and: Operators[]
@@ -398,7 +398,7 @@ export const getValidator = async () => {
         return _validate(not_argument)
       },
       units: (obj: Units) => {
-        if (!is_object(obj, ["units", "from", "exclude"])) {
+        if (!is_object(obj, ["units", "from", "not"])) {
           return false
         }
 
@@ -425,16 +425,16 @@ export const getValidator = async () => {
           }
         }
 
-        const exclude = obj.exclude
-        if (exclude) {
-          if (!Array.isArray(exclude)) {
-            errors.push({ message: "Property 'exclude' must be an array", value: obj })
+        const not = obj.not
+        if (not) {
+          if (!Array.isArray(not)) {
+            errors.push({ message: "Property 'not' must be an array", value: obj })
             return false
           }
 
-          const results = exclude.map(primitive_validators.course_code)
+          const results = not.map((c) => operator_validators.course_code(c) || operator_validators.dynamic_courses(c))
           if (!results.every(bool)) {
-            errors.push({ message: "Property 'exclude' must be an array of courses, got alien element(s)", value: obj })
+            errors.push({ message: "Property 'not' must be an array of courses, got alien element(s)", value: obj })
             return false
           }
         }
