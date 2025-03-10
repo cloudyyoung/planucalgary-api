@@ -95,18 +95,12 @@ export const getValidator = async () => {
     options.safe = options.safe !== undefined ? options.safe : true
     options.strict = options.strict !== undefined ? options.strict : false
 
-    const is_object = (obj: object, key: string, isOnlyKey: boolean): boolean => {
+    const is_object = (obj: object, key: string | string[]): boolean => {
       if (typeof obj !== "object") {
         return false
       }
-      const keys = Object.keys(obj)
-      if (isOnlyKey && keys.length !== 1) {
-        return false
-      }
-      if (!keys.includes(key)) {
-        return false
-      }
-      return true
+      const keys = Array.isArray(key) ? key : [key]
+      return keys.every((k) => k in obj)
     }
 
     const primitive_validators: Record<string, (obj: any) => boolean> = {
@@ -336,17 +330,14 @@ export const getValidator = async () => {
           return false
         }
 
-        const valid_fields = ["field", "level", "subject", "faculty", "department"]
-        const keys = Object.keys(obj)
-        const valid = keys.every((key) => valid_fields.includes(key))
-        if (!valid) {
+        if (!is_object(obj, ["field", "level", "subject", "faculty", "department"])) {
           return false
         }
 
         return primitive_validators.dynamic_courses(obj)
       },
       and: (obj: And) => {
-        if (!is_object(obj, "and", true)) {
+        if (!is_object(obj, "and")) {
           return false
         }
 
@@ -367,7 +358,7 @@ export const getValidator = async () => {
         return results.every(bool)
       },
       or: (obj: Or) => {
-        if (!is_object(obj, "or", true)) {
+        if (!is_object(obj, "or")) {
           return false
         }
 
@@ -388,7 +379,7 @@ export const getValidator = async () => {
         return results.some(bool)
       },
       not: (obj: Not) => {
-        if (!is_object(obj, "not", true)) {
+        if (!is_object(obj, "not")) {
           return false
         }
 
@@ -402,7 +393,7 @@ export const getValidator = async () => {
         return _validate(not_argument)
       },
       units: (obj: Units) => {
-        if (!is_object(obj, "units", false)) {
+        if (!is_object(obj, ["units", "from", "exclude"])) {
           return false
         }
 
@@ -446,7 +437,7 @@ export const getValidator = async () => {
         return true
       },
       consent: (obj: Consent) => {
-        if (!is_object(obj, "consent", true)) {
+        if (!is_object(obj, "consent")) {
           return false
         }
 
@@ -468,7 +459,7 @@ export const getValidator = async () => {
         return true
       },
       admission: (obj: Admission) => {
-        if (!is_object(obj, "admission", true)) {
+        if (!is_object(obj, "admission")) {
           return false
         }
 
@@ -493,7 +484,7 @@ export const getValidator = async () => {
         return true
       },
       year: (obj: Year) => {
-        if (!is_object(obj, "year", true)) {
+        if (!is_object(obj, "year")) {
           return false
         }
 
@@ -514,7 +505,7 @@ export const getValidator = async () => {
 
     const object_validators: Record<string, (obj: any) => boolean> = {
       faculty: (obj: Faculty) => {
-        if (!is_object(obj, "faculty", true)) {
+        if (!is_object(obj, "faculty")) {
           return false
         }
 
@@ -527,7 +518,7 @@ export const getValidator = async () => {
         return true
       },
       department: (obj: Department) => {
-        if (!is_object(obj, "department", true)) {
+        if (!is_object(obj, "department")) {
           return false
         }
 
@@ -540,7 +531,7 @@ export const getValidator = async () => {
         return true
       },
       program: (obj: Program) => {
-        if (!is_object(obj, "program", true)) {
+        if (!is_object(obj, "program")) {
           return false
         }
 
