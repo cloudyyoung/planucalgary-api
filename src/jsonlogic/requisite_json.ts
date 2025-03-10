@@ -17,7 +17,7 @@ export type SubjectCode = string
 export type FieldString = string
 export type LevelString = string
 
-export type Operators = Units | And | Or | Not | Consent | Admission | Year
+export type Operators = CourseCode | DynamicCourse | Units | And | Or | Not | Consent | Admission | Year
 export type Units = {
   units: number
   from?: (CourseCode | DynamicCourse)[]
@@ -103,6 +103,7 @@ export const getValidator = async () => {
       return keys.every((k) => k in obj)
     }
 
+    // Validators for primitive types, like strings, numbers, etc.
     const primitive_validators: Record<string, (obj: any) => boolean> = {
       course_code: (obj: object | string) => {
         if (typeof obj !== "string") {
@@ -317,6 +318,10 @@ export const getValidator = async () => {
       },
     }
 
+    // Validators for logic operators, like "and", "or", "not", etc.
+    // These validators first checks if an object is indeed the specified operator,
+    // then checks if the operator has the correct properties.
+    // Course codes and dynamic courses themselves also serve as logic operators (eg., truthy if the course is taken).
     const operator_validators: Record<string, (obj: any) => boolean> = {
       course_code: (obj: CourseCode) => {
         if (typeof obj !== "string") {
@@ -503,6 +508,9 @@ export const getValidator = async () => {
       },
     }
 
+    // Validators for objects, like faculty, department, program, etc.
+    // These objects don't exist alone in the JSON, but are properties of other objects.
+    // These validators check if the object has the correct properties.
     const object_validators: Record<string, (obj: any) => boolean> = {
       faculty: (obj: Faculty) => {
         if (!is_object(obj, "faculty")) {
@@ -551,11 +559,7 @@ export const getValidator = async () => {
         return false
       }
 
-      if (typeof obj === "string") {
-        return primitive_validators.course_code(obj)
-      }
-
-      if (typeof obj !== "object") {
+      if (typeof obj !== "string" && typeof obj !== "object") {
         errors.push({ message: "Requisite JSON must be an object or a string", value: obj })
         return false
       }
