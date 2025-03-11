@@ -13,39 +13,41 @@ export const listCourses = async (req: Request<any, any, any, CourseList>, res: 
 
   const getSelectStatement = () => {
     const fields = [
-      "id",
-      "code",
-      "subject_code",
-      "course_number",
-      "description",
-      "name",
-      "long_name",
-      "units",
-      "aka",
-      "career",
-      "is_active",
-      "is_multi_term",
-      "is_nogpa",
-      "is_repeatable",
+      Prisma.sql`id`,
+      Prisma.sql`code`,
+      Prisma.sql`subject_code`,
+      Prisma.sql`course_number`,
+      Prisma.sql`description`,
+      Prisma.sql`name`,
+      Prisma.sql`long_name`,
+      Prisma.sql`units`,
+      Prisma.sql`aka`,
+      Prisma.sql`career`,
+      Prisma.sql`is_active`,
+      Prisma.sql`is_multi_term`,
+      Prisma.sql`is_nogpa`,
+      Prisma.sql`is_repeatable`,
     ]
 
     if (is_admin) {
-      fields.push("prereq")
-      fields.push("coreq")
-      fields.push("antireq")
-      fields.push("prereq_json")
-      fields.push("coreq_json")
-      fields.push("antireq_json")
+      fields.push(Prisma.sql`prereq`)
+      fields.push(Prisma.sql`coreq`)
+      fields.push(Prisma.sql`antireq`)
+      fields.push(Prisma.sql`prereq_json`)
+      fields.push(Prisma.sql`coreq_json`)
+      fields.push(Prisma.sql`antireq_json`)
     }
 
-    return Prisma.sql`select ${Prisma.join(
-      fields.map((field) => Prisma.sql`${Prisma.raw(field)}`),
-      ", ",
-    )} from "catalog"."courses"`
+    fields.push(Prisma.sql`ts_rank(search_vector, plainto_tsquery('english', ${keywords})) AS rank`)
+
+    return Prisma.sql`select ${Prisma.join(fields, ", ")} from "catalog"."courses"`
   }
 
   const getWhereStatement = () => {
     const whereSegments = []
+
+    whereSegments.push(Prisma.sql`is_active = true`)
+
     if (keywords) {
       whereSegments.push(Prisma.sql`search_vector @@ plainto_tsquery('english', ${keywords})`)
     }
@@ -62,6 +64,7 @@ export const listCourses = async (req: Request<any, any, any, CourseList>, res: 
   const queryString = Prisma.sql`
       ${selectStatement}
       ${whereStatement}
+      order by rank desc
       offset ${offset}
       limit ${limit}
     `
