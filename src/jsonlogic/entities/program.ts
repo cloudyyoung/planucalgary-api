@@ -1,9 +1,7 @@
 import { Entity } from "../entities/entity"
 
 export type ProgramString = string
-export interface ProgramEntity {
-  program: ProgramString
-}
+export type ProgramEntity = { program: ProgramString }
 
 /**
  * Represents a program entity.
@@ -11,20 +9,20 @@ export interface ProgramEntity {
  * @format { program: ProgramString }
  */
 export class Program extends Entity<ProgramEntity> {
-  program: ProgramString
+  program_string: ProgramString
 
   constructor(program: ProgramString) {
     super("program")
 
-    this.program = program
+    this.program_string = program
   }
 
   toNaturalLanguage(): string {
-    return `the program of ${this.program}`
+    return `the program of ${this.program_string}`
   }
 
   toJsonLogic(): ProgramEntity {
-    return { program: this.program }
+    return { program: this.program_string }
   }
 
   protected fromJsonLogic(json: ProgramEntity): Program {

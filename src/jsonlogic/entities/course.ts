@@ -1,6 +1,7 @@
 import { Entity } from "../entities/entity"
 
 export type CourseCode = string
+
 const UntrackedCourseRegex = /^([A-Za-z ,']+) ([0-9]{2,3}(-[0-9])?(.[0-9]{2})?[AB]?)$/
 const TrackedCourseRegex = /^([A-Z]{3,4})[0-9]{2,3}(-[0-9])?(.[0-9]{2})?[AB]?$/
 

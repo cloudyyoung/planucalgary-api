@@ -4,14 +4,8 @@ import { Department } from "./department"
 import { Program } from "./program"
 import { Faculty } from "./faculty"
 
-export type YearString = "first" | "second" | "third" | "fourth" | "fifth"
-export type SubjectCode = string
-export type FieldString = string
-export type LevelString = string
-
-
-export const fromJsonLogic = (json: object | string): Entity<any> => {
-  const subclasses: (typeof Entity<any>)[] = [
+export const fromJsonLogic = (jsonLogic: object | string): Entity<object | string> => {
+  const subclasses: (typeof Entity<object | string>)[] = [
     Course,
     Department,
     Program,
@@ -19,9 +13,9 @@ export const fromJsonLogic = (json: object | string): Entity<any> => {
   ]
 
   for (const entityClass of subclasses) {
-    if (entityClass.isEntity(json)) {
-      return entityClass.fromJsonLogic(json)
+    if (entityClass.isEntity(jsonLogic)) {
+      return entityClass.fromJsonLogic(jsonLogic)
     }
   }
-  throw new Error(`No matching entity found for JSON: ${JSON.stringify(json)}`)
+  throw new Error(`No matching entity found for JSON: ${JSON.stringify(jsonLogic)}`)
 }

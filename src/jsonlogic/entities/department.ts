@@ -1,9 +1,7 @@
 import { Entity } from "../entities/entity"
 
 export type DepartmentCode = string
-export interface DepartmentEntity {
-  department: DepartmentCode
-}
+export type DepartmentEntity = { department: DepartmentCode }
 
 /**
  * Represents a department entity.
@@ -11,21 +9,21 @@ export interface DepartmentEntity {
  * @format { department: DepartmentCode }
 */
 export class Department extends Entity<DepartmentEntity> {
-  department: DepartmentCode
+  department_code: DepartmentCode
 
   constructor(department: DepartmentCode) {
     super("department")
 
-    this.department = department
+    this.department_code = department
   }
 
   toNaturalLanguage(): string {
-    return `the department of ${this.department}`
+    return `the department of ${this.department_code}`
   }
 
   toJsonLogic(): DepartmentEntity {
     return {
-      department: this.department,
+      department: this.department_code,
     }
   }
 

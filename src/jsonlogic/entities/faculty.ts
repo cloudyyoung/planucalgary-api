@@ -1,9 +1,7 @@
 import { Entity } from "../entities/entity"
 
 export type FacultyCode = string
-export interface FacultyEntity {
-  faculty: FacultyCode
-}
+export type FacultyEntity = { faculty: FacultyCode }
 
 /**
  * Represents a faculty entity.
@@ -11,20 +9,20 @@ export interface FacultyEntity {
  * @format { faculty: FacultyCode }
  */
 export class Faculty extends Entity<FacultyEntity> {
-  faculty: FacultyCode
+  faculty_code: FacultyCode
 
   constructor(faculty: FacultyCode) {
     super("faculty")
 
-    this.faculty = faculty
+    this.faculty_code = faculty
   }
 
   toNaturalLanguage(): string {
-    return `the faculty of ${this.faculty}`
+    return `the faculty of ${this.faculty_code}`
   }
 
   toJsonLogic(): FacultyEntity {
-    return { faculty: this.faculty }
+    return { faculty: this.faculty_code }
   }
 
   protected fromJsonLogic(json: FacultyEntity): Faculty {
