@@ -1,4 +1,4 @@
-import { Operator } from "../operators/index"
+import { Operator } from "./operator"
 
 export class Not extends Operator {
   not_argument: Operator

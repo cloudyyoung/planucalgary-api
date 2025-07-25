@@ -1,4 +1,4 @@
-import { fromJsonLogic } from "."
+import { fromJsonLogic } from "./factory"
 
 describe("Test util functions", () => {
   it("Test a", () => {

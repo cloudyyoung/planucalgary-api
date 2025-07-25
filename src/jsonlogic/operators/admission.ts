@@ -1,10 +1,12 @@
-import { Operator } from "../operators/index"
-import { Faculty } from "../entities/faculty"
-import { Department } from "../entities/department"
-import { Program } from "../entities/program"
-import { Entity } from "../entities"
+import { Operator } from "./operator"
+import { Faculty, FacultyEntity } from "../entities/faculty"
+import { Department, DepartmentEntity } from "../entities/department"
+import { Program, ProgramEntity } from "../entities/program"
+import { Entity } from "../entities/entity"
 
-export class Admission extends Operator {
+export type AdmissionOperator = { admission: FacultyEntity | DepartmentEntity | ProgramEntity }
+
+export class Admission extends Operator<AdmissionOperator> {
   admission: Faculty | Department | Program
 
   constructor(admission: Faculty | Department | Program) {
@@ -17,18 +19,14 @@ export class Admission extends Operator {
     return `admitted to ${this.admission.toNaturalLanguage()}`
   }
 
-  toJsonLogic(): object | string {
+  toJsonLogic(): AdmissionOperator {
     return {
       admission: this.admission.toJsonLogic(),
     }
   }
 
-  fromJsonLogic(json: object | string): Operator {
-    if (typeof json !== 'object' || json === null || !('admission' in json)) {
-      throw new Error(`Invalid JSON for "admission" operator: ${JSON.stringify(json)}`)
-    }
-
-    if (!(json.admission instanceof Object) && !(json.admission instanceof String)) {
+  protected fromJsonLogic(json: AdmissionOperator): Operator<AdmissionOperator> {
+    if (!Admission.isEntity(json)) {
       throw new Error(`Invalid JSON for "admission" operator: ${JSON.stringify(json)}`)
     }
 
@@ -38,5 +36,12 @@ export class Admission extends Operator {
     }
 
     return new Admission(admissionEntity)
+  }
+
+  protected isEntity(json: object | string): boolean {
+    if (typeof json !== 'object' || json === null) return false
+    if (typeof json !== 'object' || !('admission' in json)) return false
+    if (typeof json.admission !== 'object' || json.admission === null) return false
+    return 'admission' in json && (Faculty.isEntity(json.admission) || Department.isEntity(json.admission) || Program.isEntity(json.admission))
   }
 }

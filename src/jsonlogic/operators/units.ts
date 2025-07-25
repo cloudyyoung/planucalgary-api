@@ -1,4 +1,4 @@
-import { Operator } from "../operators/index"
+import { Operator } from "./operator"
 import { Entity } from '../entities/index'
 
 export class Units extends Operator  {

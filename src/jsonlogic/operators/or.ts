@@ -1,4 +1,4 @@
-import { Operator } from "../operators/index"
+import { Operator } from "./operator"
 
 export class Or extends Operator {
   or_arguments: Operator[]
