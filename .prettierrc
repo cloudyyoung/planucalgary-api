@@ -3,6 +3,7 @@
   "semi": false,
   "printWidth": 120,
   "trailingComma": "all",
+  "tabWidth": 2,
   "overrides": [
     {
       "files": [

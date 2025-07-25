@@ -1,5 +1,15 @@
-import { Entity, FacultyCode } from "../entities/index"
+import { Entity } from "../entities/index"
 
+export type FacultyCode = string
+export interface FacultyEntity {
+  faculty: FacultyCode
+}
+
+/**
+ * Represents a faculty entity.
+ * This class extends the Entity class and provides methods to handle faculty-specific logic.
+ * @format { faculty: FacultyCode }
+ */
 export class Faculty extends Entity {
   faculty: FacultyCode
 
@@ -13,16 +23,21 @@ export class Faculty extends Entity {
     return `the faculty of ${this.faculty}`
   }
 
-  toJsonLogic(): object | string {
+  toJsonLogic(): FacultyEntity {
     return {
       faculty: this.faculty,
     }
   }
-    
-  fromJsonLogic(json: object): Faculty {
+
+  protected fromJsonLogic(json: object): Faculty {
     if (typeof json !== 'object' || json === null || !('faculty' in json)) {
       throw new Error(`Invalid JSON for "faculty" entity: ${JSON.stringify(json)}`)
     }
     return new Faculty((json as { faculty: FacultyCode }).faculty)
+  }
+
+  protected isEntity(json: object | string): boolean {
+    if (typeof json !== 'object' || json === null) return false
+    return 'faculty' in json
   }
 }
