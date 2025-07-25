@@ -10,7 +10,7 @@ export interface FacultyEntity {
  * This class extends the Entity class and provides methods to handle faculty-specific logic.
  * @format { faculty: FacultyCode }
  */
-export class Faculty extends Entity {
+export class Faculty extends Entity<FacultyEntity> {
   faculty: FacultyCode
 
   constructor(faculty: FacultyCode) {
@@ -24,16 +24,14 @@ export class Faculty extends Entity {
   }
 
   toJsonLogic(): FacultyEntity {
-    return {
-      faculty: this.faculty,
-    }
+    return { faculty: this.faculty }
   }
 
-  protected fromJsonLogic(json: object): Faculty {
+  protected fromJsonLogic(json: FacultyEntity): Faculty {
     if (!Faculty.isEntity(json)) {
       throw new Error(`Invalid JSON for "faculty" entity: ${JSON.stringify(json)}`)
     }
-    return new Faculty((json as { faculty: FacultyCode }).faculty)
+    return new Faculty(json.faculty)
   }
 
   protected isEntity(json: object | string): boolean {

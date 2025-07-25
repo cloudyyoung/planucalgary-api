@@ -10,8 +10,8 @@ export type FieldString = string
 export type LevelString = string
 
 
-export const fromJsonLogic = (json: object | string): Entity => {
-  const subclasses: (typeof Entity)[] = [
+export const fromJsonLogic = (json: object | string): Entity<any> => {
+  const subclasses: (typeof Entity<any>)[] = [
     Course,
     Department,
     Program,

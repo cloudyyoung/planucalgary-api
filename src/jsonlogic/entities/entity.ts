@@ -1,4 +1,4 @@
-export abstract class Entity {
+export abstract class Entity<T> {
   entity: string
 
   constructor(name: string) {
@@ -6,10 +6,10 @@ export abstract class Entity {
   }
 
   abstract toNaturalLanguage(): string;
-  abstract toJsonLogic(): object | string;
+  abstract toJsonLogic(): T;
 
   // Intended static methods
-  protected abstract fromJsonLogic(json: object | string): Entity;
+  protected abstract fromJsonLogic(json: T): Entity<T>;
   protected abstract isEntity(json: object | string): boolean;
 
   static get fromJsonLogic() {

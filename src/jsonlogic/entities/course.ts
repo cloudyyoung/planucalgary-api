@@ -9,7 +9,7 @@ const TrackedCourseRegex = /^([A-Z]{3,4})[0-9]{2,3}(-[0-9])?(.[0-9]{2})?[AB]?$/
  * This class extends the Entity class and provides methods to handle course-specific logic.
  * @format "CourseCode"
  */
-export class Course extends Entity {
+export class Course extends Entity<CourseCode> {
   course_code: CourseCode
 
   constructor(course_code: CourseCode) {
@@ -25,7 +25,7 @@ export class Course extends Entity {
     return this.course_code
   }
     
-  protected fromJsonLogic(json: string): Course {
+  protected fromJsonLogic(json: CourseCode): Course {
     if (Course.isEntity(json) === false) {
       throw new Error(`Invalid JSON for "course" entity: ${JSON.stringify(json)}`)
     }

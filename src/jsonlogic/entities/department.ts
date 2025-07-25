@@ -10,7 +10,7 @@ export interface DepartmentEntity {
  * This class extends the Entity class and provides methods to handle department-specific logic.
  * @format { department: DepartmentCode }
 */
-export class Department extends Entity {
+export class Department extends Entity<DepartmentEntity> {
   department: DepartmentCode
 
   constructor(department: DepartmentCode) {
@@ -29,11 +29,11 @@ export class Department extends Entity {
     }
   }
 
-  protected fromJsonLogic(json: object): Department {
+  protected fromJsonLogic(json: DepartmentEntity): Department {
     if (!Department.isEntity(json)) {
       throw new Error(`Invalid JSON for "department" entity: ${JSON.stringify(json)}`)
     }
-    return new Department((json as { department: DepartmentCode }).department)
+    return new Department(json.department)
   }
 
   protected isEntity(json: object | string): boolean {
