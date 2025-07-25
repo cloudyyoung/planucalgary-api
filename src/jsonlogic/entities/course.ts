@@ -1,4 +1,4 @@
-import { Entity } from "../entities/index"
+import { Entity } from "../entities/entity"
 
 export type CourseCode = string
 const UntrackedCourseRegex = /^([A-Za-z ,']+) ([0-9]{2,3}(-[0-9])?(.[0-9]{2})?[AB]?)$/
@@ -26,7 +26,7 @@ export class Course extends Entity {
   }
     
   protected fromJsonLogic(json: string): Course {
-    if (this.isEntity(json) === false) {
+    if (Course.isEntity(json) === false) {
       throw new Error(`Invalid JSON for "course" entity: ${JSON.stringify(json)}`)
     }
     return new Course(json as CourseCode)

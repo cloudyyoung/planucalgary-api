@@ -1,9 +1,7 @@
-import { Entity } from "."
-import { Course } from "./course"
+import { fromJsonLogic } from "."
 
 describe("Test util functions", () => {
   it("Test a", () => {
-    // Entity.fromJsonLogic("CPSC251")
-    Course.fromJsonLogic("CPSC251")
+    console.log(fromJsonLogic("CPSC251"))
   })
 })

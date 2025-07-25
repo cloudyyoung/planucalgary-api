@@ -1,4 +1,4 @@
-import { Entity } from "../entities/index"
+import { Entity } from "../entities/entity"
 
 export type FacultyCode = string
 export interface FacultyEntity {

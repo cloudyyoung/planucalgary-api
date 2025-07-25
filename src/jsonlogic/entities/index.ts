@@ -1,31 +1,27 @@
+import { Entity } from "./entity"
+import { Course } from "./course"
+import { Department } from "./department"
+import { Program } from "./program"
+import { Faculty } from "./faculty"
+
 export type YearString = "first" | "second" | "third" | "fourth" | "fifth"
 export type SubjectCode = string
 export type FieldString = string
 export type LevelString = string
 
-export abstract class Entity { 
-  name: string
 
-  constructor(name: string) {
-    this.name = name
-  }
+export const fromJsonLogic = (json: object | string): Entity => {
+  const subclasses: (typeof Entity)[] = [
+    Course,
+    Department,
+    Program,
+    Faculty,
+  ]
 
-  abstract toNaturalLanguage(): string;
-  abstract toJsonLogic(): object | string;
-
-  // Intended static methods
-  protected abstract fromJsonLogic(json: object | string): Entity;
-  protected abstract isEntity(json: object | string): boolean;
-
-  static fromJsonLogic(json: object | string): Entity {
-    const entityClasses = Object.values(this).filter(value => value instanceof Entity)
-    for (const entityClass of entityClasses) {
-      console.log(entityClass)
-      const isEntity = entityClass.isEntity(json)
-      if (!isEntity) continue
+  for (const entityClass of subclasses) {
+    if (entityClass.isEntity(json)) {
       return entityClass.fromJsonLogic(json)
     }
-    throw new Error(`No matching entity found for JSON: ${JSON.stringify(json)}`)
   }
+  throw new Error(`No matching entity found for JSON: ${JSON.stringify(json)}`)
 }
-
