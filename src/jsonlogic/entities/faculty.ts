@@ -30,7 +30,7 @@ export class Faculty extends Entity {
   }
 
   protected fromJsonLogic(json: object): Faculty {
-    if (typeof json !== 'object' || json === null || !('faculty' in json)) {
+    if (!Faculty.isEntity(json)) {
       throw new Error(`Invalid JSON for "faculty" entity: ${JSON.stringify(json)}`)
     }
     return new Faculty((json as { faculty: FacultyCode }).faculty)

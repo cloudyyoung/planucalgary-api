@@ -33,7 +33,6 @@ export class Course extends Entity {
   }
 
   protected isEntity(json: object | string): boolean {
-    console.log("test course")
     if (typeof json !== 'string') return false
     const courseCode = json as string
     return UntrackedCourseRegex.test(courseCode) || TrackedCourseRegex.test(courseCode)
