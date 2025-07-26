@@ -1,13 +1,15 @@
-import { Entity } from "../entities/entity"
-import { fromJsonLogic, OperatorAndEntity } from "../factory"
-import { Operator } from "./operator"
+import { RequisiteComponent } from "../requisite_component"
 
 export type AndOperator = { and: (object | string)[] }
 
-export class And extends Operator<AndOperator> {
-  and_arguments: OperatorAndEntity<any>[]
+export class And extends RequisiteComponent<AndOperator> {
+  and_arguments: RequisiteComponent<any>[]
 
-  constructor(and_arguments: OperatorAndEntity<any>[]) {
+  static {
+    RequisiteComponent.registerSubclass(this)
+  }
+
+  constructor(and_arguments: RequisiteComponent<any>[]) {
     super("and")
 
     if (and_arguments.length < 2) {
@@ -24,7 +26,7 @@ export class And extends Operator<AndOperator> {
   toJsonLogic(): AndOperator {
     return {
       and: this.and_arguments.map(arg => {
-        if (arg instanceof Operator) {
+        if (arg instanceof RequisiteComponent) {
           return arg.toJsonLogic()
         }
         return arg
@@ -33,15 +35,15 @@ export class And extends Operator<AndOperator> {
   }
 
   protected fromJsonLogic(json: AndOperator): And {
-    if (!And.isEntity(json)) {
+    if (!And.isObject(json)) {
       throw new Error(`Invalid JSON for "and" operator: ${JSON.stringify(json)}`)
     }
-    return new And(json.and.map(arg => fromJsonLogic(arg)))
+    return new And(json.and.map(arg => RequisiteComponent.fromJsonLogic(arg)))
   }
 
-  protected isEntity(json: object | string): boolean {
+  protected isObject(json: object | string): boolean {
     if (typeof json !== 'object' || json === null) return false
     if (!('and' in json) || !Array.isArray(json.and)) return false
-    return json.and.every(arg => Operator.isEntity(arg) || Entity.isEntity(arg))
+    return json.and.every(arg => RequisiteComponent.isObject(arg) || RequisiteComponent.isObject(arg))
   }
 }

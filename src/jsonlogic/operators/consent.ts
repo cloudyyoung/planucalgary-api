@@ -1,12 +1,15 @@
-import { Operator } from "./operator"
+import { RequisiteComponent } from "../requisite_component"
 import { Faculty, FacultyEntity } from "../entities/faculty"
 import { Department, DepartmentEntity } from "../entities/department"
-import { Entity } from "../entities/entity"
 
 export type ConsentOperator = { consent: FacultyEntity | DepartmentEntity }
 
-export class Consent extends Operator<ConsentOperator> {
+export class Consent extends RequisiteComponent<ConsentOperator> {
   consent: Faculty | Department
+
+  static {
+    RequisiteComponent.registerSubclass(this)
+  }
 
   constructor(consent: Faculty | Department) {
     super("consent")
@@ -25,11 +28,11 @@ export class Consent extends Operator<ConsentOperator> {
   }
 
   protected fromJsonLogic(json: ConsentOperator): Consent {
-    if (!Consent.isEntity(json)) {
+    if (!Consent.isObject(json)) {
       throw new Error(`Invalid JSON for "consent" operator: ${JSON.stringify(json)}`)
     }
 
-    const consentEntity = Entity.fromJsonLogic(json.consent)
+    const consentEntity = RequisiteComponent.fromJsonLogic(json.consent)
 
     if (!(consentEntity instanceof Faculty || consentEntity instanceof Department)) {
       throw new Error(`Invalid JSON for "consent" operator: ${JSON.stringify(json)}`)
@@ -38,12 +41,12 @@ export class Consent extends Operator<ConsentOperator> {
     return new Consent(consentEntity)
   }
 
-  protected isEntity(json: object | string): boolean {
+  protected isObject(json: object | string): boolean {
     if (typeof json !== 'object' || json === null) return false
     if (typeof json !== 'object' || !('consent' in json)) return false
     if (typeof json.consent !== 'object' || json.consent === null) return false
     if (!('consent' in json)) return false
     if (typeof json.consent !== 'object' || json.consent === null) return false
-    return 'consent' in json && (Faculty.isEntity(json.consent) || Department.isEntity(json.consent))
+    return 'consent' in json && (Faculty.isObject(json.consent) || Department.isObject(json.consent))
   }
 }

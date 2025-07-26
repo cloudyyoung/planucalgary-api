@@ -1,18 +1,20 @@
-import { Operator } from "./operator"
-import { Entity } from '../entities/entity'
-import { fromJsonLogic } from "../factory"
+import { RequisiteComponent } from "../requisite_component"
 
-export type UnitsOperator = { units: number, from?: Entity<any>[], not?: Entity<any>[] }
+export type UnitsOperator = { units: number, from?: object[], not?: object[] }
 
-export class Units extends Operator<UnitsOperator> {
+export class Units extends RequisiteComponent<UnitsOperator> {
   units: number
-  from?: Entity<any>[]
-  not?: Entity<any>[]
+  from?: RequisiteComponent<any>[]
+  not?: RequisiteComponent<any>[]
+
+  static {
+    RequisiteComponent.registerSubclass(this)
+  }
 
   constructor(
     units: number,
-    from?: Entity<any>[],
-    not?: Entity<any>[]
+    from?: RequisiteComponent<any>[],
+    not?: RequisiteComponent<any>[]
   ) {
     super("units")
 
@@ -46,24 +48,24 @@ export class Units extends Operator<UnitsOperator> {
   }
 
   protected fromJsonLogic(json: UnitsOperator): Units {
-    if (!Units.isEntity(json)) {
+    if (!Units.isObject(json)) {
       throw new Error(`Invalid JSON for "units" operator: ${JSON.stringify(json)}`)
     }
 
     const units = json.units
 
     const from = json.from?.map((item: any) => {
-      return fromJsonLogic(item) as Entity<any>
+      return RequisiteComponent.fromJsonLogic(item)
     })
 
     const not = json.not?.map((item: any) => {
-      return fromJsonLogic(item) as Entity<any>
+      return RequisiteComponent.fromJsonLogic(item)
     })
 
     return new Units(units, from, not)
   }
 
-  protected isEntity(json: object | string): boolean {
+  protected isObject(json: object | string): boolean {
     if (typeof json !== 'object' || json === null) return false
     if (!('units' in json) || typeof json.units !== 'number') return false
     if (!('from' in json) || !Array.isArray(json.from)) return false

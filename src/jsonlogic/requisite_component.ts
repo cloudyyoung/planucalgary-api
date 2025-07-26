@@ -1,6 +1,6 @@
 export abstract class RequisiteComponent<T> {
   static subclasses = new Set<typeof RequisiteComponent>()
-  static registerSubclass(subclass: typeof RequisiteComponent<any>) {
+  static registerSubclass(subclass: any) {
     this.subclasses.add(subclass)
   }
   

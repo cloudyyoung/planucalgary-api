@@ -1,12 +1,15 @@
-import { fromJsonLogic, OperatorAndEntity } from "../factory"
-import { Operator } from "./operator"
+import { RequisiteComponent } from "../requisite_component"
 
 export type OrOperator = { or: (object | string)[] }
 
-export class Or extends Operator<OrOperator> {
-  or_arguments:  OperatorAndEntity<any>[]
+export class Or extends RequisiteComponent<OrOperator> {
+  or_arguments: RequisiteComponent<any>[]
+  
+  static {
+    RequisiteComponent.registerSubclass(this)
+  }
 
-  constructor(or_arguments: OperatorAndEntity<any>[]) {
+  constructor(or_arguments: RequisiteComponent<any>[]) {
     super("or")
 
     if (or_arguments.length < 2) {
@@ -27,17 +30,17 @@ export class Or extends Operator<OrOperator> {
   }
 
   protected fromJsonLogic(json: OrOperator): Or {
-    if (!Or.isEntity(json)) {
+    if (!Or.isObject(json)) {
       throw new Error(`Invalid JSON for "or" operator: ${JSON.stringify(json)}`)
     }
     return new Or(
-      json.or.map(arg => fromJsonLogic(arg))
+      json.or.map(arg => RequisiteComponent.fromJsonLogic(arg))
     )
   }
 
-  protected isEntity(json: object | string): boolean {
+  protected isObject(json: object | string): boolean {
     if (typeof json !== 'object' || json === null) return false
     if (!('or' in json) || !Array.isArray(json.or)) return false
-    return json.or.every(arg => Operator.isEntity(arg))
+    return json.or.every(arg => RequisiteComponent.isObject(arg))
   }
 }
