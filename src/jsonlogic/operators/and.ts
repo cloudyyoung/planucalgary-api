@@ -1,12 +1,13 @@
 import { Entity } from "../entities/entity"
+import { fromJsonLogic, OperatorAndEntity } from "../factory"
 import { Operator } from "./operator"
 
-export type AndOperator = { and: object[] }
+export type AndOperator = { and: (object | string)[] }
 
 export class And extends Operator<AndOperator> {
-  and_arguments: (Operator<any> | Entity<any>)[]
+  and_arguments: OperatorAndEntity<any>[]
 
-  constructor(and_arguments: (Operator<any> | Entity<any>)[]) {
+  constructor(and_arguments: OperatorAndEntity<any>[]) {
     super("and")
 
     if (and_arguments.length < 2) {
@@ -31,13 +32,11 @@ export class And extends Operator<AndOperator> {
     }
   }
 
-  protected fromJsonLogic(json: AndOperator): Operator<AndOperator> {
+  protected fromJsonLogic(json: AndOperator): And {
     if (!And.isEntity(json)) {
       throw new Error(`Invalid JSON for "and" operator: ${JSON.stringify(json)}`)
     }
-    return new And(
-      json.and.map(arg => Operator.fromJsonLogic(arg))
-    )
+    return new And(json.and.map(arg => fromJsonLogic(arg)))
   }
 
   protected isEntity(json: object | string): boolean {

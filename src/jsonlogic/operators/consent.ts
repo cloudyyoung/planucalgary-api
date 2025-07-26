@@ -24,7 +24,7 @@ export class Consent extends Operator<ConsentOperator> {
     }
   }
 
-  protected fromJsonLogic(json: ConsentOperator): Operator<ConsentOperator> {
+  protected fromJsonLogic(json: ConsentOperator): Consent {
     if (!Consent.isEntity(json)) {
       throw new Error(`Invalid JSON for "consent" operator: ${JSON.stringify(json)}`)
     }

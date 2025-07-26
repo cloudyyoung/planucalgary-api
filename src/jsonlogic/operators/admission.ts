@@ -2,7 +2,7 @@ import { Operator } from "./operator"
 import { Faculty, FacultyEntity } from "../entities/faculty"
 import { Department, DepartmentEntity } from "../entities/department"
 import { Program, ProgramEntity } from "../entities/program"
-import { Entity } from "../entities/entity"
+import { fromJsonLogic } from "../factory"
 
 export type AdmissionOperator = { admission: FacultyEntity | DepartmentEntity | ProgramEntity }
 
@@ -11,8 +11,7 @@ export class Admission extends Operator<AdmissionOperator> {
 
   constructor(admission: Faculty | Department | Program) {
     super("admission")
-
-    this.admission = admission
+    this.admission = admission 
   }
 
   toNaturalLanguage(): string {
@@ -25,12 +24,12 @@ export class Admission extends Operator<AdmissionOperator> {
     }
   }
 
-  protected fromJsonLogic(json: AdmissionOperator): Operator<AdmissionOperator> {
+  protected fromJsonLogic(json: AdmissionOperator): Admission {
     if (!Admission.isEntity(json)) {
       throw new Error(`Invalid JSON for "admission" operator: ${JSON.stringify(json)}`)
     }
 
-    const admissionEntity = Entity.fromJsonLogic(json.admission)
+    const admissionEntity = fromJsonLogic(json.admission)
     if (!(admissionEntity instanceof Faculty || admissionEntity instanceof Department || admissionEntity instanceof Program)) {
       throw new Error(`Invalid JSON for "admission" operator: ${JSON.stringify(json)}`)
     }

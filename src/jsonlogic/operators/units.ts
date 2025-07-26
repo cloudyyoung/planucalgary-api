@@ -1,15 +1,18 @@
 import { Operator } from "./operator"
-import { Entity } from '../entities/index'
+import { Entity } from '../entities/entity'
+import { fromJsonLogic } from "../factory"
 
-export class Units extends Operator  {
+export type UnitsOperator = { units: number, from?: Entity<any>[], not?: Entity<any>[] }
+
+export class Units extends Operator<UnitsOperator> {
   units: number
-  from?: Entity[]
-  not?: Entity[]
+  from?: Entity<any>[]
+  not?: Entity<any>[]
 
   constructor(
     units: number,
-    from?: Entity[],
-    not?: Entity[]
+    from?: Entity<any>[],
+    not?: Entity<any>[]
   ) {
     super("units")
 
@@ -31,8 +34,8 @@ export class Units extends Operator  {
     return description
   }
 
-  toJsonLogic(): object | string {
-    const rule: any = { units: this.units }
+  toJsonLogic(): UnitsOperator {
+    const rule: UnitsOperator = { units: this.units }
     if (this.from) {
       rule.from = this.from.map(course => course.toJsonLogic())
     }
@@ -42,32 +45,29 @@ export class Units extends Operator  {
     return rule
   }
 
-  fromJsonLogic(json: object | string): Operator {
-    if (
-      typeof json !== 'object' ||
-      json === null ||
-      !('units' in json) ||
-      typeof json.units !== 'number' ||
-      !('from' in json) ||
-      !Array.isArray(json.from) ||
-      !('not' in json) ||
-      !Array.isArray(json.not)
-    ) {
+  protected fromJsonLogic(json: UnitsOperator): Units {
+    if (!Units.isEntity(json)) {
       throw new Error(`Invalid JSON for "units" operator: ${JSON.stringify(json)}`)
     }
 
     const units = json.units
 
-    const from: Entity[] = []
-    json.from.forEach((item: any) => {
-      from.push(Entity.fromJsonLogic(item))
+    const from = json.from?.map((item: any) => {
+      return fromJsonLogic(item) as Entity<any>
     })
 
-    const not: Entity[] = []
-    json.not.forEach((item: any) => {
-      not.push(Entity.fromJsonLogic(item))
+    const not = json.not?.map((item: any) => {
+      return fromJsonLogic(item) as Entity<any>
     })
 
     return new Units(units, from, not)
+  }
+
+  protected isEntity(json: object | string): boolean {
+    if (typeof json !== 'object' || json === null) return false
+    if (!('units' in json) || typeof json.units !== 'number') return false
+    if (!('from' in json) || !Array.isArray(json.from)) return false
+    if (!('not' in json) || !Array.isArray(json.not)) return false
+    return true
   }
 }

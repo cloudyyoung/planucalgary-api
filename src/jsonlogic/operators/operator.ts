@@ -20,4 +20,3 @@ export abstract class Operator<T> {
     return this.prototype.isEntity
   }
 }
-

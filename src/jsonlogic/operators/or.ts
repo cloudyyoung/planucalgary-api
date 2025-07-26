@@ -1,9 +1,12 @@
+import { fromJsonLogic, OperatorAndEntity } from "../factory"
 import { Operator } from "./operator"
 
-export class Or extends Operator {
-  or_arguments: Operator[]
+export type OrOperator = { or: (object | string)[] }
 
-  constructor(or_arguments: Operator[]) {
+export class Or extends Operator<OrOperator> {
+  or_arguments:  OperatorAndEntity<any>[]
+
+  constructor(or_arguments: OperatorAndEntity<any>[]) {
     super("or")
 
     if (or_arguments.length < 2) {
@@ -17,23 +20,24 @@ export class Or extends Operator {
     return this.or_arguments.map(arg => arg.toNaturalLanguage()).join(", or ")
   }
 
-  toJsonLogic(): object | string {
+  toJsonLogic(): OrOperator {
     return {
       or: this.or_arguments.map(arg => arg.toJsonLogic()),
     }
   }
 
-  fromJsonLogic(json: object | string): Operator {
-    if (
-      typeof json !== 'object' ||
-      json === null ||
-      !('or' in json) ||
-      !Array.isArray(json.or)
-    ) {
+  protected fromJsonLogic(json: OrOperator): Or {
+    if (!Or.isEntity(json)) {
       throw new Error(`Invalid JSON for "or" operator: ${JSON.stringify(json)}`)
     }
     return new Or(
-      json.or.map(arg => Operator.fromJsonLogic(arg))
+      json.or.map(arg => fromJsonLogic(arg))
     )
+  }
+
+  protected isEntity(json: object | string): boolean {
+    if (typeof json !== 'object' || json === null) return false
+    if (!('or' in json) || !Array.isArray(json.or)) return false
+    return json.or.every(arg => Operator.isEntity(arg))
   }
 }
