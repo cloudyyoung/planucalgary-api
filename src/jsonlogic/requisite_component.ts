@@ -21,7 +21,6 @@ export abstract class RequisiteComponent<T> {
     if (this.prototype.fromJsonLogic) {
       return this.prototype.fromJsonLogic(json)
     }
-    console.log(RequisiteComponent.subclasses)
 
     for (const subclass of RequisiteComponent.subclasses) {
       if (subclass.isObject(json)) {

@@ -26,6 +26,9 @@ describe("Test util functions", () => {
         {
           or: ["DRAM242", "DRAM243"],
         },
+        { admission: { program: "BSC-CPSC" } },
+        { consent: { faculty: "SC" } },
+        { consent: { department: "CPSC" } },
       ],
     }
 
