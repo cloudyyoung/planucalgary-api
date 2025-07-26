@@ -1,4 +1,4 @@
-import { Entity } from "../entities/entity"
+import { RequisiteComponent } from "../requisite"
 
 export type YearString = "first" | "second" | "third" | "fourth" | "fifth"
 export type YearEntity = { year: YearString }
@@ -8,8 +8,12 @@ export type YearEntity = { year: YearString }
  * This class extends the Entity class and provides methods to handle year-specific logic.
  * @format { year: YearString }
  */
-export class Year extends Entity<YearEntity> {
+export class Year extends RequisiteComponent<YearEntity> {
   year_string: YearString
+
+  static {
+    RequisiteComponent.registerSubclass(this)
+  }
 
   constructor(year: YearString) {
     super("year")
@@ -26,13 +30,13 @@ export class Year extends Entity<YearEntity> {
   }
 
   protected fromJsonLogic(json: YearEntity): Year {
-    if (!Year.isEntity(json)) {
+    if (!Year.isObject(json)) {
       throw new Error(`Invalid JSON for "year" entity: ${JSON.stringify(json)}`)
     }
     return new Year(json.year)
   }
 
-  protected isEntity(json: object | string): boolean {
+  protected isObject(json: object | string): boolean {
     if (typeof json !== 'object' || json === null) return false
     return 'year' in json
   }

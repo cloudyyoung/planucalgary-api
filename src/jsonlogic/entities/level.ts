@@ -1,4 +1,4 @@
-import { Entity } from "../entities/entity"
+import { RequisiteComponent } from "../requisite"
 
 export type LevelString = string
 export type LevelEntity = { level: LevelString }
@@ -8,8 +8,12 @@ export type LevelEntity = { level: LevelString }
  * This class extends the Entity class and provides methods to handle level-specific logic.
  * @format { level: LevelString }
  */
-export class Level extends Entity<LevelEntity> {
+export class Level extends RequisiteComponent<LevelEntity> {
   level_string: LevelString
+
+  static {
+    RequisiteComponent.registerSubclass(this)
+  }
 
   constructor(level: LevelString) {
     super("level")
@@ -26,13 +30,13 @@ export class Level extends Entity<LevelEntity> {
   }
 
   protected fromJsonLogic(json: LevelEntity): Level {
-    if (!Level.isEntity(json)) {
+    if (!Level.isObject(json)) {
       throw new Error(`Invalid JSON for "level" entity: ${JSON.stringify(json)}`)
     }
     return new Level(json.level)
   }
 
-  protected isEntity(json: object | string): boolean {
+  protected isObject(json: object | string): boolean {
     if (typeof json !== 'object' || json === null) return false
     return 'level' in json
   }

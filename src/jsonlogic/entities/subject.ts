@@ -1,4 +1,4 @@
-import { Entity } from "../entities/entity"
+import { RequisiteComponent } from "../requisite"
 
 export type SubjectCode = string
 export type SubjectEntity = { subject: SubjectCode }
@@ -8,8 +8,12 @@ export type SubjectEntity = { subject: SubjectCode }
  * This class extends the Entity class and provides methods to handle subject-specific logic.
  * @format { subject: SubjectCode }
  */
-export class Subject extends Entity<SubjectEntity> {
+export class Subject extends RequisiteComponent<SubjectEntity> {
   subject_code: SubjectCode
+
+  static {
+    RequisiteComponent.registerSubclass(this)
+  }
 
   constructor(subject: SubjectCode) {
     super("subject")
@@ -26,13 +30,13 @@ export class Subject extends Entity<SubjectEntity> {
   }
 
   protected fromJsonLogic(json: SubjectEntity): Subject {
-    if (!Subject.isEntity(json)) {
+    if (!Subject.isObject(json)) {
       throw new Error(`Invalid JSON for "subject" entity: ${JSON.stringify(json)}`)
     }
     return new Subject(json.subject)
   }
 
-  protected isEntity(json: object | string): boolean {
+  protected isObject(json: object | string): boolean {
     if (typeof json !== 'object' || json === null) return false
     return 'subject' in json
   }

@@ -1,4 +1,4 @@
-import { Entity } from "../entities/entity"
+import { RequisiteComponent } from "../requisite"
 
 export type FacultyCode = string
 export type FacultyEntity = { faculty: FacultyCode }
@@ -8,8 +8,12 @@ export type FacultyEntity = { faculty: FacultyCode }
  * This class extends the Entity class and provides methods to handle faculty-specific logic.
  * @format { faculty: FacultyCode }
  */
-export class Faculty extends Entity<FacultyEntity> {
+export class Faculty extends RequisiteComponent<FacultyEntity> {
   faculty_code: FacultyCode
+
+  static {
+    RequisiteComponent.registerSubclass(this)
+  }
 
   constructor(faculty: FacultyCode) {
     super("faculty")
@@ -26,13 +30,13 @@ export class Faculty extends Entity<FacultyEntity> {
   }
 
   protected fromJsonLogic(json: FacultyEntity): Faculty {
-    if (!Faculty.isEntity(json)) {
+    if (!Faculty.isObject(json)) {
       throw new Error(`Invalid JSON for "faculty" entity: ${JSON.stringify(json)}`)
     }
     return new Faculty(json.faculty)
   }
 
-  protected isEntity(json: object | string): boolean {
+  protected isObject(json: object | string): boolean {
     if (typeof json !== 'object' || json === null) return false
     return 'faculty' in json
   }

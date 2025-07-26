@@ -1,4 +1,4 @@
-import { Entity } from "../entities/entity"
+import { RequisiteComponent } from "../requisite"
 
 export type FieldString = string
 export type FieldEntity = { field: FieldString }
@@ -8,8 +8,12 @@ export type FieldEntity = { field: FieldString }
  * This class extends the Entity class and provides methods to handle field-specific logic.
  * @format { field: FieldCode }
  */
-export class Field extends Entity<FieldEntity> {
+export class Field extends RequisiteComponent<FieldEntity> {
   field_code: FieldString
+
+  static {
+    RequisiteComponent.registerSubclass(this)
+  }
 
   constructor(field: FieldString) {
     super("field")
@@ -26,13 +30,13 @@ export class Field extends Entity<FieldEntity> {
   }
 
   protected fromJsonLogic(json: FieldEntity): Field {
-    if (!Field.isEntity(json)) {
+    if (!Field.isObject(json)) {
       throw new Error(`Invalid JSON for "field" entity: ${JSON.stringify(json)}`)
     }
     return new Field(json.field)
   }
 
-  protected isEntity(json: object | string): boolean {
+  protected isObject(json: object | string): boolean {
     if (typeof json !== 'object' || json === null) return false
     return 'field' in json
   }

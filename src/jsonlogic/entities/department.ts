@@ -1,4 +1,4 @@
-import { Entity } from "../entities/entity"
+import { RequisiteComponent } from "../requisite"
 
 export type DepartmentCode = string
 export type DepartmentEntity = { department: DepartmentCode }
@@ -8,8 +8,12 @@ export type DepartmentEntity = { department: DepartmentCode }
  * This class extends the Entity class and provides methods to handle department-specific logic.
  * @format { department: DepartmentCode }
 */
-export class Department extends Entity<DepartmentEntity> {
+export class Department extends RequisiteComponent<DepartmentEntity> {
   department_code: DepartmentCode
+
+  static {
+    RequisiteComponent.registerSubclass(this)
+  }
 
   constructor(department: DepartmentCode) {
     super("department")
@@ -28,13 +32,13 @@ export class Department extends Entity<DepartmentEntity> {
   }
 
   protected fromJsonLogic(json: DepartmentEntity): Department {
-    if (!Department.isEntity(json)) {
+    if (!Department.isObject(json)) {
       throw new Error(`Invalid JSON for "department" entity: ${JSON.stringify(json)}`)
     }
     return new Department(json.department)
   }
 
-  protected isEntity(json: object | string): boolean {
+  protected isObject(json: object | string): boolean {
     if (typeof json !== 'object' || json === null) return false
     return 'department' in json
   }

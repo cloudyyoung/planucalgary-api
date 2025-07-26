@@ -16,7 +16,7 @@ export const fromJsonLogic = (jsonLogic: object | string): OperatorAndEntity<obj
   ]
 
   for (const entityClass of subclasses) {
-    if (entityClass.isEntity(jsonLogic)) {
+    if (entityClass.isObject(jsonLogic)) {
       return entityClass.fromJsonLogic(jsonLogic)
     }
   }
