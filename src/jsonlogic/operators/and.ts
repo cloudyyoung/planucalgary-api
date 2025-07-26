@@ -44,6 +44,6 @@ export class And extends RequisiteComponent<AndOperator> {
   protected isObject(json: object | string): boolean {
     if (typeof json !== 'object' || json === null) return false
     if (!('and' in json) || !Array.isArray(json.and)) return false
-    return json.and.every(arg => RequisiteComponent.isObject(arg) || RequisiteComponent.isObject(arg))
+    return json.and.every(arg => RequisiteComponent.isObject(arg))
   }
 }

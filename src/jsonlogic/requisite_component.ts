@@ -36,6 +36,12 @@ export abstract class RequisiteComponent<T> {
       return this.prototype.isObject(json)
     }
 
-    throw new Error("This method cannot be called on the base Requisite class")
+    for (const subclass of RequisiteComponent.subclasses) {
+      if (subclass.isObject(json)) {
+        return true
+      }
+    }
+
+    return false
   }
 }
