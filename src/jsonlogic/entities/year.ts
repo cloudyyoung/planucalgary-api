@@ -1,4 +1,4 @@
-import { RequisiteComponent } from "../requisite"
+import { RequisiteComponent } from "../requisite_component"
 
 export type YearString = "first" | "second" | "third" | "fourth" | "fifth"
 export type YearEntity = { year: YearString }

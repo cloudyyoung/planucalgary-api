@@ -1,4 +1,4 @@
-import { RequisiteComponent } from "../requisite"
+import { RequisiteComponent } from "../requisite_component"
 
 export type DepartmentCode = string
 export type DepartmentEntity = { department: DepartmentCode }

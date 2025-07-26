@@ -1,4 +1,4 @@
-import { RequisiteComponent } from "../requisite"
+import { RequisiteComponent } from "../requisite_component"
 
 export type CourseCode = string
 

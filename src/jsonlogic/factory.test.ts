@@ -1,9 +1,9 @@
 import { Course } from "./entities/course"
-import { Entity } from "./entities/entity"
+import { RequisiteComponent } from "./requisite_component"
 
 describe("Test util functions", () => {
   it("Test a", () => {
-    console.log(Entity.fromJsonLogic("CPSC251"))
+    console.log(RequisiteComponent.fromJsonLogic("CPSC251"))
     console.log(Course.fromJsonLogic("CPSC251"))
   })
 })
