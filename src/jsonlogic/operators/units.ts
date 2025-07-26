@@ -68,8 +68,8 @@ export class Units extends RequisiteComponent<UnitsOperator> {
   protected isObject(json: object | string): boolean {
     if (typeof json !== 'object' || json === null) return false
     if (!('units' in json) || typeof json.units !== 'number') return false
-    if (!('from' in json) || !Array.isArray(json.from)) return false
-    if (!('not' in json) || !Array.isArray(json.not)) return false
+    if ('from' in json && !Array.isArray(json.from)) return false
+    if ('not' in json && !Array.isArray(json.not)) return false
     return true
   }
 }

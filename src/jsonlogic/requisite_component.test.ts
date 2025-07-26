@@ -1,6 +1,8 @@
 import { Course } from "./entities/course"
 import { And } from "./operators/and"
 import { RequisiteComponent } from "./requisite_component"
+import "./entities"
+import "./operators"
 
 describe("Test util functions", () => {
   it("Test subclass routing for fromJsonLogic", () => {
@@ -12,5 +14,23 @@ describe("Test util functions", () => {
         "CPSC233",
       ]
     })
+  })
+
+  it('Test fromJsonLogic with valid JSON', () => {
+    const json = {
+      and: [
+        {
+          from: ["DRAM210", "DRAM223", "DRAM225"],
+          units: 12,
+        },
+        {
+          or: ["DRAM242", "DRAM243"],
+        },
+      ],
+    }
+
+    const result = RequisiteComponent.fromJsonLogic(json)
+    expect(result).toBeInstanceOf(And)
+    expect(result.toJsonLogic()).toEqual(json)
   })
 })
