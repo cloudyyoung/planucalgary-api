@@ -13,6 +13,10 @@ const TrackedCourseRegex = /^([A-Z]{3,4})[0-9]{2,3}(-[0-9])?(.[0-9]{2})?[AB]?$/
 export class Course extends Entity<CourseCode> {
   course_code: CourseCode
 
+  static {
+    Entity.registerSubclass(this)
+  }
+
   constructor(course_code: CourseCode) {
     super("course")
     this.course_code = course_code
