@@ -87,7 +87,7 @@ export type RequisiteLogicOr = {
 
 RequisiteJsonLogic.add_operator({
   name: 'or',
-  is_rule: (logic: any): logic is RequisiteLogicOr => logic && typeof logic === 'object' && Object.keys(logic).includes('or') && Array.isArray(logic.or) && logic.or.every((arg: any) => RequisiteJsonLogic.is_rule(arg) || typeof arg === 'string'),
+  is_rule: (logic: any): logic is RequisiteLogicOr => logic && typeof logic === 'object' && Object.keys(logic).includes('or') && Array.isArray(logic.or) && logic.or.every((arg: any) => RequisiteJsonLogic.is_rule(arg)),
   apply: (logic: RequisiteLogicOr, data: any) => logic.or.some((arg: any) => RequisiteJsonLogic.is_satisfied(arg, data)),
 })
 
