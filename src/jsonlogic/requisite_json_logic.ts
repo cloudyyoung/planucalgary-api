@@ -9,8 +9,7 @@ export type Operator = {
 }
 
 export type Data = {
-  past_term_courses: Course[]
-  current_term_courses: Course[]
+  courses: Course[]
 }
 
 export const RequisiteJsonLogic = {
@@ -67,13 +66,13 @@ RequisiteJsonLogic.add_operator({
     const satisfiedCourses: Course[] = []
     if (from.length > 0) {
       from.forEach(courseCode => {
-        const course = data.current_term_courses.find(c => c.code === courseCode)
+        const course = data.courses.find(c => c.code === courseCode)
         if (course && !not.includes(course.code)) {
           satisfiedCourses.push(course)
         }
       })
     } else {
-      data.current_term_courses.forEach(course => {
+      data.courses.forEach(course => {
         if (!not.includes(course.code)) {
           satisfiedCourses.push(course)
         }
