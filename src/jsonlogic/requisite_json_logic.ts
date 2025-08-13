@@ -1,5 +1,6 @@
 import { Course } from "@prisma/client"
 import { sum } from "lodash"
+import { prismaClient } from "../middlewares"
 
 export type Operator = {
   name: string
@@ -8,12 +9,22 @@ export type Operator = {
   is_rule: (logic: object | string) => boolean
 }
 
+export type Operators = Record<string, Operator>
+
 export type Data = {
   courses: Course[]
 }
 
+export type References = {
+  subjectCodes: string[],
+  facultyCodes: string[],
+  departmentCodes: string[],
+  courseCodes: string[],
+}
+
 export const RequisiteJsonLogic = {
-  operators: {} as Record<string, Operator>,
+  operators: {} as Operators,
+  references: {} as References,
   add_operator: (operator: Operator) => {
     RequisiteJsonLogic.operators[operator.name] = operator
     const sortedOperators = Object.values(RequisiteJsonLogic.operators).sort((a, b) => {
@@ -24,10 +35,40 @@ export const RequisiteJsonLogic = {
   get_operator: (name: string) => {
     return RequisiteJsonLogic.operators[name]
   },
+  populate_data: async () => {
+    const subjects = await prismaClient.subject.findMany()
+    const subjectCodes = subjects.map((subject) => subject.code)
+    const faculties = await prismaClient.faculty.findMany()
+    const facultyCodes = faculties.map((faculty) => faculty.code)
+    const departments = await prismaClient.department.findMany()
+    const departmentCodes = departments.map((department) => department.code)
+    const courses = await prismaClient.course.findMany({
+      select: {
+        code: true,
+        topics: {
+          select: {
+            number: true,
+          },
+        },
+      },
+      distinct: ["code"],
+    })
+    const courseCodes = courses.flatMap((course) => {
+      const topics = course.topics.map((topic) => `${course.code}.${topic.number.padStart(2, "0")}`)
+      return [course.code, ...topics]
+    })
+
+    RequisiteJsonLogic.references = {
+      subjectCodes,
+      facultyCodes,
+      departmentCodes,
+      courseCodes,
+    }
+  },
   is_satisfied: (logic: object | string, data: Data) => {
     return Object.values(RequisiteJsonLogic.operators).find(op => op.is_rule(logic))?.is_satisfied(logic, data)
   },
-  is_rule: (logic: object | string) => Object.values(RequisiteJsonLogic.operators).some(op => op.is_rule(logic))
+  is_rule: (logic: object | string) => Object.values(RequisiteJsonLogic.operators).some(op => op.is_rule(logic)),
 }
 
 RequisiteJsonLogic.add_operator({
@@ -53,7 +94,7 @@ RequisiteJsonLogic.add_operator({
   is_satisfied: (logic: any, data: any) => {
     return typeof logic === 'string' && data.courses.includes(logic)
   },
-  is_rule: (logic: any) => logic && typeof logic === 'string',
+  is_rule: (logic: any) => logic && typeof logic === 'string' && RequisiteJsonLogic.references.courseCodes.includes(logic),
 })
 
 RequisiteJsonLogic.add_operator({

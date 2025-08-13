@@ -1,6 +1,10 @@
 import { RequisiteJsonLogic, Operator } from "./requisite_json_logic"
 
 describe('RequisiteJsonLogic', () => {
+  beforeAll(async () => {
+    await RequisiteJsonLogic.populate_data()
+  })
+
   it('should add a new operator', () => {
     const operator: Operator = {
       name: 'testOperator',
