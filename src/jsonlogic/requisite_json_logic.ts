@@ -2,14 +2,14 @@ import { Course } from "@prisma/client"
 import { sum } from "lodash"
 import { prismaClient } from "../middlewares"
 
-export type Operator = {
+export type Operator<T> = {
   name: string
   precedence?: number
-  is_satisfied:  (logic: object | string, data: Data) => boolean
-  is_rule: (logic: object | string) => boolean
+  is_rule: (logic: any) => logic is T
+  is_satisfied:  (logic: T, data: Data) => boolean
 }
 
-export type Operators = Record<string, Operator>
+export type Operators = Record<string, Operator<any>>
 
 export type Data = {
   courses: Course[]
@@ -25,7 +25,7 @@ export type References = {
 export const RequisiteJsonLogic = {
   operators: {} as Operators,
   references: {} as References,
-  add_operator: (operator: Operator) => {
+  add_operator<T>(operator: Operator<T>) {
     RequisiteJsonLogic.operators[operator.name] = operator
     const sortedOperators = Object.values(RequisiteJsonLogic.operators).sort((a, b) => {
       return (b.precedence || 10) - (a.precedence || 10)
@@ -65,41 +65,80 @@ export const RequisiteJsonLogic = {
       courseCodes,
     }
   },
+  is_rule: (logic: object | string) => Object.values(RequisiteJsonLogic.operators).some(op => op.is_rule(logic)),
   is_satisfied: (logic: object | string, data: Data) => {
     return Object.values(RequisiteJsonLogic.operators).find(op => op.is_rule(logic))?.is_satisfied(logic, data)
   },
-  is_rule: (logic: object | string) => Object.values(RequisiteJsonLogic.operators).some(op => op.is_rule(logic)),
+}
+
+export type RequisiteLogicAnd = {
+  and: (string | object)[]
 }
 
 RequisiteJsonLogic.add_operator({
   name: 'and',
-  is_satisfied: (logic: any, data: any) => logic.and.every((arg: any) => RequisiteJsonLogic.is_satisfied(arg, data)),
-  is_rule: (logic: any) => logic && typeof logic === 'object' && Object.keys(logic).includes('and') && Array.isArray(logic.and) && logic.and.every((arg: any) => RequisiteJsonLogic.is_rule(arg) || typeof arg === 'string'),
+  is_rule: (logic: any): logic is RequisiteLogicAnd => logic && typeof logic === 'object' && Object.keys(logic).includes('and') && Array.isArray(logic.and) && logic.and.every((arg: any) => RequisiteJsonLogic.is_rule(arg) || typeof arg === 'string'),
+  is_satisfied: (logic: RequisiteLogicAnd, data: any) => logic.and.every((arg: any) => RequisiteJsonLogic.is_satisfied(arg, data)),
 })
+
+export type RequisiteLogicOr = {
+  or: (string | object)[]
+}
 
 RequisiteJsonLogic.add_operator({
   name: 'or',
-  is_satisfied: (logic: any, data: any) => logic.or.some((arg: any) => RequisiteJsonLogic.is_satisfied(arg, data)),
-  is_rule: (logic: any) => logic && typeof logic === 'object' && Object.keys(logic).includes('or') && Array.isArray(logic.or) && logic.or.every((arg: any) => RequisiteJsonLogic.is_rule(arg) || typeof arg === 'string'),
+  is_rule: (logic: any): logic is RequisiteLogicOr => logic && typeof logic === 'object' && Object.keys(logic).includes('or') && Array.isArray(logic.or) && logic.or.every((arg: any) => RequisiteJsonLogic.is_rule(arg) || typeof arg === 'string'),
+  is_satisfied: (logic: RequisiteLogicOr, data: any) => logic.or.some((arg: any) => RequisiteJsonLogic.is_satisfied(arg, data)),
 })
+
+export type RequisiteLogicNot = {
+  not: (string | object)[]
+}
 
 RequisiteJsonLogic.add_operator({
   name: 'not',
-  is_satisfied: (logic: any, data: any) => !RequisiteJsonLogic.is_satisfied(logic.not, data),
-  is_rule: (logic: any) => logic && typeof logic === 'object' && Object.keys(logic).includes('not') && RequisiteJsonLogic.is_rule(logic.not),
+  is_rule: (logic: any): logic is RequisiteLogicNot => logic && typeof logic === 'object' && Object.keys(logic).includes('not') && RequisiteJsonLogic.is_rule(logic.not),
+  is_satisfied: (logic: RequisiteLogicNot, data: any) => !RequisiteJsonLogic.is_satisfied(logic.not, data),
 })
+
+export type RequisiteLogicCourseCode = string
 
 RequisiteJsonLogic.add_operator({
   name: 'course_code',
-  is_satisfied: (logic: any, data: any) => {
-    return typeof logic === 'string' && data.courses.includes(logic)
-  },
-  is_rule: (logic: any) => logic && typeof logic === 'string' && RequisiteJsonLogic.references.courseCodes.includes(logic),
+  is_rule: (logic: any): logic is RequisiteLogicCourseCode => logic && typeof logic === 'string' && RequisiteJsonLogic.references.courseCodes.includes(logic),
+  is_satisfied: (logic: RequisiteLogicCourseCode, data: Data) => data.courses.includes(logic),
 })
+
+export type RequisiteLogicUnits = {
+  units: number
+  from?: string[]
+  not?: string[]
+}
 
 RequisiteJsonLogic.add_operator({
   name: 'units',
-  is_satisfied: (logic: any, data: Data) => {
+  is_rule: (logic: any): logic is RequisiteLogicUnits => {
+    if (!(logic && typeof logic === 'object')) return false
+
+    if (Object.keys(logic).includes('from')) {
+      if (
+        !Array.isArray(logic.from)
+        || logic.from.length === 0
+        || !logic.from.every((course: any) => typeof course === 'string')
+      ) return false
+    }
+
+    if (Object.keys(logic).includes('not')) {
+      if (
+        !Array.isArray(logic.not)
+        || logic.not.length === 0
+        || !logic.not.every((course: any) => typeof course === 'string')
+      ) return false
+    }
+
+    return Object.keys(logic).includes('units') && typeof logic.units === 'number' 
+  },
+  is_satisfied: (logic: RequisiteLogicUnits, data: Data) => {
     const units: number = logic.units
     const from: string[] = logic.from || []
     const not: string[] = logic.not || []
@@ -124,38 +163,21 @@ RequisiteJsonLogic.add_operator({
 
     return satisfiedUnits >= units
   },
-  is_rule: (logic: any) => {
-    if (!(logic && typeof logic === 'object')) return false
-
-    if (Object.keys(logic).includes('from')) {
-      if (
-        !Array.isArray(logic.from)
-        || logic.from.length === 0
-        || !logic.from.every((course: any) => typeof course === 'string')
-      ) return false
-    }
-
-    if (Object.keys(logic).includes('not')) {
-      if (
-        !Array.isArray(logic.not)
-        || logic.not.length === 0
-        || !logic.not.every((course: any) => typeof course === 'string')
-      ) return false
-    }
-
-    return Object.keys(logic).includes('units') && typeof logic.units === 'number' 
-  },
 })
+
+export type RequisiteLogicAdmission = string
 
 RequisiteJsonLogic.add_operator({
   name: 'admission',
+  is_rule: (logic: any): logic is RequisiteLogicAdmission => logic && typeof logic === 'object' && Object.keys(logic).includes('admission') && typeof logic.admission === 'string',
   is_satisfied: () => true,
-  is_rule: (logic: any) => logic && typeof logic === 'object' && Object.keys(logic).includes('admission') && typeof logic.admission === 'string',
 })
+
+export type RequisiteLogicConsent = string
 
 RequisiteJsonLogic.add_operator({
   name: 'consent',
+  is_rule: (logic: any): logic is RequisiteLogicConsent => logic && typeof logic === 'object' && Object.keys(logic).includes('consent') && typeof logic.consent === 'string',
   is_satisfied: () => true,
-  is_rule: (logic: any) => logic && typeof logic === 'object' && Object.keys(logic).includes('consent') && typeof logic.consent === 'string',
 })
 
