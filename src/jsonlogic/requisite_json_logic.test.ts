@@ -6,11 +6,11 @@ describe('RequisiteJsonLogic', () => {
   })
 
   it('should add a new operator', () => {
-    const operator: Operator = {
+    const operator: Operator<any> = {
       name: 'testOperator',
       precedence: 5,
       is_satisfied: () => true,
-      is_rule: () => true,
+      is_rule: (logic: any): logic is any => true,
     }
     RequisiteJsonLogic.add_operator(operator)
     expect(RequisiteJsonLogic.get_operator('testOperator')).toEqual(operator)

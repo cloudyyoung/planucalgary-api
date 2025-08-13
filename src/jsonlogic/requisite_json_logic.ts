@@ -106,7 +106,7 @@ export type RequisiteLogicCourseCode = string
 RequisiteJsonLogic.add_operator({
   name: 'course_code',
   is_rule: (logic: any): logic is RequisiteLogicCourseCode => logic && typeof logic === 'string' && RequisiteJsonLogic.references.courseCodes.includes(logic),
-  is_satisfied: (logic: RequisiteLogicCourseCode, data: Data) => data.courses.includes(logic),
+  is_satisfied: (logic: RequisiteLogicCourseCode, data: Data) => data.courses.find(c => c.code === logic) !== undefined,
 })
 
 export type RequisiteLogicUnits = {
