@@ -124,7 +124,7 @@ RequisiteJsonLogic.add_operator({
       if (
         !Array.isArray(logic.from)
         || logic.from.length === 0
-        || !logic.from.every((course: any) => typeof course === 'string')
+        || !logic.from.every((item: any) => RequisiteJsonLogic.is_rule(item))
       ) return false
     }
 
@@ -132,7 +132,7 @@ RequisiteJsonLogic.add_operator({
       if (
         !Array.isArray(logic.not)
         || logic.not.length === 0
-        || !logic.not.every((course: any) => typeof course === 'string')
+        || !logic.not.every((item: any) => RequisiteJsonLogic.is_rule(item))
       ) return false
     }
 
