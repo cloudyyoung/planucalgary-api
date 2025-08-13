@@ -67,7 +67,7 @@ export const RequisiteJsonLogic = {
   },
   is_rule: (logic: object | string) => Object.values(RequisiteJsonLogic.operators).some(op => op.is_rule(logic)),
   is_satisfied: (logic: object | string, data: Data) => {
-    return Object.values(RequisiteJsonLogic.operators).find(op => op.is_rule(logic))?.apply(logic, data)
+    return !!Object.values(RequisiteJsonLogic.operators).find(op => op.is_rule(logic))?.apply(logic, data)
   },
 }
 
