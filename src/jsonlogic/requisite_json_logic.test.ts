@@ -9,7 +9,7 @@ describe('RequisiteJsonLogic', () => {
     const operator: Operator<any> = {
       name: 'testOperator',
       precedence: 5,
-      is_satisfied: () => true,
+      apply: () => true,
       is_rule: (logic: any): logic is any => true,
     }
     RequisiteJsonLogic.add_operator(operator)

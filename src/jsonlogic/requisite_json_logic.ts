@@ -6,7 +6,7 @@ export type Operator<T> = {
   name: string
   precedence?: number
   is_rule: (logic: any) => logic is T
-  is_satisfied:  (logic: T, data: Data) => boolean
+  apply:  (logic: T, data: Data) => any
 }
 
 export type Operators = Record<string, Operator<any>>
@@ -67,7 +67,7 @@ export const RequisiteJsonLogic = {
   },
   is_rule: (logic: object | string) => Object.values(RequisiteJsonLogic.operators).some(op => op.is_rule(logic)),
   is_satisfied: (logic: object | string, data: Data) => {
-    return Object.values(RequisiteJsonLogic.operators).find(op => op.is_rule(logic))?.is_satisfied(logic, data)
+    return Object.values(RequisiteJsonLogic.operators).find(op => op.is_rule(logic))?.apply(logic, data)
   },
 }
 
@@ -78,7 +78,7 @@ export type RequisiteLogicAnd = {
 RequisiteJsonLogic.add_operator({
   name: 'and',
   is_rule: (logic: any): logic is RequisiteLogicAnd => logic && typeof logic === 'object' && Object.keys(logic).includes('and') && Array.isArray(logic.and) && logic.and.every((arg: any) => RequisiteJsonLogic.is_rule(arg) || typeof arg === 'string'),
-  is_satisfied: (logic: RequisiteLogicAnd, data: any) => logic.and.every((arg: any) => RequisiteJsonLogic.is_satisfied(arg, data)),
+  apply: (logic: RequisiteLogicAnd, data: any) => logic.and.every((arg: any) => RequisiteJsonLogic.is_satisfied(arg, data)),
 })
 
 export type RequisiteLogicOr = {
@@ -88,7 +88,7 @@ export type RequisiteLogicOr = {
 RequisiteJsonLogic.add_operator({
   name: 'or',
   is_rule: (logic: any): logic is RequisiteLogicOr => logic && typeof logic === 'object' && Object.keys(logic).includes('or') && Array.isArray(logic.or) && logic.or.every((arg: any) => RequisiteJsonLogic.is_rule(arg) || typeof arg === 'string'),
-  is_satisfied: (logic: RequisiteLogicOr, data: any) => logic.or.some((arg: any) => RequisiteJsonLogic.is_satisfied(arg, data)),
+  apply: (logic: RequisiteLogicOr, data: any) => logic.or.some((arg: any) => RequisiteJsonLogic.is_satisfied(arg, data)),
 })
 
 export type RequisiteLogicNot = {
@@ -98,7 +98,7 @@ export type RequisiteLogicNot = {
 RequisiteJsonLogic.add_operator({
   name: 'not',
   is_rule: (logic: any): logic is RequisiteLogicNot => logic && typeof logic === 'object' && Object.keys(logic).includes('not') && RequisiteJsonLogic.is_rule(logic.not),
-  is_satisfied: (logic: RequisiteLogicNot, data: any) => !RequisiteJsonLogic.is_satisfied(logic.not, data),
+  apply: (logic: RequisiteLogicNot, data: any) => !RequisiteJsonLogic.is_satisfied(logic.not, data),
 })
 
 export type RequisiteLogicCourseCode = string
@@ -106,7 +106,7 @@ export type RequisiteLogicCourseCode = string
 RequisiteJsonLogic.add_operator({
   name: 'course_code',
   is_rule: (logic: any): logic is RequisiteLogicCourseCode => logic && typeof logic === 'string' && RequisiteJsonLogic.references.courseCodes.includes(logic),
-  is_satisfied: (logic: RequisiteLogicCourseCode, data: Data) => data.courses.find(c => c.code === logic) !== undefined,
+  apply: (logic: RequisiteLogicCourseCode, data: Data) => data.courses.find(c => c.code === logic) !== undefined,
 })
 
 export type RequisiteLogicUnits = {
@@ -138,7 +138,7 @@ RequisiteJsonLogic.add_operator({
 
     return Object.keys(logic).includes('units') && typeof logic.units === 'number' 
   },
-  is_satisfied: (logic: RequisiteLogicUnits, data: Data) => {
+  apply: (logic: RequisiteLogicUnits, data: Data) => {
     const units: number = logic.units
     const from: string[] = logic.from || []
     const not: string[] = logic.not || []
@@ -170,7 +170,7 @@ export type RequisiteLogicAdmission = string
 RequisiteJsonLogic.add_operator({
   name: 'admission',
   is_rule: (logic: any): logic is RequisiteLogicAdmission => logic && typeof logic === 'object' && Object.keys(logic).includes('admission') && typeof logic.admission === 'string',
-  is_satisfied: () => true,
+  apply: () => true,
 })
 
 export type RequisiteLogicConsent = string
@@ -178,6 +178,6 @@ export type RequisiteLogicConsent = string
 RequisiteJsonLogic.add_operator({
   name: 'consent',
   is_rule: (logic: any): logic is RequisiteLogicConsent => logic && typeof logic === 'object' && Object.keys(logic).includes('consent') && typeof logic.consent === 'string',
-  is_satisfied: () => true,
+  apply: () => true,
 })
 
